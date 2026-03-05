@@ -175,19 +175,39 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
                           padding: const EdgeInsets.only(bottom: 4),
                           child: Row(
                             children: [
-                              Icon(Icons.email_outlined, size: 14, color: Colors.grey.shade600),
+                              Icon(
+                                Icons.email_outlined,
+                                size: 14,
+                                color: Colors.grey.shade600,
+                              ),
                               const SizedBox(width: 6),
-                              Text(patient.email, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                              Text(
+                                patient.email,
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 13,
+                                ),
+                              ),
                             ],
                           ),
                         ),
                       if (patient.address.isNotEmpty)
                         Row(
                           children: [
-                            Icon(Icons.location_on_outlined, size: 14, color: Colors.grey.shade600),
+                            Icon(
+                              Icons.location_on_outlined,
+                              size: 14,
+                              color: Colors.grey.shade600,
+                            ),
                             const SizedBox(width: 6),
                             Expanded(
-                              child: Text(patient.address, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                              child: Text(
+                                patient.address,
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 13,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -285,8 +305,11 @@ class _MedicalHistoryCard extends StatelessWidget {
                         color: theme.colorScheme.primary.withAlpha(25),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(Icons.medical_information_outlined,
-                          color: theme.colorScheme.primary, size: 18),
+                      child: Icon(
+                        Icons.medical_information_outlined,
+                        color: theme.colorScheme.primary,
+                        size: 18,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -302,11 +325,18 @@ class _MedicalHistoryCard extends StatelessWidget {
                 if (record.facilityName.isNotEmpty)
                   Row(
                     children: [
-                      Icon(Icons.local_hospital, size: 12, color: Colors.grey.shade500),
+                      Icon(
+                        Icons.local_hospital,
+                        size: 12,
+                        color: Colors.grey.shade500,
+                      ),
                       const SizedBox(width: 3),
                       Text(
                         record.facilityName,
-                        style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade500,
+                        ),
                       ),
                     ],
                   ),
@@ -315,23 +345,43 @@ class _MedicalHistoryCard extends StatelessWidget {
             const SizedBox(height: 10),
 
             // Diagnosis (always shown)
-            _RecordField(icon: Icons.medical_information_outlined, label: 'Diagnosis', value: record.details),
+            _RecordField(
+              icon: Icons.medical_information_outlined,
+              label: 'Diagnosis',
+              value: record.details,
+            ),
 
             // Symptoms
             if (record.symptoms.isNotEmpty)
-              _RecordField(icon: Icons.sick_outlined, label: 'Symptoms', value: record.symptoms),
+              _RecordField(
+                icon: Icons.sick_outlined,
+                label: 'Symptoms',
+                value: record.symptoms,
+              ),
 
             // Medication
             if (record.medication.isNotEmpty)
-              _RecordField(icon: Icons.medication_outlined, label: 'Medication', value: record.medication),
+              _RecordField(
+                icon: Icons.medication_outlined,
+                label: 'Medication',
+                value: record.medication,
+              ),
 
             // Lab Tests
             if (record.labTests.isNotEmpty)
-              _RecordField(icon: Icons.science_outlined, label: 'Lab Tests', value: record.labTests),
+              _RecordField(
+                icon: Icons.science_outlined,
+                label: 'Lab Tests',
+                value: record.labTests,
+              ),
 
             // Notes
             if (record.notes.isNotEmpty)
-              _RecordField(icon: Icons.note_alt_outlined, label: 'Notes', value: record.notes),
+              _RecordField(
+                icon: Icons.note_alt_outlined,
+                label: 'Notes',
+                value: record.notes,
+              ),
           ],
         ),
       ),
@@ -343,7 +393,11 @@ class _RecordField extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  const _RecordField({required this.icon, required this.label, required this.value});
+  const _RecordField({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -354,7 +408,14 @@ class _RecordField extends StatelessWidget {
         children: [
           Icon(icon, size: 14, color: Colors.grey.shade600),
           const SizedBox(width: 6),
-          Text('$label: ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+          Text(
+            '$label: ',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade700,
+            ),
+          ),
           Expanded(child: Text(value, style: const TextStyle(fontSize: 12))),
         ],
       ),

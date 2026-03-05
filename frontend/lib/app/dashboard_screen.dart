@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../features/patients/presentation/patient_list_screen.dart';
-import '../features/records/presentation/qr_lookup_screen.dart';
+import '../features/patients/presentation/register_patient_screen.dart';
 import 'profile_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -15,8 +15,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
 
   final _pages = const <Widget>[
-    PatientListScreen(),
-    QrLookupScreen(),
+    PatientLookupScreen(),
+    RegisterPatientScreen(embedded: true),
     ProfileScreen(),
   ];
 
@@ -29,14 +29,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onDestinationSelected: (i) => setState(() => _currentIndex = i),
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.people_outline),
-            selectedIcon: Icon(Icons.people),
-            label: 'Patients',
-          ),
-          NavigationDestination(
             icon: Icon(Icons.qr_code_scanner),
             selectedIcon: Icon(Icons.qr_code),
-            label: 'Scan QR',
+            label: 'Find Patient',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_add_outlined),
+            selectedIcon: Icon(Icons.person_add),
+            label: 'Register',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),

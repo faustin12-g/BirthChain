@@ -6,7 +6,9 @@ import '../domain/patient_models.dart';
 import 'patient_provider.dart';
 
 class RegisterPatientScreen extends StatefulWidget {
-  const RegisterPatientScreen({super.key});
+  /// When true, the screen is used as a tab (no back button, "Done" resets form).
+  final bool embedded;
+  const RegisterPatientScreen({super.key, this.embedded = false});
 
   @override
   State<RegisterPatientScreen> createState() => _RegisterPatientScreenState();
@@ -53,14 +55,16 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
     }
 
     final prov = context.read<PatientProvider>();
-    final patient = await prov.create(CreatePatientRequest(
-      fullName: _nameCtrl.text.trim(),
-      phone: _phoneCtrl.text.trim(),
-      email: _emailCtrl.text.trim(),
-      gender: _selectedGender,
-      address: _addressCtrl.text.trim(),
-      dateOfBirth: _dob!.toIso8601String().split('T').first,
-    ));
+    final patient = await prov.create(
+      CreatePatientRequest(
+        fullName: _nameCtrl.text.trim(),
+        phone: _phoneCtrl.text.trim(),
+        email: _emailCtrl.text.trim(),
+        gender: _selectedGender,
+        address: _addressCtrl.text.trim(),
+        dateOfBirth: _dob!.toIso8601String().split('T').first,
+      ),
+    );
 
     if (patient != null && mounted) {
       setState(() => _createdPatient = patient);
@@ -78,22 +82,38 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
     // ── Success state: show generated QR ──
     if (_createdPatient != null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Register Patient')),
+        appBar: AppBar(
+          title: widget.embedded
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset('assets/icon/logo.png', height: 28),
+                    const SizedBox(width: 8),
+                    const Text('BirthChain'),
+                  ],
+                )
+              : const Text('Register Patient'),
+          automaticallyImplyLeading: !widget.embedded,
+        ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(28),
           child: Column(
             children: [
               const SizedBox(height: 20),
-              Icon(Icons.check_circle,
-                  size: 60, color: Colors.green.shade400),
+              Icon(Icons.check_circle, size: 60, color: Colors.green.shade400),
               const SizedBox(height: 16),
-              Text('Patient Registered!',
-                  style: theme.textTheme.titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold)),
+              Text(
+                'Patient Registered!',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 24),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primary.withAlpha(20),
                   borderRadius: BorderRadius.circular(12),
@@ -131,8 +151,23 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Done'),
+                  onPressed: () {
+                    if (widget.embedded) {
+                      // Reset form for another registration
+                      setState(() {
+                        _createdPatient = null;
+                        _nameCtrl.clear();
+                        _phoneCtrl.clear();
+                        _emailCtrl.clear();
+                        _addressCtrl.clear();
+                        _selectedGender = 'Male';
+                        _dob = null;
+                      });
+                    } else {
+                      Navigator.of(context).pop(true);
+                    }
+                  },
+                  child: Text(widget.embedded ? 'Register Another' : 'Done'),
                 ),
               ),
             ],
@@ -143,7 +178,19 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
 
     // ── Form state ──
     return Scaffold(
-      appBar: AppBar(title: const Text('Register Patient')),
+      appBar: AppBar(
+        title: widget.embedded
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset('assets/icon/logo.png', height: 28),
+                  const SizedBox(width: 8),
+                  const Text('BirthChain'),
+                ],
+              )
+            : const Text('Register Patient'),
+        automaticallyImplyLeading: !widget.embedded,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Form(
@@ -158,8 +205,11 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
                   labelText: 'Full Name',
                   prefixIcon: Icon(Icons.person_outline),
                 ),
-                validator: (v) =>
-                    v == null || v.trim().isEmpty ? 'Name is required' : null,
+                validator:
+                    (v) =>
+                        v == null || v.trim().isEmpty
+                            ? 'Name is required'
+                            : null,
               ),
               const SizedBox(height: 16),
 
@@ -170,9 +220,10 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
                   labelText: 'Gender',
                   prefixIcon: Icon(Icons.wc_outlined),
                 ),
-                items: _genders
-                    .map((g) => DropdownMenuItem(value: g, child: Text(g)))
-                    .toList(),
+                items:
+                    _genders
+                        .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                        .toList(),
                 onChanged: (v) => setState(() => _selectedGender = v!),
               ),
               const SizedBox(height: 16),
@@ -189,7 +240,8 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
                         ? '${_dob!.year}-${_dob!.month.toString().padLeft(2, '0')}-${_dob!.day.toString().padLeft(2, '0')}'
                         : 'Tap to select',
                     style: TextStyle(
-                        color: _dob != null ? null : Colors.grey.shade500),
+                      color: _dob != null ? null : Colors.grey.shade500,
+                    ),
                   ),
                 ),
               ),
@@ -226,18 +278,27 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
               const SizedBox(height: 28),
 
               Consumer<PatientProvider>(
-                builder: (_, prov, __) => FilledButton(
-                  onPressed: prov.isLoading ? null : _submit,
-                  child: prov.isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : const Text('Register',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w600)),
-                ),
+                builder:
+                    (_, prov, __) => FilledButton(
+                      onPressed: prov.isLoading ? null : _submit,
+                      child:
+                          prov.isLoading
+                              ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                              : const Text(
+                                'Register',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                    ),
               ),
             ],
           ),
