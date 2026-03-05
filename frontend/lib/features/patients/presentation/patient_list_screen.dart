@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 
 import '../../records/presentation/record_provider.dart';
@@ -16,17 +17,42 @@ class PatientLookupScreen extends StatefulWidget {
 class _PatientLookupScreenState extends State<PatientLookupScreen> {
   final _qrCtrl = TextEditingController();
   bool _showManualEntry = false;
+  bool _isProcessing = false;
+
+  final MobileScannerController _scannerCtrl = MobileScannerController(
+    detectionSpeed: DetectionSpeed.normal,
+    facing: CameraFacing.back,
+  );
 
   @override
   void dispose() {
     _qrCtrl.dispose();
+    _scannerCtrl.dispose();
     super.dispose();
+  }
+
+  /// Called when the camera detects a QR / barcode.
+  void _onDetect(BarcodeCapture capture) {
+    if (_isProcessing) return; // avoid duplicate fires
+    final barcode = capture.barcodes.firstOrNull;
+    if (barcode == null || barcode.rawValue == null) return;
+
+    final code = barcode.rawValue!.trim();
+    if (code.isEmpty) return;
+
+    setState(() => _isProcessing = true);
+    _scannerCtrl.stop(); // pause camera while we look up
+    _lookupCode(code);
   }
 
   Future<void> _lookup() async {
     final qr = _qrCtrl.text.trim();
     if (qr.isEmpty) return;
+    setState(() => _isProcessing = true);
+    await _lookupCode(qr);
+  }
 
+  Future<void> _lookupCode(String qr) async {
     final prov = context.read<RecordProvider>();
     await prov.loadByQrCode(qr);
 
@@ -43,6 +69,12 @@ class _PatientLookupScreenState extends State<PatientLookupScreen> {
           backgroundColor: Colors.red.shade600,
         ),
       );
+    }
+
+    // Re-enable scanning
+    if (mounted) {
+      setState(() => _isProcessing = false);
+      _scannerCtrl.start();
     }
   }
 
@@ -80,7 +112,7 @@ class _PatientLookupScreenState extends State<PatientLookupScreen> {
             ),
             const SizedBox(height: 24),
 
-            // ── QR Scanner placeholder ──
+            // ── Live QR Scanner ──
             Container(
               width: double.infinity,
               height: 260,
@@ -91,27 +123,55 @@ class _PatientLookupScreenState extends State<PatientLookupScreen> {
                   color: const Color(0xFF1A3C6D).withAlpha(50),
                 ),
               ),
+              clipBehavior: Clip.antiAlias,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.qr_code_scanner,
-                        size: 72,
-                        color: theme.colorScheme.primary.withAlpha(100),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Camera preview',
-                        style: TextStyle(
-                          color: Colors.grey.shade500,
-                          fontSize: 13,
+                  // Camera feed
+                  MobileScanner(
+                    controller: _scannerCtrl,
+                    onDetect: _onDetect,
+                    errorBuilder: (context, error) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 48,
+                              color: Colors.red.shade400,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Camera unavailable',
+                              style: TextStyle(
+                                color: Colors.red.shade400,
+                                fontSize: 13,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Use manual entry below',
+                              style: TextStyle(
+                                color: Colors.grey.shade500,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
+
+                  // Scanning overlay with corner brackets
+                  if (_isProcessing)
+                    Container(
+                      color: Colors.black45,
+                      child: const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      ),
+                    ),
+
                   // Corner brackets
                   Positioned(
                     top: 36,
