@@ -27,7 +27,8 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const DashboardScreen());
       case patientDashboard:
         return MaterialPageRoute(
-            builder: (_) => const PatientDashboardScreen());
+          builder: (_) => const PatientDashboardScreen(),
+        );
       default:
         return MaterialPageRoute(builder: (_) => const SplashScreen());
     }

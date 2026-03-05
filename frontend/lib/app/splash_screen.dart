@@ -41,13 +41,11 @@ class _SplashScreenState extends State<SplashScreen>
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _textFade =
-        CurvedAnimation(parent: _textController, curve: Curves.easeIn);
+    _textFade = CurvedAnimation(parent: _textController, curve: Curves.easeIn);
     _textSlide = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
-    ).animate(
-        CurvedAnimation(parent: _textController, curve: Curves.easeOut));
+    ).animate(CurvedAnimation(parent: _textController, curve: Curves.easeOut));
 
     _startAnimation();
   }

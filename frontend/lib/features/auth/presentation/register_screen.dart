@@ -62,18 +62,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final auth = context.read<AuthProvider>();
     final navigator = Navigator.of(context);
 
-    final success = await auth.register(RegisterRequest(
-      fullName: _nameCtrl.text.trim(),
-      email: _emailCtrl.text.trim(),
-      password: _passwordCtrl.text,
-      phone: _phoneCtrl.text.trim(),
-      gender: _gender,
-      address: _addressCtrl.text.trim(),
-      dateOfBirth: _dob!,
-    ));
+    final success = await auth.register(
+      RegisterRequest(
+        fullName: _nameCtrl.text.trim(),
+        email: _emailCtrl.text.trim(),
+        password: _passwordCtrl.text,
+        phone: _phoneCtrl.text.trim(),
+        gender: _gender,
+        address: _addressCtrl.text.trim(),
+        dateOfBirth: _dob!,
+      ),
+    );
 
     if (success && mounted) {
-      navigator.pushReplacementNamed('/dashboard');
+      navigator.pushReplacementNamed('/patient-dashboard');
     }
   }
 
@@ -136,14 +138,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.error_outline,
-                              color: Colors.red.shade700, size: 18),
+                          Icon(
+                            Icons.error_outline,
+                            color: Colors.red.shade700,
+                            size: 18,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               auth.error!,
                               style: TextStyle(
-                                  color: Colors.red.shade700, fontSize: 13),
+                                color: Colors.red.shade700,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         ],
@@ -161,8 +168,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: 'Full Name',
                     prefixIcon: Icon(Icons.person_outline),
                   ),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Name is required' : null,
+                  validator:
+                      (v) =>
+                          (v == null || v.trim().isEmpty)
+                              ? 'Name is required'
+                              : null,
                 ),
                 const SizedBox(height: 14),
 
@@ -176,7 +186,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Email is required';
+                    if (v == null || v.trim().isEmpty)
+                      return 'Email is required';
                     if (!v.contains('@')) return 'Invalid email';
                     return null;
                   },
@@ -207,8 +218,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     DropdownMenuItem(value: 'Female', child: Text('Female')),
                   ],
                   onChanged: (v) => setState(() => _gender = v ?? ''),
-                  validator: (v) =>
-                      (v == null || v.isEmpty) ? 'Gender is required' : null,
+                  validator:
+                      (v) =>
+                          (v == null || v.isEmpty)
+                              ? 'Gender is required'
+                              : null,
                 ),
                 const SizedBox(height: 14),
 
@@ -218,14 +232,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: AbsorbPointer(
                     child: TextFormField(
                       decoration: InputDecoration(
-                        labelText: _dob == null
-                            ? 'Date of Birth'
-                            : DateFormat('MMM d, yyyy').format(_dob!),
+                        labelText:
+                            _dob == null
+                                ? 'Date of Birth'
+                                : DateFormat('MMM d, yyyy').format(_dob!),
                         prefixIcon: const Icon(Icons.calendar_today_outlined),
                         suffixIcon: const Icon(Icons.arrow_drop_down),
                       ),
-                      validator: (_) =>
-                          _dob == null ? 'Date of birth is required' : null,
+                      validator:
+                          (_) =>
+                              _dob == null ? 'Date of birth is required' : null,
                     ),
                   ),
                 ),
@@ -253,7 +269,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
-                          _obscure ? Icons.visibility_off : Icons.visibility),
+                        _obscure ? Icons.visibility_off : Icons.visibility,
+                      ),
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
                   ),
@@ -275,15 +292,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: 'Confirm Password',
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
-                      icon: Icon(_obscureConfirm
-                          ? Icons.visibility_off
-                          : Icons.visibility),
-                      onPressed: () =>
-                          setState(() => _obscureConfirm = !_obscureConfirm),
+                      icon: Icon(
+                        _obscureConfirm
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed:
+                          () => setState(
+                            () => _obscureConfirm = !_obscureConfirm,
+                          ),
                     ),
                   ),
                   validator: (v) {
-                    if (v != _passwordCtrl.text) return 'Passwords do not match';
+                    if (v != _passwordCtrl.text)
+                      return 'Passwords do not match';
                     return null;
                   },
                 ),
@@ -291,25 +313,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 // Register button
                 Consumer<AuthProvider>(
-                  builder: (_, auth, __) => SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: FilledButton(
-                      onPressed: auth.isLoading ? null : _handleRegister,
-                      child: auth.isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white),
-                            )
-                          : const Text(
-                              'Create Account',
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w600),
-                            ),
-                    ),
-                  ),
+                  builder:
+                      (_, auth, __) => SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: FilledButton(
+                          onPressed: auth.isLoading ? null : _handleRegister,
+                          child:
+                              auth.isLoading
+                                  ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                  : const Text(
+                                    'Create Account',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                        ),
+                      ),
                 ),
                 const SizedBox(height: 16),
 
@@ -323,8 +351,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         style: TextStyle(color: Colors.grey.shade600),
                       ),
                       TextButton(
-                        onPressed: () => Navigator.of(context)
-                            .pushReplacementNamed('/login'),
+                        onPressed:
+                            () => Navigator.of(
+                              context,
+                            ).pushReplacementNamed('/login'),
                         child: Text(
                           'Login',
                           style: TextStyle(
