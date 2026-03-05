@@ -33,8 +33,7 @@ class BirthChainApp extends StatelessWidget {
               title: 'BirthChain',
               debugShowCheckedModeBanner: false,
               theme: AppTheme.lightTheme,
-              initialRoute:
-                  auth.isLoggedIn ? AppRoutes.dashboard : AppRoutes.login,
+              initialRoute: AppRoutes.splash,
               onGenerateRoute: AppRoutes.onGenerateRoute,
             ),
       ),

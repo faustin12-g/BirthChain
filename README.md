@@ -79,13 +79,7 @@ GET http://localhost:5066/api/health
 
 ### Seed data
 
-On first run the database is seeded with an admin account:
-
-| Field | Value |
-|-------|-------|
-| Email | `nyaepeace@gmail.com` |
-| Password | `UhoRaho@842` |
-| Role | Admin |
+On first run the database is seeded with an admin account. Check the seed configuration in the source code for credentials.
 
 ## Frontend Setup
 

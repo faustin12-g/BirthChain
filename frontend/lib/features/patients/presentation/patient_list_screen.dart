@@ -80,7 +80,7 @@ class _PatientListScreenState extends State<PatientListScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final provider = context.read<PatientProvider>();
           final result = await Navigator.of(context).push<bool>(
@@ -90,8 +90,8 @@ class _PatientListScreenState extends State<PatientListScreen> {
             provider.loadAll();
           }
         },
-        icon: const Icon(Icons.person_add),
-        label: const Text('Register'),
+        tooltip: 'Register Patient',
+        child: const Icon(Icons.person_add),
       ),
     );
   }

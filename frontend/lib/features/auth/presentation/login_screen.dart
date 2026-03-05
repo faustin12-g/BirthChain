@@ -27,8 +27,10 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     final auth = context.read<AuthProvider>();
     final navigator = Navigator.of(context);
-    final success =
-        await auth.login(_emailCtrl.text.trim(), _passwordCtrl.text);
+    final success = await auth.login(
+      _emailCtrl.text.trim(),
+      _passwordCtrl.text,
+    );
     if (success && mounted) {
       navigator.pushReplacementNamed('/dashboard');
     }
@@ -46,8 +48,10 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             Image.asset('assets/icon/logo.png', height: 30),
             const SizedBox(width: 8),
-            const Text('BirthChain',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'BirthChain',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ],
         ),
         centerTitle: true,
@@ -61,13 +65,19 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 32),
-                Text('Login',
-                    style: theme.textTheme.headlineMedium
-                        ?.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  'Login',
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text('Provider Login',
-                    style: theme.textTheme.bodyLarge
-                        ?.copyWith(color: Colors.grey.shade600)),
+                Text(
+                  'Provider Login',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: Colors.grey.shade600,
+                  ),
+                ),
                 const SizedBox(height: 32),
 
                 // Error banner
@@ -85,13 +95,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.error_outline,
-                              color: Colors.red.shade700, size: 18),
+                          Icon(
+                            Icons.error_outline,
+                            color: Colors.red.shade700,
+                            size: 18,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(auth.error!,
-                                style: TextStyle(
-                                    color: Colors.red.shade700, fontSize: 13)),
+                            child: Text(
+                              auth.error!,
+                              style: TextStyle(
+                                color: Colors.red.shade700,
+                                fontSize: 13,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -109,7 +126,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     prefixIcon: Icon(Icons.person_outline),
                   ),
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Email is required';
+                    if (v == null || v.trim().isEmpty)
+                      return 'Email is required';
                     if (!v.contains('@')) return 'Invalid email';
                     return null;
                   },
@@ -127,7 +145,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
-                          _obscure ? Icons.visibility_off : Icons.visibility),
+                        _obscure ? Icons.visibility_off : Icons.visibility,
+                      ),
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
                   ),
@@ -140,30 +159,41 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 // Login button
                 Consumer<AuthProvider>(
-                  builder: (_, auth, __) => SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: FilledButton(
-                      onPressed: auth.isLoading ? null : _handleLogin,
-                      child: auth.isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white))
-                          : const Text('Login',
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w600)),
-                    ),
-                  ),
+                  builder:
+                      (_, auth, __) => SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: FilledButton(
+                          onPressed: auth.isLoading ? null : _handleLogin,
+                          child:
+                              auth.isLoading
+                                  ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                  : const Text(
+                                    'Login',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                        ),
+                      ),
                 ),
                 const SizedBox(height: 16),
 
                 Center(
                   child: TextButton(
                     onPressed: () {},
-                    child: Text('Forgot Password?',
-                        style: TextStyle(color: theme.colorScheme.primary)),
+                    child: Text(
+                      'Forgot Password?',
+                      style: TextStyle(color: theme.colorScheme.primary),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 40),
