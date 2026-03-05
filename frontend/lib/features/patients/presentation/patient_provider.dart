@@ -9,14 +9,20 @@ class PatientProvider extends ChangeNotifier {
   PatientProvider(this._repo);
 
   List<Patient> _patients = [];
+  List<Patient> _searchResults = [];
   Patient? _selectedPatient;
   bool _isLoading = false;
+  bool _isSearching = false;
   String? _error;
+  String _searchQuery = '';
 
   List<Patient> get patients => _patients;
+  List<Patient> get searchResults => _searchResults;
   Patient? get selectedPatient => _selectedPatient;
   bool get isLoading => _isLoading;
+  bool get isSearching => _isSearching;
   String? get error => _error;
+  String get searchQuery => _searchQuery;
 
   Future<void> loadAll() async {
     _isLoading = true;
@@ -75,6 +81,40 @@ class PatientProvider extends ChangeNotifier {
 
   void clearSelection() {
     _selectedPatient = null;
+    notifyListeners();
+  }
+
+  Future<void> search(String query) async {
+    _searchQuery = query;
+    if (query.trim().isEmpty) {
+      _searchResults = [];
+      _isSearching = false;
+      notifyListeners();
+      return;
+    }
+
+    _isSearching = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _searchResults = await _repo.search(query.trim());
+    } on DioException catch (e) {
+      _error = e.response?.data?['message'] ?? 'Search failed.';
+      _searchResults = [];
+    } catch (_) {
+      _error = 'Search failed.';
+      _searchResults = [];
+    }
+
+    _isSearching = false;
+    notifyListeners();
+  }
+
+  void clearSearch() {
+    _searchQuery = '';
+    _searchResults = [];
+    _isSearching = false;
     notifyListeners();
   }
 }

@@ -16,13 +16,20 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _addressCtrl = TextEditingController();
+  String _selectedGender = 'Male';
   DateTime? _dob;
   Patient? _createdPatient;
+
+  static const _genders = ['Male', 'Female', 'Other'];
 
   @override
   void dispose() {
     _nameCtrl.dispose();
     _phoneCtrl.dispose();
+    _emailCtrl.dispose();
+    _addressCtrl.dispose();
     super.dispose();
   }
 
@@ -49,6 +56,9 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
     final patient = await prov.create(CreatePatientRequest(
       fullName: _nameCtrl.text.trim(),
       phone: _phoneCtrl.text.trim(),
+      email: _emailCtrl.text.trim(),
+      gender: _selectedGender,
+      address: _addressCtrl.text.trim(),
       dateOfBirth: _dob!.toIso8601String().split('T').first,
     ));
 
@@ -153,6 +163,20 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
               ),
               const SizedBox(height: 16),
 
+              // Gender dropdown
+              DropdownButtonFormField<String>(
+                value: _selectedGender,
+                decoration: const InputDecoration(
+                  labelText: 'Gender',
+                  prefixIcon: Icon(Icons.wc_outlined),
+                ),
+                items: _genders
+                    .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                    .toList(),
+                onChanged: (v) => setState(() => _selectedGender = v!),
+              ),
+              const SizedBox(height: 16),
+
               InkWell(
                 onTap: _pickDate,
                 child: InputDecorator(
@@ -177,6 +201,26 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Phone Number',
                   prefixIcon: Icon(Icons.phone_outlined),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _emailCtrl,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'Email (optional)',
+                  prefixIcon: Icon(Icons.email_outlined),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _addressCtrl,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(
+                  labelText: 'Address (optional)',
+                  prefixIcon: Icon(Icons.location_on_outlined),
                 ),
               ),
               const SizedBox(height: 28),

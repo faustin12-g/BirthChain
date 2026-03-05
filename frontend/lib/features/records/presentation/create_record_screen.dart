@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../patients/domain/patient_models.dart';
 import '../domain/record_models.dart';
 import 'record_provider.dart';
-import 'record_type_helper.dart';
 
 class CreateRecordScreen extends StatefulWidget {
   final Patient patient;
@@ -16,14 +15,21 @@ class CreateRecordScreen extends StatefulWidget {
 
 class _CreateRecordScreenState extends State<CreateRecordScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _descCtrl = TextEditingController();
+  final _diagnosisCtrl = TextEditingController();
+  final _symptomsCtrl = TextEditingController();
+  final _medicationCtrl = TextEditingController();
+  final _labTestsCtrl = TextEditingController();
+  final _notesCtrl = TextEditingController();
   final _facilityCtrl = TextEditingController();
-  String _selectedType = RecordTypeHelper.types.first;
   DateTime _eventDate = DateTime.now();
 
   @override
   void dispose() {
-    _descCtrl.dispose();
+    _diagnosisCtrl.dispose();
+    _symptomsCtrl.dispose();
+    _medicationCtrl.dispose();
+    _labTestsCtrl.dispose();
+    _notesCtrl.dispose();
     _facilityCtrl.dispose();
     super.dispose();
   }
@@ -47,8 +53,11 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
     final record = await prov.create(
       CreateRecordRequest(
         clientId: widget.patient.id,
-        recordType: _selectedType,
-        details: _descCtrl.text.trim(),
+        diagnosis: _diagnosisCtrl.text.trim(),
+        symptoms: _symptomsCtrl.text.trim(),
+        medication: _medicationCtrl.text.trim(),
+        labTests: _labTestsCtrl.text.trim(),
+        notes: _notesCtrl.text.trim(),
         facilityName: _facilityCtrl.text.trim(),
         eventDate:
             '${_eventDate.year}-${_eventDate.month.toString().padLeft(2, '0')}-${_eventDate.day.toString().padLeft(2, '0')}',
@@ -91,39 +100,93 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Record type dropdown
-              DropdownButtonFormField<String>(
-                value: _selectedType,
-                decoration: const InputDecoration(
-                  labelText: 'Record Type',
-                  prefixIcon: Icon(Icons.category),
-                ),
-                items:
-                    RecordTypeHelper.types
-                        .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                        .toList(),
-                onChanged: (v) => setState(() => _selectedType = v!),
-              ),
-              const SizedBox(height: 16),
-
-              // Description
+              // Diagnosis (required)
               TextFormField(
-                controller: _descCtrl,
-                maxLines: 3,
+                controller: _diagnosisCtrl,
+                maxLines: 2,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
-                  labelText: 'Diagnosis or treatment details...',
+                  labelText: 'Diagnosis *',
+                  hintText: 'e.g. Upper respiratory tract infection',
                   alignLabelWithHint: true,
                   prefixIcon: Padding(
-                    padding: EdgeInsets.only(bottom: 50),
-                    child: Icon(Icons.notes),
+                    padding: EdgeInsets.only(bottom: 24),
+                    child: Icon(Icons.medical_information_outlined),
                   ),
                 ),
                 validator:
                     (v) =>
                         v == null || v.trim().isEmpty
-                            ? 'Details are required'
+                            ? 'Diagnosis is required'
                             : null,
+              ),
+              const SizedBox(height: 16),
+
+              // Symptoms
+              TextFormField(
+                controller: _symptomsCtrl,
+                maxLines: 2,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(
+                  labelText: 'Symptoms',
+                  hintText: 'e.g. Fever, cough, sore throat',
+                  alignLabelWithHint: true,
+                  prefixIcon: Padding(
+                    padding: EdgeInsets.only(bottom: 24),
+                    child: Icon(Icons.sick_outlined),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Medication
+              TextFormField(
+                controller: _medicationCtrl,
+                maxLines: 2,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(
+                  labelText: 'Medication',
+                  hintText: 'e.g. Amoxicillin 500mg 3x daily',
+                  alignLabelWithHint: true,
+                  prefixIcon: Padding(
+                    padding: EdgeInsets.only(bottom: 24),
+                    child: Icon(Icons.medication_outlined),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Lab Tests
+              TextFormField(
+                controller: _labTestsCtrl,
+                maxLines: 2,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(
+                  labelText: 'Lab Tests',
+                  hintText: 'e.g. CBC, Blood glucose: 95 mg/dL',
+                  alignLabelWithHint: true,
+                  prefixIcon: Padding(
+                    padding: EdgeInsets.only(bottom: 24),
+                    child: Icon(Icons.science_outlined),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Notes
+              TextFormField(
+                controller: _notesCtrl,
+                maxLines: 2,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(
+                  labelText: 'Additional Notes',
+                  hintText: 'Follow-up in 2 weeks...',
+                  alignLabelWithHint: true,
+                  prefixIcon: Padding(
+                    padding: EdgeInsets.only(bottom: 24),
+                    child: Icon(Icons.note_alt_outlined),
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
 

@@ -6,7 +6,6 @@ import '../../../core/utils/date_formatter.dart';
 import '../../records/domain/record_models.dart';
 import '../../records/presentation/create_record_screen.dart';
 import '../../records/presentation/record_provider.dart';
-import '../../records/presentation/record_type_helper.dart';
 import '../domain/patient_models.dart';
 
 class PatientDetailScreen extends StatefulWidget {
@@ -90,6 +89,23 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
                             ],
                           ),
                         const SizedBox(height: 2),
+                        if (patient.gender.isNotEmpty)
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.wc,
+                                size: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                patient.gender,
+                                style: TextStyle(color: Colors.grey.shade600),
+                              ),
+                            ],
+                          ),
+                        if (patient.gender.isNotEmpty)
+                          const SizedBox(height: 2),
                         Row(
                           children: [
                             Icon(
@@ -147,6 +163,38 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
               ),
 
               const SizedBox(height: 24),
+
+              // ── Additional Info (email & address) ──
+              if (patient.email.isNotEmpty || patient.address.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Column(
+                    children: [
+                      if (patient.email.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Row(
+                            children: [
+                              Icon(Icons.email_outlined, size: 14, color: Colors.grey.shade600),
+                              const SizedBox(width: 6),
+                              Text(patient.email, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                            ],
+                          ),
+                        ),
+                      if (patient.address.isNotEmpty)
+                        Row(
+                          children: [
+                            Icon(Icons.location_on_outlined, size: 14, color: Colors.grey.shade600),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(patient.address, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+
               const Divider(),
               const SizedBox(height: 8),
 
@@ -216,74 +264,99 @@ class _MedicalHistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final typeInfo = RecordTypeHelper.getInfo(record.recordType);
+    final theme = Theme.of(context);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: Padding(
         padding: const EdgeInsets.all(14),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: typeInfo.color.withAlpha(25),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(typeInfo.icon, color: typeInfo.color, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        record.recordType,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
+            // Header: Date + Facility
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withAlpha(25),
+                        borderRadius: BorderRadius.circular(8),
                       ),
+                      child: Icon(Icons.medical_information_outlined,
+                          color: theme.colorScheme.primary, size: 18),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      DateFormatter.formatDate(record.eventDate),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+                if (record.facilityName.isNotEmpty)
+                  Row(
+                    children: [
+                      Icon(Icons.local_hospital, size: 12, color: Colors.grey.shade500),
+                      const SizedBox(width: 3),
                       Text(
-                        DateFormatter.formatDate(record.eventDate),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade500,
-                        ),
+                        record.facilityName,
+                        style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(record.details, style: const TextStyle(fontSize: 13)),
-                  if (record.facilityName.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.local_hospital,
-                          size: 12,
-                          color: Colors.grey.shade500,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          record.facilityName,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
+              ],
             ),
+            const SizedBox(height: 10),
+
+            // Diagnosis (always shown)
+            _RecordField(icon: Icons.medical_information_outlined, label: 'Diagnosis', value: record.details),
+
+            // Symptoms
+            if (record.symptoms.isNotEmpty)
+              _RecordField(icon: Icons.sick_outlined, label: 'Symptoms', value: record.symptoms),
+
+            // Medication
+            if (record.medication.isNotEmpty)
+              _RecordField(icon: Icons.medication_outlined, label: 'Medication', value: record.medication),
+
+            // Lab Tests
+            if (record.labTests.isNotEmpty)
+              _RecordField(icon: Icons.science_outlined, label: 'Lab Tests', value: record.labTests),
+
+            // Notes
+            if (record.notes.isNotEmpty)
+              _RecordField(icon: Icons.note_alt_outlined, label: 'Notes', value: record.notes),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _RecordField extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  const _RecordField({required this.icon, required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 14, color: Colors.grey.shade600),
+          const SizedBox(width: 6),
+          Text('$label: ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+          Expanded(child: Text(value, style: const TextStyle(fontSize: 12))),
+        ],
       ),
     );
   }

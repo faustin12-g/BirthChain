@@ -26,4 +26,16 @@ public sealed class ClientRepository : IClientRepository
 
     public async Task<IReadOnlyList<Client>> GetAllAsync()
         => await _db.Clients.OrderBy(c => c.FullName).ToListAsync();
+
+    public async Task<IReadOnlyList<Client>> SearchAsync(string query)
+    {
+        var q = query.Trim().ToLower();
+        return await _db.Clients
+            .Where(c => c.FullName.ToLower().Contains(q)
+                     || c.Phone.Contains(q)
+                     || c.QrCodeId.ToLower().Contains(q)
+                     || c.Email.ToLower().Contains(q))
+            .OrderBy(c => c.FullName)
+            .ToListAsync();
+    }
 }

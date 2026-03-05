@@ -8,4 +8,5 @@ public interface IClientRepository
     Task<Client?> GetByIdAsync(Guid id);
     Task<Client?> GetByQrCodeAsync(string qrCodeId);
     Task<IReadOnlyList<Client>> GetAllAsync();
+    Task<IReadOnlyList<Client>> SearchAsync(string query);
 }

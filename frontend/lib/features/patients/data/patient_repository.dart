@@ -31,4 +31,12 @@ class PatientRepository {
       return null;
     }
   }
+
+  Future<List<Patient>> search(String query) async {
+    final response = await _apiClient.dio.get(
+      ApiEndpoints.clientSearch(query),
+    );
+    final list = response.data as List;
+    return list.map((e) => Patient.fromJson(e)).toList();
+  }
 }

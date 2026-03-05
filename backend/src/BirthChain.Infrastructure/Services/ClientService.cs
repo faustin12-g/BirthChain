@@ -16,6 +16,9 @@ public sealed class ClientService : IClientService
         {
             FullName = dto.FullName,
             Phone = dto.Phone,
+            Email = dto.Email,
+            Gender = dto.Gender,
+            Address = dto.Address,
             DateOfBirth = DateTime.SpecifyKind(dto.DateOfBirth, DateTimeKind.Utc),
             QrCodeId = $"BC-{Guid.NewGuid().ToString("N")[..8].ToUpper()}",
             CreatedAt = DateTime.UtcNow
@@ -43,11 +46,20 @@ public sealed class ClientService : IClientService
         return clients.Select(ToDto).ToList().AsReadOnly();
     }
 
+    public async Task<IReadOnlyList<ClientDto>> SearchAsync(string query)
+    {
+        var clients = await _clientRepo.SearchAsync(query);
+        return clients.Select(ToDto).ToList().AsReadOnly();
+    }
+
     private static ClientDto ToDto(Client c) => new()
     {
         Id = c.Id,
         FullName = c.FullName,
         Phone = c.Phone,
+        Email = c.Email,
+        Gender = c.Gender,
+        Address = c.Address,
         DateOfBirth = c.DateOfBirth,
         QrCodeId = c.QrCodeId,
         CreatedAt = c.CreatedAt

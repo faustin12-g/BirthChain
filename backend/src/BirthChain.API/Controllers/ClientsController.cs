@@ -22,6 +22,7 @@ public class ClientsController : ControllerBase
 
     /// <summary>Register a new client. QrCodeId is generated automatically.</summary>
     [HttpPost]
+    [Authorize(Roles = "Provider")]
     public async Task<IActionResult> Create([FromBody] CreateClientDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.FullName))
@@ -33,6 +34,17 @@ public class ClientsController : ControllerBase
         await _activityLog.LogAsync(userId, $"Registered client {dto.FullName}");
 
         return CreatedAtAction(nameof(GetByQrCode), new { qrCodeId = client.QrCodeId }, client);
+    }
+
+    /// <summary>Search clients by name, phone, email, or QR code.</summary>
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string q)
+    {
+        if (string.IsNullOrWhiteSpace(q))
+            return Ok(Array.Empty<ClientDto>());
+
+        var results = await _clientService.SearchAsync(q);
+        return Ok(results);
     }
 
     /// <summary>Look up a client by QR code.</summary>

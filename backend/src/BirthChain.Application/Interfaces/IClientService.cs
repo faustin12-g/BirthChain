@@ -8,4 +8,5 @@ public interface IClientService
     Task<ClientDto?> GetByIdAsync(Guid id);
     Task<ClientDto?> GetByQrCodeAsync(string qrCodeId);
     Task<IReadOnlyList<ClientDto>> GetAllAsync();
+    Task<IReadOnlyList<ClientDto>> SearchAsync(string query);
 }

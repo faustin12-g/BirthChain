@@ -11,6 +11,7 @@ class ApiEndpoints {
   // Clients (patients)
   static const String clients = '/clients';
   static String clientByQr(String qr) => '/clients/by-qr/$qr';
+  static String clientSearch(String query) => '/clients/search?q=$query';
 
   // Records
   static const String records = '/records';

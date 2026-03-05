@@ -40,6 +40,18 @@ class MedicalRecord {
   /// The medical details / notes
   String get details => _parsed['details'] as String? ?? description;
 
+  /// Symptoms
+  String get symptoms => _parsed['symptoms'] as String? ?? '';
+
+  /// Medication prescribed
+  String get medication => _parsed['medication'] as String? ?? '';
+
+  /// Lab test results
+  String get labTests => _parsed['labTests'] as String? ?? '';
+
+  /// Additional notes
+  String get notes => _parsed['notes'] as String? ?? '';
+
   /// Healthcare facility name
   String get facilityName => _parsed['facility'] as String? ?? '';
 
@@ -59,15 +71,21 @@ class MedicalRecord {
 
 class CreateRecordRequest {
   final String clientId;
-  final String recordType;
-  final String details;
+  final String diagnosis;
+  final String symptoms;
+  final String medication;
+  final String labTests;
+  final String notes;
   final String facilityName;
   final String eventDate;
 
   CreateRecordRequest({
     required this.clientId,
-    required this.recordType,
-    required this.details,
+    required this.diagnosis,
+    this.symptoms = '',
+    this.medication = '',
+    this.labTests = '',
+    this.notes = '',
     required this.facilityName,
     required this.eventDate,
   });
@@ -75,8 +93,12 @@ class CreateRecordRequest {
   Map<String, dynamic> toJson() => {
     'clientId': clientId,
     'description': json.encode({
-      'type': recordType,
-      'details': details,
+      'type': 'Consultation',
+      'details': diagnosis,
+      'symptoms': symptoms,
+      'medication': medication,
+      'labTests': labTests,
+      'notes': notes,
       'facility': facilityName,
       'date': eventDate,
     }),
