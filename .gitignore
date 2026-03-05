@@ -1,0 +1,79 @@
+# ========================
+# OS & Editor
+# ========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ========================
+# .NET / Backend
+# ========================
+backend/**/bin/
+backend/**/obj/
+backend/**/.vs/
+backend/**/*.user
+backend/**/*.suo
+backend/**/*.cache
+backend/**/project.lock.json
+backend/**/launchSettings.json
+*.nupkg
+*.snupkg
+
+# User secrets / local config
+backend/**/appsettings.Development.json
+
+# EF Migrations design-time artifacts
+*.mdf
+*.ldf
+
+# ========================
+# Flutter / Frontend
+# ========================
+frontend/build/
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/.pub-cache/
+frontend/.pub/
+frontend/**/doc/api/
+frontend/**/ios/Flutter/.last_build_id
+frontend/**/Generated.xcconfig
+frontend/**/flutter_export_environment.sh
+
+# Android
+frontend/android/.gradle/
+frontend/android/app/debug/
+frontend/android/app/profile/
+frontend/android/app/release/
+frontend/android/local.properties
+frontend/android/**/GeneratedPluginRegistrant.java
+*.apk
+*.aab
+
+# iOS
+frontend/ios/Pods/
+frontend/ios/.symlinks/
+frontend/ios/Flutter/Flutter.framework
+frontend/ios/Flutter/Flutter.podspec
+
+# Windows / macOS / Linux build
+frontend/windows/flutter/ephemeral/
+frontend/macos/Flutter/ephemeral/
+frontend/linux/flutter/ephemeral/
+
+# Symbolication & obfuscation
+*.symbols
+*.map.json
+
+# ========================
+# Logs & misc
+# ========================
+*.log
+build_log.txt
