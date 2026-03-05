@@ -113,10 +113,26 @@ class _PatientLookupScreenState extends State<PatientLookupScreen> {
                     ],
                   ),
                   // Corner brackets
-                  Positioned(top: 36, left: 36, child: _ScanCorner(alignment: Alignment.topLeft)),
-                  Positioned(top: 36, right: 36, child: _ScanCorner(alignment: Alignment.topRight)),
-                  Positioned(bottom: 36, left: 36, child: _ScanCorner(alignment: Alignment.bottomLeft)),
-                  Positioned(bottom: 36, right: 36, child: _ScanCorner(alignment: Alignment.bottomRight)),
+                  Positioned(
+                    top: 36,
+                    left: 36,
+                    child: _ScanCorner(alignment: Alignment.topLeft),
+                  ),
+                  Positioned(
+                    top: 36,
+                    right: 36,
+                    child: _ScanCorner(alignment: Alignment.topRight),
+                  ),
+                  Positioned(
+                    bottom: 36,
+                    left: 36,
+                    child: _ScanCorner(alignment: Alignment.bottomLeft),
+                  ),
+                  Positioned(
+                    bottom: 36,
+                    right: 36,
+                    child: _ScanCorner(alignment: Alignment.bottomRight),
+                  ),
                 ],
               ),
             ),
@@ -129,12 +145,24 @@ class _PatientLookupScreenState extends State<PatientLookupScreen> {
 
             // ── Manual entry toggle ──
             OutlinedButton.icon(
-              onPressed: () => setState(() => _showManualEntry = !_showManualEntry),
-              icon: Icon(_showManualEntry ? Icons.keyboard_hide : Icons.keyboard),
-              label: Text(_showManualEntry ? 'Hide Manual Entry' : 'Enter QR Code Manually'),
+              onPressed:
+                  () => setState(() => _showManualEntry = !_showManualEntry),
+              icon: Icon(
+                _showManualEntry ? Icons.keyboard_hide : Icons.keyboard,
+              ),
+              label: Text(
+                _showManualEntry
+                    ? 'Hide Manual Entry'
+                    : 'Enter QR Code Manually',
+              ),
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
 
@@ -159,19 +187,27 @@ class _PatientLookupScreenState extends State<PatientLookupScreen> {
                   ),
                   const SizedBox(width: 12),
                   Consumer<RecordProvider>(
-                    builder: (_, prov, __) => FilledButton(
-                      onPressed: prov.isLoading ? null : _lookup,
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                      ),
-                      child: prov.isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                            )
-                          : const Icon(Icons.search),
-                    ),
+                    builder:
+                        (_, prov, __) => FilledButton(
+                          onPressed: prov.isLoading ? null : _lookup,
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 16,
+                            ),
+                          ),
+                          child:
+                              prov.isLoading
+                                  ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                  : const Icon(Icons.search),
+                        ),
                   ),
                 ],
               ),
@@ -195,14 +231,18 @@ class _PatientLookupScreenState extends State<PatientLookupScreen> {
               child: FilledButton.icon(
                 onPressed: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const RegisterPatientScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => const RegisterPatientScreen(),
+                    ),
                   );
                 },
                 icon: const Icon(Icons.person_add),
                 label: const Text('Register New Patient'),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ),
@@ -235,11 +275,12 @@ class _CornerPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFF00BFA5)
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+    final paint =
+        Paint()
+          ..color = const Color(0xFF00BFA5)
+          ..strokeWidth = 3
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
 
     final path = Path();
     if (alignment == Alignment.topLeft) {

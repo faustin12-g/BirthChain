@@ -83,16 +83,17 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
     if (_createdPatient != null) {
       return Scaffold(
         appBar: AppBar(
-          title: widget.embedded
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset('assets/icon/logo.png', height: 28),
-                    const SizedBox(width: 8),
-                    const Text('BirthChain'),
-                  ],
-                )
-              : const Text('Register Patient'),
+          title:
+              widget.embedded
+                  ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset('assets/icon/logo.png', height: 28),
+                      const SizedBox(width: 8),
+                      const Text('BirthChain'),
+                    ],
+                  )
+                  : const Text('Register Patient'),
           automaticallyImplyLeading: !widget.embedded,
         ),
         body: SingleChildScrollView(
@@ -179,16 +180,17 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
     // ── Form state ──
     return Scaffold(
       appBar: AppBar(
-        title: widget.embedded
-            ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.asset('assets/icon/logo.png', height: 28),
-                  const SizedBox(width: 8),
-                  const Text('BirthChain'),
-                ],
-              )
-            : const Text('Register Patient'),
+        title:
+            widget.embedded
+                ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset('assets/icon/logo.png', height: 28),
+                    const SizedBox(width: 8),
+                    const Text('BirthChain'),
+                  ],
+                )
+                : const Text('Register Patient'),
         automaticallyImplyLeading: !widget.embedded,
       ),
       body: SingleChildScrollView(

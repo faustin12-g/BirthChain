@@ -17,11 +17,89 @@ class PatientDetailScreen extends StatefulWidget {
 }
 
 class _PatientDetailScreenState extends State<PatientDetailScreen> {
+  final _searchCtrl = TextEditingController();
+  String _searchQuery = '';
+  String? _facilityFilter;
+  DateTimeRange? _dateRange;
+
   @override
   void initState() {
     super.initState();
     final prov = context.read<RecordProvider>();
     Future.microtask(() => prov.loadByClientId(widget.patient.id));
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  /// Filter records based on search query, facility, and date range.
+  List<MedicalRecord> _applyFilters(List<MedicalRecord> records) {
+    var filtered = records;
+
+    // Text search across diagnosis, symptoms, medication, notes, labTests
+    if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      filtered = filtered.where((r) {
+        return r.details.toLowerCase().contains(q) ||
+            r.symptoms.toLowerCase().contains(q) ||
+            r.medication.toLowerCase().contains(q) ||
+            r.notes.toLowerCase().contains(q) ||
+            r.labTests.toLowerCase().contains(q) ||
+            r.facilityName.toLowerCase().contains(q) ||
+            r.providerName.toLowerCase().contains(q);
+      }).toList();
+    }
+
+    // Facility filter
+    if (_facilityFilter != null) {
+      filtered = filtered.where((r) => r.facilityName == _facilityFilter).toList();
+    }
+
+    // Date range filter
+    if (_dateRange != null) {
+      filtered = filtered.where((r) {
+        final date = DateTime.tryParse(r.eventDate);
+        if (date == null) return false;
+        return !date.isBefore(_dateRange!.start) &&
+            !date.isAfter(_dateRange!.end.add(const Duration(days: 1)));
+      }).toList();
+    }
+
+    return filtered;
+  }
+
+  /// Extract unique facility names from records.
+  List<String> _uniqueFacilities(List<MedicalRecord> records) {
+    return records
+        .map((r) => r.facilityName)
+        .where((f) => f.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+  }
+
+  Future<void> _pickDateRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      initialDateRange: _dateRange,
+    );
+    if (picked != null) {
+      setState(() => _dateRange = picked);
+    }
+  }
+
+  void _clearAllFilters() {
+    setState(() {
+      _searchCtrl.clear();
+      _searchQuery = '';
+      _facilityFilter = null;
+      _dateRange = null;
+    });
   }
 
   @override
@@ -218,15 +296,112 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
               const Divider(),
               const SizedBox(height: 8),
 
-              // ── Medical History ──
-              Text(
-                'Medical History',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+              // ── Medical History Header ──
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Medical History',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (_searchQuery.isNotEmpty ||
+                      _facilityFilter != null ||
+                      _dateRange != null)
+                    TextButton.icon(
+                      onPressed: _clearAllFilters,
+                      icon: const Icon(Icons.clear_all, size: 18),
+                      label: const Text('Clear'),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
 
+              // ── Search bar ──
+              TextField(
+                controller: _searchCtrl,
+                decoration: InputDecoration(
+                  hintText: 'Search records...',
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, size: 18),
+                          onPressed: () {
+                            _searchCtrl.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: theme.colorScheme.primary.withAlpha(10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                  isDense: true,
+                ),
+                style: const TextStyle(fontSize: 13),
+                onChanged: (v) => setState(() => _searchQuery = v.trim()),
+              ),
+              const SizedBox(height: 8),
+
+              // ── Filter chips row ──
+              if (!prov.isLoading && prov.records.isNotEmpty)
+                Builder(builder: (_) {
+                  final facilities = _uniqueFacilities(prov.records);
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        // Date range chip
+                        Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: FilterChip(
+                            avatar: const Icon(Icons.calendar_today, size: 14),
+                            label: Text(
+                              _dateRange != null
+                                  ? '${_fmt(_dateRange!.start)} – ${_fmt(_dateRange!.end)}'
+                                  : 'Date range',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            selected: _dateRange != null,
+                            onSelected: (_) => _pickDateRange(),
+                            onDeleted: _dateRange != null
+                                ? () => setState(() => _dateRange = null)
+                                : null,
+                            visualDensity: VisualDensity.compact,
+                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                        ),
+                        // Facility chips
+                        ...facilities.map(
+                          (f) => Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: FilterChip(
+                              avatar: const Icon(Icons.local_hospital, size: 14),
+                              label: Text(f, style: const TextStyle(fontSize: 12)),
+                              selected: _facilityFilter == f,
+                              onSelected: (sel) {
+                                setState(() => _facilityFilter = sel ? f : null);
+                              },
+                              visualDensity: VisualDensity.compact,
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              const SizedBox(height: 8),
+
+              // ── Records list ──
               if (prov.isLoading)
                 const Center(
                   child: Padding(
@@ -255,7 +430,39 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
                   ),
                 )
               else
-                ...prov.records.map((r) => _MedicalHistoryCard(record: r)),
+                Builder(builder: (_) {
+                  final filtered = _applyFilters(prov.records);
+                  if (filtered.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Column(
+                          children: [
+                            Icon(Icons.filter_list_off, size: 40, color: Colors.grey.shade300),
+                            const SizedBox(height: 8),
+                            Text(
+                              'No records match your filters',
+                              style: TextStyle(color: Colors.grey.shade500),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Text(
+                          '${filtered.length} record${filtered.length == 1 ? '' : 's'}',
+                          style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                        ),
+                      ),
+                      ...filtered.map((r) => _MedicalHistoryCard(record: r)),
+                    ],
+                  );
+                }),
             ],
           );
         },
@@ -277,6 +484,10 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
     );
   }
 }
+
+/// Format date as MM/DD for chip label.
+String _fmt(DateTime d) =>
+    '${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')}/${d.year}';
 
 class _MedicalHistoryCard extends StatelessWidget {
   final MedicalRecord record;
