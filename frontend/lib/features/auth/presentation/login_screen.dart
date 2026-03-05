@@ -44,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.shield, color: Colors.orange.shade300, size: 24),
+            Image.asset('assets/icon/logo.png', height: 30),
             const SizedBox(width: 8),
             const Text('BirthChain',
                 style: TextStyle(fontWeight: FontWeight.bold)),
@@ -168,16 +168,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                // Medical illustration placeholder
+                // Logo illustration
                 Center(
-                  child: Column(
-                    children: [
-                      Icon(Icons.local_hospital,
-                          size: 80, color: Colors.grey.shade200),
-                      const SizedBox(height: 8),
-                      Icon(Icons.people_outline,
-                          size: 60, color: Colors.grey.shade200),
-                    ],
+                  child: Opacity(
+                    opacity: 0.2,
+                    child: Image.asset('assets/icon/logo.png', height: 120),
                   ),
                 ),
               ],

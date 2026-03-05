@@ -30,7 +30,7 @@ class _PatientListScreenState extends State<PatientListScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.shield, color: Colors.orange.shade300, size: 22),
+            Image.asset('assets/icon/logo.png', height: 28),
             const SizedBox(width: 8),
             const Text('BirthChain'),
           ],
