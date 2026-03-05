@@ -42,30 +42,33 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
     // Text search across diagnosis, symptoms, medication, notes, labTests
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
-      filtered = filtered.where((r) {
-        return r.details.toLowerCase().contains(q) ||
-            r.symptoms.toLowerCase().contains(q) ||
-            r.medication.toLowerCase().contains(q) ||
-            r.notes.toLowerCase().contains(q) ||
-            r.labTests.toLowerCase().contains(q) ||
-            r.facilityName.toLowerCase().contains(q) ||
-            r.providerName.toLowerCase().contains(q);
-      }).toList();
+      filtered =
+          filtered.where((r) {
+            return r.details.toLowerCase().contains(q) ||
+                r.symptoms.toLowerCase().contains(q) ||
+                r.medication.toLowerCase().contains(q) ||
+                r.notes.toLowerCase().contains(q) ||
+                r.labTests.toLowerCase().contains(q) ||
+                r.facilityName.toLowerCase().contains(q) ||
+                r.providerName.toLowerCase().contains(q);
+          }).toList();
     }
 
     // Facility filter
     if (_facilityFilter != null) {
-      filtered = filtered.where((r) => r.facilityName == _facilityFilter).toList();
+      filtered =
+          filtered.where((r) => r.facilityName == _facilityFilter).toList();
     }
 
     // Date range filter
     if (_dateRange != null) {
-      filtered = filtered.where((r) {
-        final date = DateTime.tryParse(r.eventDate);
-        if (date == null) return false;
-        return !date.isBefore(_dateRange!.start) &&
-            !date.isAfter(_dateRange!.end.add(const Duration(days: 1)));
-      }).toList();
+      filtered =
+          filtered.where((r) {
+            final date = DateTime.tryParse(r.eventDate);
+            if (date == null) return false;
+            return !date.isBefore(_dateRange!.start) &&
+                !date.isAfter(_dateRange!.end.add(const Duration(days: 1)));
+          }).toList();
     }
 
     return filtered;
@@ -328,15 +331,16 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
                 decoration: InputDecoration(
                   hintText: 'Search records...',
                   prefixIcon: const Icon(Icons.search, size: 20),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, size: 18),
-                          onPressed: () {
-                            _searchCtrl.clear();
-                            setState(() => _searchQuery = '');
-                          },
-                        )
-                      : null,
+                  suffixIcon:
+                      _searchQuery.isNotEmpty
+                          ? IconButton(
+                            icon: const Icon(Icons.clear, size: 18),
+                            onPressed: () {
+                              _searchCtrl.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                          )
+                          : null,
                   filled: true,
                   fillColor: theme.colorScheme.primary.withAlpha(10),
                   border: OutlineInputBorder(
@@ -353,52 +357,68 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
 
               // ── Filter chips row ──
               if (!prov.isLoading && prov.records.isNotEmpty)
-                Builder(builder: (_) {
-                  final facilities = _uniqueFacilities(prov.records);
-                  return SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        // Date range chip
-                        Padding(
-                          padding: const EdgeInsets.only(right: 6),
-                          child: FilterChip(
-                            avatar: const Icon(Icons.calendar_today, size: 14),
-                            label: Text(
-                              _dateRange != null
-                                  ? '${_fmt(_dateRange!.start)} – ${_fmt(_dateRange!.end)}'
-                                  : 'Date range',
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            selected: _dateRange != null,
-                            onSelected: (_) => _pickDateRange(),
-                            onDeleted: _dateRange != null
-                                ? () => setState(() => _dateRange = null)
-                                : null,
-                            visualDensity: VisualDensity.compact,
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                        ),
-                        // Facility chips
-                        ...facilities.map(
-                          (f) => Padding(
+                Builder(
+                  builder: (_) {
+                    final facilities = _uniqueFacilities(prov.records);
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          // Date range chip
+                          Padding(
                             padding: const EdgeInsets.only(right: 6),
                             child: FilterChip(
-                              avatar: const Icon(Icons.local_hospital, size: 14),
-                              label: Text(f, style: const TextStyle(fontSize: 12)),
-                              selected: _facilityFilter == f,
-                              onSelected: (sel) {
-                                setState(() => _facilityFilter = sel ? f : null);
-                              },
+                              avatar: const Icon(
+                                Icons.calendar_today,
+                                size: 14,
+                              ),
+                              label: Text(
+                                _dateRange != null
+                                    ? '${_fmt(_dateRange!.start)} – ${_fmt(_dateRange!.end)}'
+                                    : 'Date range',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              selected: _dateRange != null,
+                              onSelected: (_) => _pickDateRange(),
+                              onDeleted:
+                                  _dateRange != null
+                                      ? () => setState(() => _dateRange = null)
+                                      : null,
                               visualDensity: VisualDensity.compact,
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
+                          // Facility chips
+                          ...facilities.map(
+                            (f) => Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: FilterChip(
+                                avatar: const Icon(
+                                  Icons.local_hospital,
+                                  size: 14,
+                                ),
+                                label: Text(
+                                  f,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                selected: _facilityFilter == f,
+                                onSelected: (sel) {
+                                  setState(
+                                    () => _facilityFilter = sel ? f : null,
+                                  );
+                                },
+                                visualDensity: VisualDensity.compact,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               const SizedBox(height: 8),
 
               // ── Records list ──
@@ -430,39 +450,48 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
                   ),
                 )
               else
-                Builder(builder: (_) {
-                  final filtered = _applyFilters(prov.records);
-                  if (filtered.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(32),
-                        child: Column(
-                          children: [
-                            Icon(Icons.filter_list_off, size: 40, color: Colors.grey.shade300),
-                            const SizedBox(height: 8),
-                            Text(
-                              'No records match your filters',
-                              style: TextStyle(color: Colors.grey.shade500),
+                Builder(
+                  builder: (_) {
+                    final filtered = _applyFilters(prov.records);
+                    if (filtered.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.filter_list_off,
+                                size: 40,
+                                color: Colors.grey.shade300,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'No records match your filters',
+                                style: TextStyle(color: Colors.grey.shade500),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Text(
+                            '${filtered.length} record${filtered.length == 1 ? '' : 's'}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade500,
                             ),
-                          ],
+                          ),
                         ),
-                      ),
+                        ...filtered.map((r) => _MedicalHistoryCard(record: r)),
+                      ],
                     );
-                  }
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Text(
-                          '${filtered.length} record${filtered.length == 1 ? '' : 's'}',
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                        ),
-                      ),
-                      ...filtered.map((r) => _MedicalHistoryCard(record: r)),
-                    ],
-                  );
-                }),
+                  },
+                ),
             ],
           );
         },
