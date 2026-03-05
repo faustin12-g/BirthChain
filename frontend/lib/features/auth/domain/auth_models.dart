@@ -4,10 +4,37 @@ class LoginRequest {
 
   LoginRequest({required this.email, required this.password});
 
+  Map<String, dynamic> toJson() => {'email': email, 'password': password};
+}
+
+class RegisterRequest {
+  final String fullName;
+  final String email;
+  final String password;
+  final String phone;
+  final String gender;
+  final String address;
+  final DateTime dateOfBirth;
+
+  RegisterRequest({
+    required this.fullName,
+    required this.email,
+    required this.password,
+    required this.phone,
+    required this.gender,
+    required this.address,
+    required this.dateOfBirth,
+  });
+
   Map<String, dynamic> toJson() => {
-        'email': email,
-        'password': password,
-      };
+    'fullName': fullName,
+    'email': email,
+    'password': password,
+    'phone': phone,
+    'gender': gender,
+    'address': address,
+    'dateOfBirth': dateOfBirth.toUtc().toIso8601String(),
+  };
 }
 
 class LoginResponse {
@@ -28,11 +55,11 @@ class LoginResponse {
   });
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) => LoginResponse(
-        token: json['token'] ?? '',
-        userId: json['userId'] ?? '',
-        email: json['email'] ?? '',
-        fullName: json['fullName'] ?? '',
-        role: json['role'] ?? '',
-        expiresAt: json['expiresAt'] ?? '',
-      );
+    token: json['token'] ?? '',
+    userId: json['userId'] ?? '',
+    email: json['email'] ?? '',
+    fullName: json['fullName'] ?? '',
+    role: json['role'] ?? '',
+    expiresAt: json['expiresAt'] ?? '',
+  );
 }

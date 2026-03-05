@@ -3,6 +3,7 @@ class ApiEndpoints {
 
   // Auth
   static const String login = '/auth/login';
+  static const String register = '/auth/register';
 
   // Providers
   static const String providers = '/providers';
@@ -10,11 +11,13 @@ class ApiEndpoints {
 
   // Clients (patients)
   static const String clients = '/clients';
+  static const String clientMe = '/clients/me';
   static String clientByQr(String qr) => '/clients/by-qr/$qr';
   static String clientSearch(String query) => '/clients/search?q=$query';
 
   // Records
   static const String records = '/records';
+  static const String myRecords = '/records/my';
   static String recordsByClient(String id) => '/records/by-client/$id';
   static String recordsByQr(String qr) => '/records/by-qr/$qr';
 

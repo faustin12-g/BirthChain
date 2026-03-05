@@ -18,6 +18,17 @@ public record LoginResponseDto
     public DateTime ExpiresAt { get; init; }
 }
 
+public record RegisterPatientDto
+{
+    public string FullName { get; init; } = string.Empty;
+    public string Email { get; init; } = string.Empty;
+    public string Password { get; init; } = string.Empty;
+    public string Phone { get; init; } = string.Empty;
+    public string Gender { get; init; } = string.Empty;
+    public string Address { get; init; } = string.Empty;
+    public DateTime DateOfBirth { get; init; }
+}
+
 // ── User ──
 
 public record UserDto
@@ -79,6 +90,7 @@ public record ClientDto
     public DateTime DateOfBirth { get; init; }
     public string QrCodeId { get; init; } = string.Empty;
     public DateTime CreatedAt { get; init; }
+    public Guid? UserId { get; init; }
 }
 
 public record CreateClientDto

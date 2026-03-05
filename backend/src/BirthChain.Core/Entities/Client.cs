@@ -1,7 +1,7 @@
 namespace BirthChain.Core.Entities;
 
 /// <summary>
-/// Client / Patient registered by a provider.
+/// Client / Patient — can be registered by a provider or self-registered.
 /// </summary>
 public class Client : BaseEntity
 {
@@ -13,4 +13,7 @@ public class Client : BaseEntity
     public DateTime DateOfBirth { get; set; }
     public string QrCodeId { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>Nullable — set when a patient creates their own account.</summary>
+    public Guid? UserId { get; set; }
 }

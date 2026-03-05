@@ -52,6 +52,13 @@ public class BirthChainDbContext : DbContext
             e.Property(c => c.Phone).HasMaxLength(50);
             e.Property(c => c.QrCodeId).IsRequired().HasMaxLength(100);
             e.HasIndex(c => c.QrCodeId).IsUnique();
+
+            // Optional link to a User account (for self-registered patients)
+            e.HasIndex(c => c.UserId).IsUnique().HasFilter("\"UserId\" IS NOT NULL");
+            e.HasOne<User>()
+             .WithOne()
+             .HasForeignKey<Client>(c => c.UserId)
+             .OnDelete(DeleteBehavior.SetNull);
         });
 
         // ── Record ──

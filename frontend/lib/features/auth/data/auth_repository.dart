@@ -29,6 +29,26 @@ class AuthRepository {
     return loginResponse;
   }
 
+  Future<LoginResponse> register(RegisterRequest request) async {
+    final response = await _apiClient.dio.post(
+      ApiEndpoints.register,
+      data: request.toJson(),
+    );
+
+    final loginResponse = LoginResponse.fromJson(response.data);
+
+    // Persist session — patient is logged in immediately
+    await _storage.saveToken(loginResponse.token);
+    await _storage.saveUserInfo(
+      userId: loginResponse.userId,
+      role: loginResponse.role,
+      name: loginResponse.fullName,
+      email: loginResponse.email,
+    );
+
+    return loginResponse;
+  }
+
   Future<void> logout() async {
     await _storage.clearAll();
   }

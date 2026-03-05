@@ -40,6 +40,12 @@ public sealed class ClientService : IClientService
         return client is null ? null : ToDto(client);
     }
 
+    public async Task<ClientDto?> GetByUserIdAsync(Guid userId)
+    {
+        var client = await _clientRepo.GetByUserIdAsync(userId);
+        return client is null ? null : ToDto(client);
+    }
+
     public async Task<IReadOnlyList<ClientDto>> GetAllAsync()
     {
         var clients = await _clientRepo.GetAllAsync();
@@ -62,6 +68,7 @@ public sealed class ClientService : IClientService
         Address = c.Address,
         DateOfBirth = c.DateOfBirth,
         QrCodeId = c.QrCodeId,
-        CreatedAt = c.CreatedAt
+        CreatedAt = c.CreatedAt,
+        UserId = c.UserId
     };
 }

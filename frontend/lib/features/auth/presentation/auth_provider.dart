@@ -20,6 +20,7 @@ class AuthProvider extends ChangeNotifier {
   String? get name => _name;
   bool get isLoggedIn => _isLoggedIn;
   bool get isAdmin => _role == 'Admin';
+  bool get isPatient => _role == 'Patient';
 
   Future<void> checkSession() async {
     _isLoggedIn = await _repo.isLoggedIn();
@@ -36,7 +37,9 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _repo.login(LoginRequest(email: email, password: password));
+      final response = await _repo.login(
+        LoginRequest(email: email, password: password),
+      );
       _role = response.role;
       _name = response.fullName;
       _isLoggedIn = true;
@@ -48,7 +51,43 @@ class AuthProvider extends ChangeNotifier {
       if (e.response?.statusCode == 401) {
         _error = 'Invalid email or password.';
       } else {
-        _error = e.response?.data?['message'] ?? 'Connection error. Is the server running?';
+        _error =
+            e.response?.data?['message'] ??
+            'Connection error. Is the server running?';
+      }
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _isLoading = false;
+      _error = 'Something went wrong.';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> register(RegisterRequest request) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final response = await _repo.register(request);
+      _role = response.role;
+      _name = response.fullName;
+      _isLoggedIn = true;
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } on DioException catch (e) {
+      _isLoading = false;
+      if (e.response?.statusCode == 409) {
+        _error =
+            e.response?.data?['message'] ??
+            'An account with this email already exists.';
+      } else {
+        _error =
+            e.response?.data?['message'] ??
+            'Connection error. Is the server running?';
       }
       notifyListeners();
       return false;

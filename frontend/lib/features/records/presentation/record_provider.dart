@@ -84,4 +84,26 @@ class RecordProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+
+  /// Patient: load own profile + records
+  Future<void> loadMyRecords() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final result = await _repo.getMyRecords();
+      _currentClient = result.client;
+      _records = result.records;
+    } on DioException catch (e) {
+      _error = e.response?.data?['message'] ?? 'Failed to load your records.';
+      _records = [];
+      _currentClient = null;
+    } catch (_) {
+      _error = 'Something went wrong.';
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
 }

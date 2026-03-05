@@ -8,7 +8,7 @@ namespace BirthChain.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Provider,Admin")]
+[Authorize(Roles = "Provider,Admin,Patient")]
 public class RecordsController : ControllerBase
 {
     private readonly IRecordService _recordService;
@@ -18,6 +18,20 @@ public class RecordsController : ControllerBase
     {
         _recordService = recordService;
         _clientService = clientService;
+    }
+
+    /// <summary>Patient: View own medical records.</summary>
+    [HttpGet("my")]
+    [Authorize(Roles = "Patient")]
+    public async Task<IActionResult> GetMyRecords()
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var client = await _clientService.GetByUserIdAsync(userId);
+        if (client is null)
+            return NotFound(new { message = "Patient profile not found." });
+
+        var records = await _recordService.GetByClientIdAsync(client.Id);
+        return Ok(new { client, records });
     }
 
     /// <summary>Append a new record for a client. Provider is resolved from the JWT.</summary>

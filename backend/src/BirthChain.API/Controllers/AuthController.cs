@@ -33,4 +33,28 @@ public class AuthController : ControllerBase
 
         return Ok(result);
     }
+
+    /// <summary>Patient self-registration. Creates user + client and returns JWT.</summary>
+    [HttpPost("register")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Register([FromBody] RegisterPatientDto request)
+    {
+        if (string.IsNullOrWhiteSpace(request.FullName))
+            return BadRequest(new { message = "Full name is required." });
+        if (string.IsNullOrWhiteSpace(request.Email))
+            return BadRequest(new { message = "Email is required." });
+        if (string.IsNullOrWhiteSpace(request.Password) || request.Password.Length < 6)
+            return BadRequest(new { message = "Password must be at least 6 characters." });
+
+        try
+        {
+            var result = await _authService.RegisterPatientAsync(request);
+            await _activityLog.LogAsync(result.UserId, "Patient self-registered");
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+    }
 }

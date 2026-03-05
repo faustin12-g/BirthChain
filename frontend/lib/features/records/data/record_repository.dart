@@ -43,4 +43,16 @@ class RecordRepository {
             .toList();
     return (client: client, records: records);
   }
+
+  /// Patient: fetch own profile + records via GET /records/my
+  Future<({Patient client, List<MedicalRecord> records})> getMyRecords() async {
+    final response = await _apiClient.dio.get(ApiEndpoints.myRecords);
+    final data = response.data;
+    final client = Patient.fromJson(data['client']);
+    final records =
+        (data['records'] as List)
+            .map((e) => MedicalRecord.fromJson(e))
+            .toList();
+    return (client: client, records: records);
+  }
 }

@@ -61,8 +61,14 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(const Duration(milliseconds: 1500));
     if (!mounted) return;
     final auth = context.read<AuthProvider>();
-    final route =
-        auth.isLoggedIn ? AppRoutes.dashboard : AppRoutes.login;
+    String route;
+    if (!auth.isLoggedIn) {
+      route = AppRoutes.login;
+    } else if (auth.isPatient) {
+      route = AppRoutes.patientDashboard;
+    } else {
+      route = AppRoutes.dashboard;
+    }
     Navigator.of(context).pushReplacementNamed(route);
   }
 

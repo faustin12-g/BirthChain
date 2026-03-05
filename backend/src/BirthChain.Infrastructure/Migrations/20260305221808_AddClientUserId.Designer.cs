@@ -3,6 +3,7 @@ using System;
 using BirthChain.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BirthChain.Infrastructure.Migrations
 {
     [DbContext(typeof(BirthChainDbContext))]
-    partial class BirthChainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260305221808_AddClientUserId")]
+    partial class AddClientUserId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

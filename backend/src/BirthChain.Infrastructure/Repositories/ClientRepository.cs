@@ -24,6 +24,18 @@ public sealed class ClientRepository : IClientRepository
     public async Task<Client?> GetByQrCodeAsync(string qrCodeId)
         => await _db.Clients.FirstOrDefaultAsync(c => c.QrCodeId == qrCodeId);
 
+    public async Task<Client?> GetByUserIdAsync(Guid userId)
+        => await _db.Clients.FirstOrDefaultAsync(c => c.UserId == userId);
+
+    public async Task<Client?> GetByEmailAsync(string email)
+        => await _db.Clients.FirstOrDefaultAsync(c => c.Email == email);
+
+    public async Task UpdateAsync(Client client)
+    {
+        _db.Clients.Update(client);
+        await _db.SaveChangesAsync();
+    }
+
     public async Task<IReadOnlyList<Client>> GetAllAsync()
         => await _db.Clients.OrderBy(c => c.FullName).ToListAsync();
 

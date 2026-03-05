@@ -32,7 +32,12 @@ class _LoginScreenState extends State<LoginScreen> {
       _passwordCtrl.text,
     );
     if (success && mounted) {
-      navigator.pushReplacementNamed('/dashboard');
+      final role = auth.role;
+      if (role == 'Patient') {
+        navigator.pushReplacementNamed('/patient-dashboard');
+      } else {
+        navigator.pushReplacementNamed('/dashboard');
+      }
     }
   }
 
@@ -73,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Provider Login',
+                  'Welcome back',
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: Colors.grey.shade600,
                   ),
@@ -196,7 +201,32 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 12),
+
+                // Sign up link
+                Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "Don't have an account? ",
+                        style: TextStyle(color: Colors.grey.shade600),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(context)
+                            .pushReplacementNamed('/register'),
+                        child: Text(
+                          'Sign Up',
+                          style: TextStyle(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
 
                 // Logo illustration
                 Center(

@@ -8,7 +8,7 @@ namespace BirthChain.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Provider,Admin")]
+[Authorize(Roles = "Provider,Admin,Patient")]
 public class ClientsController : ControllerBase
 {
     private readonly IClientService _clientService;
@@ -18,6 +18,18 @@ public class ClientsController : ControllerBase
     {
         _clientService = clientService;
         _activityLog = activityLog;
+    }
+
+    /// <summary>Patient: Get own client profile.</summary>
+    [HttpGet("me")]
+    [Authorize(Roles = "Patient")]
+    public async Task<IActionResult> GetMyProfile()
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var client = await _clientService.GetByUserIdAsync(userId);
+        if (client is null)
+            return NotFound(new { message = "Patient profile not found." });
+        return Ok(client);
     }
 
     /// <summary>Register a new client. QrCodeId is generated automatically.</summary>
