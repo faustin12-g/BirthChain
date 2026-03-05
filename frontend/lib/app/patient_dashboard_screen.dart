@@ -555,14 +555,96 @@ class _RecentRecordTile extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────
-// Tab 1: My Records (full list)
+// Tab 1: My Records (full list with search & filter)
 // ─────────────────────────────────────────────
-class _MyRecordsTab extends StatelessWidget {
+class _MyRecordsTab extends StatefulWidget {
   const _MyRecordsTab();
+
+  @override
+  State<_MyRecordsTab> createState() => _MyRecordsTabState();
+}
+
+class _MyRecordsTabState extends State<_MyRecordsTab> {
+  final _searchCtrl = TextEditingController();
+  String _searchQuery = '';
+  String? _facilityFilter;
+  DateTimeRange? _dateRange;
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  List<MedicalRecord> _applyFilters(List<MedicalRecord> records) {
+    var filtered = records;
+
+    if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      filtered = filtered.where((r) {
+        return r.details.toLowerCase().contains(q) ||
+            r.symptoms.toLowerCase().contains(q) ||
+            r.medication.toLowerCase().contains(q) ||
+            r.notes.toLowerCase().contains(q) ||
+            r.labTests.toLowerCase().contains(q) ||
+            r.facilityName.toLowerCase().contains(q) ||
+            r.providerName.toLowerCase().contains(q);
+      }).toList();
+    }
+
+    if (_facilityFilter != null) {
+      filtered =
+          filtered.where((r) => r.facilityName == _facilityFilter).toList();
+    }
+
+    if (_dateRange != null) {
+      filtered = filtered.where((r) {
+        final date = DateTime.tryParse(r.eventDate);
+        if (date == null) return false;
+        return !date.isBefore(_dateRange!.start) &&
+            !date.isAfter(_dateRange!.end.add(const Duration(days: 1)));
+      }).toList();
+    }
+
+    return filtered;
+  }
+
+  List<String> _uniqueFacilities(List<MedicalRecord> records) {
+    return records
+        .map((r) => r.facilityName)
+        .where((f) => f.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+  }
+
+  Future<void> _pickDateRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      initialDateRange: _dateRange,
+    );
+    if (picked != null) setState(() => _dateRange = picked);
+  }
+
+  void _clearAllFilters() {
+    setState(() {
+      _searchCtrl.clear();
+      _searchQuery = '';
+      _facilityFilter = null;
+      _dateRange = null;
+    });
+  }
+
+  static String _fmtChipDate(DateTime d) =>
+      '${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')}/${d.year}';
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final hasFilters =
+        _searchQuery.isNotEmpty || _facilityFilter != null || _dateRange != null;
 
     return Scaffold(
       appBar: AppBar(
@@ -625,26 +707,142 @@ class _MyRecordsTab extends StatelessWidget {
             );
           }
 
-          final records = prov.records.reversed.toList();
+          final allRecords = prov.records.reversed.toList();
+          final filtered = _applyFilters(allRecords);
+          final facilities = _uniqueFacilities(prov.records);
+
           return RefreshIndicator(
             onRefresh: () => prov.loadMyRecords(),
-            child: ListView.builder(
+            child: ListView(
               padding: const EdgeInsets.all(16),
-              itemCount: records.length + 1,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(
-                      '${records.length} record${records.length == 1 ? '' : 's'}',
+              children: [
+                // ── Search bar ──
+                TextField(
+                  controller: _searchCtrl,
+                  decoration: InputDecoration(
+                    hintText: 'Search records...',
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, size: 18),
+                            onPressed: () {
+                              _searchCtrl.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: theme.colorScheme.primary.withAlpha(10),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12),
+                    isDense: true,
+                  ),
+                  style: const TextStyle(fontSize: 13),
+                  onChanged: (v) => setState(() => _searchQuery = v.trim()),
+                ),
+                const SizedBox(height: 8),
+
+                // ── Filter chips ──
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      // Date range chip
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: FilterChip(
+                          avatar:
+                              const Icon(Icons.calendar_today, size: 14),
+                          label: Text(
+                            _dateRange != null
+                                ? '${_fmtChipDate(_dateRange!.start)} – ${_fmtChipDate(_dateRange!.end)}'
+                                : 'Date range',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          selected: _dateRange != null,
+                          onSelected: (_) => _pickDateRange(),
+                          onDeleted: _dateRange != null
+                              ? () => setState(() => _dateRange = null)
+                              : null,
+                          visualDensity: VisualDensity.compact,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                        ),
+                      ),
+                      // Facility chips
+                      ...facilities.map(
+                        (f) => Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: FilterChip(
+                            avatar: const Icon(Icons.local_hospital,
+                                size: 14),
+                            label: Text(f,
+                                style: const TextStyle(fontSize: 12)),
+                            selected: _facilityFilter == f,
+                            onSelected: (sel) {
+                              setState(
+                                  () => _facilityFilter = sel ? f : null);
+                            },
+                            visualDensity: VisualDensity.compact,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // ── Header row with count + clear ──
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${filtered.length} of ${allRecords.length} record${allRecords.length == 1 ? '' : 's'}',
                       style: TextStyle(
                           color: Colors.grey.shade600, fontSize: 13),
                     ),
-                  );
-                }
-                final rec = records[index - 1];
-                return _PatientRecordCard(record: rec);
-              },
+                    if (hasFilters)
+                      TextButton.icon(
+                        onPressed: _clearAllFilters,
+                        icon: const Icon(Icons.clear_all, size: 18),
+                        label: const Text('Clear'),
+                        style: TextButton.styleFrom(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 8),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+
+                // ── Filtered records ──
+                if (filtered.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      children: [
+                        Icon(Icons.filter_list_off,
+                            size: 40, color: Colors.grey.shade300),
+                        const SizedBox(height: 8),
+                        Text(
+                          'No records match your filters',
+                          style:
+                              TextStyle(color: Colors.grey.shade500),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  ...filtered
+                      .map((rec) => _PatientRecordCard(record: rec)),
+              ],
             ),
           );
         },
