@@ -94,8 +94,8 @@ public sealed class EmailService : IEmailService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send email to {Email}: {Subject}", toEmail, subject);
-            // Don't throw for non-critical emails — log and continue
+            _logger.LogError(ex, "Failed to send email to {Email}: {Subject}. SMTP Host: {Host}, Port: {Port}", toEmail, subject, _smtp.Host, _smtp.Port);
+            throw; // Re-throw to let caller handle or see the error
         }
     }
 
