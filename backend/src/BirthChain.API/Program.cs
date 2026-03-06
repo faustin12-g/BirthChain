@@ -9,6 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // --------------- Services ---------------
 
+// HttpClient for Resend email API
+builder.Services.AddHttpClient();
+
 // Controllers
 builder.Services.AddControllers();
 

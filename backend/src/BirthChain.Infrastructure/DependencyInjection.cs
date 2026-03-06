@@ -26,7 +26,7 @@ public static class DependencyInjection
 
         // Services
         services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IEmailService, EmailService>();
+        services.AddHttpClient<IEmailService, EmailService>();  // Use HttpClient for Resend API
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IProviderService, ProviderService>();
         services.AddScoped<IClientService, ClientService>();
