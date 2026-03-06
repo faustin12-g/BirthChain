@@ -1,7 +1,7 @@
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
 using BirthChain.Infrastructure.Data;
+using FirebaseAdmin;
+using FirebaseAdmin.Messaging;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -11,64 +11,103 @@ public interface IFcmNotificationService
 {
     Task SendNotificationAsync(string deviceToken, string title, string body, Dictionary<string, string>? data = null);
     Task SendNotificationToUserAsync(Guid userId, string title, string body, Dictionary<string, string>? data = null);
+    void InitializeFirebase();
 }
 
 public class FcmNotificationService : IFcmNotificationService
 {
-    private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
     private readonly ILogger<FcmNotificationService> _logger;
     private readonly BirthChainDbContext _context;
+    private static bool _isInitialized = false;
+    private static readonly object _lock = new object();
 
     public FcmNotificationService(
-        HttpClient httpClient,
         IConfiguration configuration,
         ILogger<FcmNotificationService> logger,
         BirthChainDbContext context)
     {
-        _httpClient = httpClient;
         _configuration = configuration;
         _logger = logger;
         _context = context;
+        InitializeFirebase();
+    }
+
+    public void InitializeFirebase()
+    {
+        lock (_lock)
+        {
+            if (_isInitialized) return;
+
+            try
+            {
+                // Try to get credentials from environment variable (for Railway)
+                var firebaseCredentialsJson = Environment.GetEnvironmentVariable("FIREBASE_CREDENTIALS_JSON");
+                
+                if (!string.IsNullOrEmpty(firebaseCredentialsJson))
+                {
+                    // Use credentials from environment variable (Railway deployment)
+                    FirebaseApp.Create(new AppOptions
+                    {
+                        Credential = GoogleCredential.FromJson(firebaseCredentialsJson)
+                    });
+                    _logger.LogInformation("Firebase initialized from environment variable");
+                }
+                else
+                {
+                    // Try to use credentials file path from configuration
+                    var credentialsPath = _configuration["Firebase:CredentialsPath"];
+                    if (!string.IsNullOrEmpty(credentialsPath) && File.Exists(credentialsPath))
+                    {
+                        FirebaseApp.Create(new AppOptions
+                        {
+                            Credential = GoogleCredential.FromFile(credentialsPath)
+                        });
+                        _logger.LogInformation("Firebase initialized from file: {Path}", credentialsPath);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Firebase credentials not configured. Push notifications will not work.");
+                        return;
+                    }
+                }
+
+                _isInitialized = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to initialize Firebase");
+            }
+        }
     }
 
     public async Task SendNotificationAsync(string deviceToken, string title, string body, Dictionary<string, string>? data = null)
     {
-        var serverKey = _configuration["Firebase:ServerKey"];
-        if (string.IsNullOrEmpty(serverKey))
+        if (!_isInitialized)
         {
-            _logger.LogWarning("Firebase ServerKey not configured. Notification not sent.");
+            _logger.LogWarning("Firebase not initialized. Cannot send notification.");
             return;
         }
 
-        var message = new
+        var message = new Message
         {
-            to = deviceToken,
-            notification = new
+            Token = deviceToken,
+            Notification = new Notification
             {
-                title,
-                body
+                Title = title,
+                Body = body
             },
-            data
+            Data = data
         };
-
-        var json = JsonSerializer.Serialize(message);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("key", "=" + serverKey);
 
         try
         {
-            var response = await _httpClient.PostAsync("https://fcm.googleapis.com/fcm/send", content);
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                _logger.LogError("FCM notification failed: {Error}", error);
-            }
-            else
-            {
-                _logger.LogInformation("FCM notification sent successfully to {Token}", deviceToken);
-            }
+            var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+            _logger.LogInformation("FCM notification sent successfully. Message ID: {MessageId}", response);
+        }
+        catch (FirebaseMessagingException ex)
+        {
+            _logger.LogError(ex, "FCM notification failed: {Error}", ex.Message);
         }
         catch (Exception ex)
         {
