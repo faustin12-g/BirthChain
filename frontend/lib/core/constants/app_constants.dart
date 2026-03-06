@@ -3,9 +3,9 @@ class AppConstants {
 
   static const String appName = 'BirthChain';
 
-  // Production URL - Update this after Railway deployment
+  // Production URL - Railway deployment
   static const String apiBaseUrlProduction =
-      'https://YOUR-APP.up.railway.app/api';
+      'https://birthchain-production.up.railway.app/api';
 
   // Development URLs
   static const String apiBaseUrl =
@@ -13,5 +13,5 @@ class AppConstants {
   static const String apiBaseUrlWindows = 'http://localhost:5066/api';
 
   // Set to true when using production server
-  static const bool useProductionServer = false;
+  static const bool useProductionServer = true;
 }
