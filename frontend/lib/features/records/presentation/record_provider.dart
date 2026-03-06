@@ -85,6 +85,14 @@ class RecordProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Set client and records directly (used after PIN verification)
+  void setClientAndRecords(Patient client, List<MedicalRecord> records) {
+    _currentClient = client;
+    _records = records;
+    _error = null;
+    notifyListeners();
+  }
+
   /// Patient: load own profile + records
   Future<void> loadMyRecords() async {
     _isLoading = true;

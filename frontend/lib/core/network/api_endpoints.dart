@@ -89,4 +89,16 @@ class ApiEndpoints {
   static const String notificationToken = '/notification/token';
   static String notificationMarkRead(String id) => '/notification/$id/read';
   static const String notificationMarkAllRead = '/notification/read-all';
+
+  // PIN Security
+  static const String pinStatus = '/profile/pin/status';
+  static const String pinSet = '/profile/pin';
+  static const String pinChange = '/profile/pin';
+  static const String pinRemove = '/profile/pin';
+  static const String pinVerify = '/profile/pin/verify';
+
+  // Client PIN verification (for providers)
+  static String clientLookup(String qrCode) => '/clients/by-qr/$qrCode';
+  static String clientVerifyPin(String qrCode) =>
+      '/clients/by-qr/$qrCode/verify';
 }

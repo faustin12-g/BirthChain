@@ -6,6 +6,7 @@ import '../features/patients/data/patient_repository.dart';
 import '../features/records/data/record_repository.dart';
 import '../features/admin/data/admin_repository.dart';
 import '../features/admin/data/profile_repository.dart';
+import '../features/pin/data/pin_repository.dart';
 
 final getIt = GetIt.instance;
 
@@ -36,5 +37,8 @@ void setupDependencies() {
   );
   getIt.registerLazySingleton<ProfileRepository>(
     () => ProfileRepository(getIt<ApiClient>()),
+  );
+  getIt.registerLazySingleton<PinRepository>(
+    () => PinRepository(getIt<ApiClient>()),
   );
 }

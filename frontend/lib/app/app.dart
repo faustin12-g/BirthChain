@@ -14,6 +14,8 @@ import '../features/admin/data/admin_repository.dart';
 import '../features/admin/data/profile_repository.dart';
 import '../features/admin/presentation/admin_provider.dart';
 import '../features/admin/presentation/profile_provider.dart';
+import '../features/pin/data/pin_repository.dart';
+import '../features/pin/presentation/pin_provider.dart';
 import 'routes.dart';
 import 'theme.dart';
 
@@ -41,6 +43,9 @@ class BirthChainApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => ProfileProvider(getIt<ProfileRepository>()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => PinProvider(getIt<PinRepository>()),
         ),
       ],
       child: Builder(

@@ -33,24 +33,25 @@ class NotificationProvider extends ChangeNotifier {
 
   NotificationProvider(this._dio);
 
-  List<AppNotification> get notifications =>
-      List.unmodifiable(_notifications..sort((a, b) => b.timestamp.compareTo(a.timestamp)));
+  List<AppNotification> get notifications => List.unmodifiable(
+    _notifications..sort((a, b) => b.timestamp.compareTo(a.timestamp)),
+  );
 
   int get unreadCount => _notifications.where((n) => !n.isRead).length;
 
   bool get hasUnread => unreadCount > 0;
-  
+
   bool get isLoading => _isLoading;
 
   /// Load notifications from backend API
   Future<void> loadNotifications() async {
     _isLoading = true;
     notifyListeners();
-    
+
     try {
       final response = await _dio.get(ApiEndpoints.notifications);
       final List<dynamic> data = response.data ?? [];
-      
+
       for (final item in data) {
         final notification = AppNotification(
           id: item['id']?.toString() ?? '',
@@ -58,10 +59,11 @@ class NotificationProvider extends ChangeNotifier {
           subtitle: item['body'] ?? '',
           icon: _getIconForTitle(item['title'] ?? ''),
           color: _getColorForTitle(item['title'] ?? ''),
-          timestamp: DateTime.tryParse(item['createdAt'] ?? '') ?? DateTime.now(),
+          timestamp:
+              DateTime.tryParse(item['createdAt'] ?? '') ?? DateTime.now(),
           isRead: item['isRead'] ?? false,
         );
-        
+
         // Avoid duplicates
         if (!_notifications.any((n) => n.id == notification.id)) {
           _notifications.add(notification);
@@ -70,11 +72,11 @@ class NotificationProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('Failed to load notifications from API: $e');
     }
-    
+
     _isLoading = false;
     notifyListeners();
   }
-  
+
   IconData _getIconForTitle(String title) {
     final lower = title.toLowerCase();
     if (lower.contains('facility')) return Icons.local_hospital;
@@ -83,7 +85,7 @@ class NotificationProvider extends ChangeNotifier {
     if (lower.contains('welcome')) return Icons.celebration;
     return Icons.notifications;
   }
-  
+
   Color _getColorForTitle(String title) {
     final lower = title.toLowerCase();
     if (lower.contains('facility')) return Colors.blue;
@@ -105,7 +107,7 @@ class NotificationProvider extends ChangeNotifier {
     if (n != null && !n.isRead) {
       n.isRead = true;
       notifyListeners();
-      
+
       // Also update on backend
       try {
         await _dio.put(ApiEndpoints.notificationMarkRead(id));
@@ -125,7 +127,7 @@ class NotificationProvider extends ChangeNotifier {
     }
     if (changed) {
       notifyListeners();
-      
+
       // Also update on backend
       try {
         await _dio.put(ApiEndpoints.notificationMarkAllRead);
@@ -143,39 +145,47 @@ class NotificationProvider extends ChangeNotifier {
   /// Generate smart notifications based on records data (client-side).
   void generateFromRecords(List<dynamic> records, String? patientName) {
     if (records.isEmpty && patientName != null) {
-      addNotification(AppNotification(
-        id: 'welcome',
-        title: 'Welcome to BirthChain!',
-        subtitle: 'Your account is set up. Visit a provider to start tracking your health.',
-        icon: Icons.celebration,
-        color: Colors.blue,
-        timestamp: DateTime.now(),
-      ));
+      addNotification(
+        AppNotification(
+          id: 'welcome',
+          title: 'Welcome to BirthChain!',
+          subtitle:
+              'Your account is set up. Visit a provider to start tracking your health.',
+          icon: Icons.celebration,
+          color: Colors.blue,
+          timestamp: DateTime.now(),
+        ),
+      );
     }
 
     if (records.isNotEmpty) {
       // Notify about latest record
       final latest = records.last;
       final recId = latest is Map ? (latest['id'] ?? '') : '';
-      addNotification(AppNotification(
-        id: 'record-$recId',
-        title: 'New Record Added',
-        subtitle: 'A healthcare provider added a new record to your file.',
-        icon: Icons.note_add,
-        color: Colors.green,
-        timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-      ));
+      addNotification(
+        AppNotification(
+          id: 'record-$recId',
+          title: 'New Record Added',
+          subtitle: 'A healthcare provider added a new record to your file.',
+          icon: Icons.note_add,
+          color: Colors.green,
+          timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
+        ),
+      );
     }
 
     if (records.length >= 5) {
-      addNotification(AppNotification(
-        id: 'milestone-5',
-        title: 'Health Milestone!',
-        subtitle: 'You now have ${records.length} records in your health history.',
-        icon: Icons.emoji_events,
-        color: Colors.amber,
-        timestamp: DateTime.now().subtract(const Duration(hours: 1)),
-      ));
+      addNotification(
+        AppNotification(
+          id: 'milestone-5',
+          title: 'Health Milestone!',
+          subtitle:
+              'You now have ${records.length} records in your health history.',
+          icon: Icons.emoji_events,
+          color: Colors.amber,
+          timestamp: DateTime.now().subtract(const Duration(hours: 1)),
+        ),
+      );
     }
   }
 }

@@ -16,6 +16,9 @@ import '../core/widgets/notification_bell.dart';
 import '../features/auth/presentation/auth_provider.dart';
 import '../features/notifications/notification_provider.dart';
 import '../features/patients/domain/patient_models.dart';
+import '../features/pin/presentation/pin_provider.dart';
+import '../features/pin/presentation/pin_setup_widget.dart';
+import '../features/pin/presentation/pin_entry_dialog.dart';
 import '../features/records/domain/record_models.dart';
 import '../features/records/presentation/record_provider.dart';
 import 'theme.dart';
@@ -38,7 +41,9 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
     final prov = context.read<RecordProvider>();
     Future.microtask(() => prov.loadMyRecords());
     // Load notifications from backend
-    Future.microtask(() => context.read<NotificationProvider>().loadNotifications());
+    Future.microtask(
+      () => context.read<NotificationProvider>().loadNotifications(),
+    );
   }
 
   @override
@@ -675,10 +680,16 @@ class _MyRecordsTabState extends State<_MyRecordsTab> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final pinProvider = context.watch<PinProvider>();
     final hasFilters =
         _searchQuery.isNotEmpty ||
         _facilityFilter != null ||
         _dateRange != null;
+
+    // Check if PIN verification is required
+    if (pinProvider.hasPinSet && !pinProvider.isPinVerified) {
+      return _buildRecordsPinVerificationScreen(context, theme);
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -893,6 +904,98 @@ class _MyRecordsTabState extends State<_MyRecordsTab> {
         },
       ),
     );
+  }
+
+  Widget _buildRecordsPinVerificationScreen(
+    BuildContext context,
+    ThemeData theme,
+  ) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/icon/logo.png', height: 28),
+            const SizedBox(width: 8),
+            const Text('My Health Records'),
+          ],
+        ),
+        actions: const [NotificationBell(), SizedBox(width: 4)],
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: AppTheme.navyBlue.withAlpha(20),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.medical_information_outlined,
+                  size: 64,
+                  color: AppTheme.navyBlue,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Records Protected',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.navyBlue,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Enter your PIN to view your health records',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey[600], fontSize: 16),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: 200,
+                child: ElevatedButton.icon(
+                  onPressed: () => _showRecordsPinVerification(context),
+                  icon: const Icon(Icons.pin),
+                  label: const Text('Enter PIN'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.navyBlue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showRecordsPinVerification(BuildContext context) async {
+    final pin = await PinEntryDialog.getPin(
+      context,
+      title: 'Enter Your PIN',
+      message: 'Verify your identity to view records',
+    );
+    if (pin != null && pin.isNotEmpty && context.mounted) {
+      final pinProvider = context.read<PinProvider>();
+      final success = await pinProvider.verifyPin(pin);
+      if (!success && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(pinProvider.error ?? 'Invalid PIN'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
 
@@ -1353,6 +1456,12 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final pinProvider = context.watch<PinProvider>();
+
+    // Check if PIN verification is required
+    if (pinProvider.hasPinSet && !pinProvider.isPinVerified) {
+      return _buildPinVerificationScreen(context, theme);
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -1533,6 +1642,95 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
         },
       ),
     );
+  }
+
+  Widget _buildPinVerificationScreen(BuildContext context, ThemeData theme) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/icon/logo.png', height: 28),
+            const SizedBox(width: 8),
+            const Text('My QR Code'),
+          ],
+        ),
+        actions: const [NotificationBell(), SizedBox(width: 4)],
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: AppTheme.navyBlue.withAlpha(20),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.lock_outline,
+                  size: 64,
+                  color: AppTheme.navyBlue,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'QR Code Protected',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.navyBlue,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Enter your PIN to view your QR code',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey[600], fontSize: 16),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: 200,
+                child: ElevatedButton.icon(
+                  onPressed: () => _showPinVerification(context),
+                  icon: const Icon(Icons.pin),
+                  label: const Text('Enter PIN'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.navyBlue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showPinVerification(BuildContext context) async {
+    final pin = await PinEntryDialog.getPin(
+      context,
+      title: 'Enter Your PIN',
+      message: 'Verify your identity to view QR code',
+    );
+    if (pin != null && pin.isNotEmpty && context.mounted) {
+      final pinProvider = context.read<PinProvider>();
+      final success = await pinProvider.verifyPin(pin);
+      if (!success && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(pinProvider.error ?? 'Invalid PIN'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
 
@@ -1739,6 +1937,10 @@ class _PatientProfileTab extends StatelessWidget {
               );
             },
           ),
+
+          // PIN Security section
+          const PinSetupWidget(),
+          const SizedBox(height: 24),
 
           // Account section
           Text(

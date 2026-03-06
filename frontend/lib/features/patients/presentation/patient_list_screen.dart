@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 
+import '../../pin/data/pin_repository.dart';
+import '../../pin/presentation/pin_entry_dialog.dart';
+import '../../pin/presentation/pin_provider.dart';
+import '../../records/domain/record_models.dart';
 import '../../records/presentation/record_provider.dart';
+import '../domain/patient_models.dart';
 import 'patient_detail_screen.dart';
 import 'register_patient_screen.dart';
 
@@ -67,29 +72,97 @@ class _PatientLookupScreenState extends State<PatientLookupScreen> {
   }
 
   Future<void> _lookupCode(String qr) async {
-    final prov = context.read<RecordProvider>();
-    await prov.loadByQrCode(qr);
+    final pinProvider = context.read<PinProvider>();
+    final lookup = await pinProvider.lookupClientByQr(qr);
 
-    if (prov.currentClient != null && mounted) {
-      // Close scanner before navigating
+    if (lookup == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(pinProvider.error ?? 'Patient not found'),
+            backgroundColor: Colors.red.shade600,
+          ),
+        );
+        setState(() => _isProcessing = false);
+        _scannerCtrl?.start();
+      }
+      return;
+    }
+
+    // If patient has PIN, ask for verification
+    if (lookup.hasPinSet) {
       _closeScanner();
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => PatientDetailScreen(patient: prov.currentClient!),
-        ),
-      );
-    } else if (prov.error != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(prov.error!),
-          backgroundColor: Colors.red.shade600,
-        ),
-      );
+      await _showPinVerificationDialog(qr, lookup);
+    } else {
+      // No PIN, use old flow
+      final prov = context.read<RecordProvider>();
+      await prov.loadByQrCode(qr);
+
+      if (prov.currentClient != null && mounted) {
+        _closeScanner();
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PatientDetailScreen(patient: prov.currentClient!),
+          ),
+        );
+      }
     }
 
     if (mounted) {
       setState(() => _isProcessing = false);
       _scannerCtrl?.start();
+    }
+  }
+
+  Future<void> _showPinVerificationDialog(
+    String qrCode,
+    ClientLookup lookup,
+  ) async {
+    final pin = await PinEntryDialog.getPin(
+      context,
+      title: 'Patient PIN Required',
+      message: 'Ask ${lookup.fullName} to enter their PIN',
+    );
+
+    if (pin == null || pin.isEmpty || !mounted) {
+      setState(() => _isProcessing = false);
+      return;
+    }
+
+    final pinProvider = context.read<PinProvider>();
+    final data = await pinProvider.verifyClientPinAndGetData(qrCode, pin);
+
+    if (data == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(pinProvider.error ?? 'Invalid PIN'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() => _isProcessing = false);
+      }
+      return;
+    }
+
+    // Build Patient and records from verified data
+    if (mounted) {
+      final patient = Patient.fromJson(data['client']);
+      final records =
+          (data['records'] as List?)
+              ?.map((r) => MedicalRecord.fromJson(r))
+              .toList() ??
+          [];
+
+      // Update RecordProvider with the data
+      final recordProv = context.read<RecordProvider>();
+      recordProv.setClientAndRecords(patient, records);
+
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => PatientDetailScreen(patient: patient),
+        ),
+      );
     }
   }
 
