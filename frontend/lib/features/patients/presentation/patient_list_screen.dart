@@ -18,22 +18,36 @@ class _PatientLookupScreenState extends State<PatientLookupScreen> {
   final _qrCtrl = TextEditingController();
   bool _showManualEntry = false;
   bool _isProcessing = false;
+  bool _scannerOpen = false;
 
-  final MobileScannerController _scannerCtrl = MobileScannerController(
-    detectionSpeed: DetectionSpeed.normal,
-    facing: CameraFacing.back,
-  );
+  MobileScannerController? _scannerCtrl;
 
   @override
   void dispose() {
     _qrCtrl.dispose();
-    _scannerCtrl.dispose();
+    _scannerCtrl?.dispose();
     super.dispose();
+  }
+
+  void _openScanner() {
+    _scannerCtrl?.dispose();
+    _scannerCtrl = MobileScannerController(
+      detectionSpeed: DetectionSpeed.normal,
+      facing: CameraFacing.back,
+    );
+    setState(() => _scannerOpen = true);
+  }
+
+  void _closeScanner() {
+    _scannerCtrl?.stop();
+    _scannerCtrl?.dispose();
+    _scannerCtrl = null;
+    setState(() => _scannerOpen = false);
   }
 
   /// Called when the camera detects a QR / barcode.
   void _onDetect(BarcodeCapture capture) {
-    if (_isProcessing) return; // avoid duplicate fires
+    if (_isProcessing) return;
     final barcode = capture.barcodes.firstOrNull;
     if (barcode == null || barcode.rawValue == null) return;
 
@@ -41,7 +55,7 @@ class _PatientLookupScreenState extends State<PatientLookupScreen> {
     if (code.isEmpty) return;
 
     setState(() => _isProcessing = true);
-    _scannerCtrl.stop(); // pause camera while we look up
+    _scannerCtrl?.stop();
     _lookupCode(code);
   }
 
@@ -57,6 +71,8 @@ class _PatientLookupScreenState extends State<PatientLookupScreen> {
     await prov.loadByQrCode(qr);
 
     if (prov.currentClient != null && mounted) {
+      // Close scanner before navigating
+      _closeScanner();
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => PatientDetailScreen(patient: prov.currentClient!),
@@ -71,16 +87,17 @@ class _PatientLookupScreenState extends State<PatientLookupScreen> {
       );
     }
 
-    // Re-enable scanning
     if (mounted) {
       setState(() => _isProcessing = false);
-      _scannerCtrl.start();
+      _scannerCtrl?.start();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    const navy = Color(0xFF1A3C6D);
+    const orange = Color(0xFFF58B1F);
 
     return Scaffold(
       appBar: AppBar(
@@ -110,97 +127,160 @@ class _PatientLookupScreenState extends State<PatientLookupScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
 
-            // ── Live QR Scanner ──
-            Container(
-              width: double.infinity,
-              height: 260,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1A3C6D).withAlpha(15),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xFF1A3C6D).withAlpha(50),
-                ),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Camera feed
-                  MobileScanner(
-                    controller: _scannerCtrl,
-                    onDetect: _onDetect,
-                    errorBuilder: (context, error) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.error_outline,
-                              size: 48,
-                              color: Colors.red.shade400,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Camera unavailable',
-                              style: TextStyle(
-                                color: Colors.red.shade400,
-                                fontSize: 13,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Use manual entry below',
-                              style: TextStyle(
-                                color: Colors.grey.shade500,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+            // ── Scanner area: either button or live camera ──
+            if (!_scannerOpen) ...[
+              // Prominent scan button
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [navy, Color(0xFF2A5298)],
                   ),
-
-                  // Scanning overlay with corner brackets
-                  if (_isProcessing)
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: navy.withAlpha(80),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
                     Container(
-                      color: Colors.black45,
-                      child: const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(25),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.qr_code_scanner_rounded,
+                        size: 44,
+                        color: Colors.white,
                       ),
                     ),
-
-                  // Corner brackets
-                  Positioned(
-                    top: 36,
-                    left: 36,
-                    child: _ScanCorner(alignment: Alignment.topLeft),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Scan Patient QR Code',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Tap the button below to open the camera',
+                      style: TextStyle(
+                        color: Colors.white.withAlpha(180),
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: _openScanner,
+                      icon: const Icon(Icons.camera_alt_rounded),
+                      label: const Text('Open Scanner'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: orange,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ] else ...[
+              // ── Live Scanner ──
+              Container(
+                width: double.infinity,
+                height: 280,
+                decoration: BoxDecoration(
+                  color: navy.withAlpha(15),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: navy.withAlpha(50)),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    MobileScanner(
+                      controller: _scannerCtrl!,
+                      onDetect: _onDetect,
+                      errorBuilder: (context, error) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.error_outline, size: 48, color: Colors.red.shade400),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Camera unavailable',
+                                style: TextStyle(color: Colors.red.shade400, fontSize: 13),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Use manual entry below',
+                                style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                    if (_isProcessing)
+                      Container(
+                        color: Colors.black45,
+                        child: const Center(
+                          child: CircularProgressIndicator(color: Colors.white),
+                        ),
+                      ),
+                    // Corner brackets
+                    Positioned(top: 36, left: 36, child: _ScanCorner(alignment: Alignment.topLeft)),
+                    Positioned(top: 36, right: 36, child: _ScanCorner(alignment: Alignment.topRight)),
+                    Positioned(bottom: 36, left: 36, child: _ScanCorner(alignment: Alignment.bottomLeft)),
+                    Positioned(bottom: 36, right: 36, child: _ScanCorner(alignment: Alignment.bottomRight)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Align the QR code within the frame',
+                    style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
                   ),
-                  Positioned(
-                    top: 36,
-                    right: 36,
-                    child: _ScanCorner(alignment: Alignment.topRight),
-                  ),
-                  Positioned(
-                    bottom: 36,
-                    left: 36,
-                    child: _ScanCorner(alignment: Alignment.bottomLeft),
-                  ),
-                  Positioned(
-                    bottom: 36,
-                    right: 36,
-                    child: _ScanCorner(alignment: Alignment.bottomRight),
+                  const SizedBox(width: 12),
+                  TextButton.icon(
+                    onPressed: _closeScanner,
+                    icon: const Icon(Icons.close, size: 18),
+                    label: const Text('Close'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.red.shade400,
+                      textStyle: const TextStyle(fontSize: 12),
+                    ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Align the QR code within frame to scan.',
-              style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
-            ),
+            ],
+
             const SizedBox(height: 20),
 
             // ── Manual entry toggle ──

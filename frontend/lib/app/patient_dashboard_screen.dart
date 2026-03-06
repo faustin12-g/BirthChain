@@ -1289,8 +1289,8 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
             action: SnackBarAction(
               label: 'Share',
               textColor: Colors.white,
-              onPressed: () => SharePlus.instance.share(
-                ShareParams(files: [XFile(file.path)]),
+              onPressed: () => Share.shareXFiles(
+                [XFile(file.path)],
               ),
             ),
           ),
@@ -1314,8 +1314,8 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/BirthChain_QR_${patient.qrCodeId}.pdf');
       await file.writeAsBytes(pdfBytes);
-      await SharePlus.instance.share(
-        ShareParams(files: [XFile(file.path)]),
+      await Share.shareXFiles(
+        [XFile(file.path)],
       );
     } catch (e) {
       if (mounted) {
