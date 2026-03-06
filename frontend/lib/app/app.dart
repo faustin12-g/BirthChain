@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:dio/dio.dart';
 import '../core/notifications/notification_service.dart';
+import '../core/network/api_client.dart';
 import '../features/notifications/notification_provider.dart';
 import '../di/injection.dart';
 import '../features/auth/data/auth_repository.dart';
@@ -36,7 +36,7 @@ class BirthChainApp extends StatelessWidget {
           create: (_) => RecordProvider(getIt<RecordRepository>()),
         ),
         ChangeNotifierProvider(
-          create: (_) => NotificationProvider(getIt<Dio>()),
+          create: (_) => NotificationProvider(getIt<ApiClient>().dio),
         ),
         ChangeNotifierProvider(
           create: (_) => AdminProvider(getIt<AdminRepository>()),

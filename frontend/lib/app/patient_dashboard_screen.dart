@@ -38,16 +38,12 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    final prov = context.read<RecordProvider>();
-    Future.microtask(() => prov.loadMyRecords());
-    // Load notifications from backend
-    Future.microtask(
-      () => context.read<NotificationProvider>().loadNotifications(),
-    );
-    // Load PIN status for security checks
-    Future.microtask(
-      () => context.read<PinProvider>().loadStatus(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<RecordProvider>().loadMyRecords();
+      context.read<NotificationProvider>().loadNotifications();
+      context.read<PinProvider>().loadStatus();
+    });
   }
 
   @override

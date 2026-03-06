@@ -305,7 +305,8 @@ public sealed class ProfileService : IProfileService
 
     private static bool VerifyPassword(string password, string hash)
     {
-        return AuthService.HashPassword(password) == hash;
+        // Use AuthService's proper verification which extracts salt from stored hash
+        return AuthService.VerifyPassword(password, hash);
     }
 
     private static bool IsValidPin(string pin)

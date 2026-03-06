@@ -48,16 +48,22 @@ class PinProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      debugPrint('PinProvider: Setting PIN...');
       await _repository.setPin(pin, password);
+      debugPrint('PinProvider: PIN set successfully, loading status...');
       await loadStatus();
       return true;
     } on DioException catch (e) {
+      debugPrint(
+        'PinProvider: DioException - ${e.response?.statusCode} - ${e.response?.data}',
+      );
       _error = e.response?.data?['message'] ?? 'Failed to set PIN';
       _isLoading = false;
       notifyListeners();
       return false;
     } catch (e) {
-      _error = 'Something went wrong';
+      debugPrint('PinProvider: Exception - $e');
+      _error = 'Something went wrong: $e';
       _isLoading = false;
       notifyListeners();
       return false;

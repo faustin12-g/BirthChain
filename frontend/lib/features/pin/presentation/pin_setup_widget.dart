@@ -16,7 +16,9 @@ class _PinSetupWidgetState extends State<PinSetupWidget> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<PinProvider>().loadStatus());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<PinProvider>().loadStatus();
+    });
   }
 
   @override
@@ -40,11 +42,7 @@ class _PinSetupWidgetState extends State<PinSetupWidget> {
                     color: AppTheme.navyBlue.withAlpha(25),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    Icons.lock,
-                    color: AppTheme.navyBlue,
-                    size: 24,
-                  ),
+                  child: Icon(Icons.lock, color: AppTheme.navyBlue, size: 24),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -64,10 +62,7 @@ class _PinSetupWidgetState extends State<PinSetupWidget> {
                         provider.hasPinSet
                             ? 'Your data is protected'
                             : 'Add extra security to your data',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -149,153 +144,182 @@ class _PinSetupWidgetState extends State<PinSetupWidget> {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => AlertDialog(
-          title: Row(
-            children: [
-              Icon(Icons.lock_outline, color: AppTheme.navyBlue),
-              const SizedBox(width: 12),
-              const Text('Set Up PIN'),
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Create a 4-6 digit PIN to protect your health data.',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: pinController,
-                  obscureText: true,
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(
-                    labelText: 'New PIN',
-                    hintText: 'Enter 4-6 digits',
-                    prefixIcon: Icon(Icons.pin),
-                    counterText: '',
+      builder:
+          (ctx) => StatefulBuilder(
+            builder:
+                (ctx, setState) => AlertDialog(
+                  title: Row(
+                    children: [
+                      Icon(Icons.lock_outline, color: AppTheme.navyBlue),
+                      const SizedBox(width: 12),
+                      const Text('Set Up PIN'),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: confirmPinController,
-                  obscureText: true,
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm PIN',
-                    hintText: 'Re-enter PIN',
-                    prefixIcon: Icon(Icons.pin),
-                    counterText: '',
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Account Password',
-                    hintText: 'Verify your identity',
-                    prefixIcon: Icon(Icons.password),
-                  ),
-                ),
-                if (error != null) ...[
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red[50],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.error, color: Colors.red[700], size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            error!,
-                            style: TextStyle(color: Colors.red[700], fontSize: 13),
+                        Text(
+                          'Create a 4-6 digit PIN to protect your health data.',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
                           ),
                         ),
+                        const SizedBox(height: 20),
+                        TextField(
+                          controller: pinController,
+                          obscureText: true,
+                          keyboardType: TextInputType.number,
+                          maxLength: 6,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          decoration: const InputDecoration(
+                            labelText: 'New PIN',
+                            hintText: 'Enter 4-6 digits',
+                            prefixIcon: Icon(Icons.pin),
+                            counterText: '',
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: confirmPinController,
+                          obscureText: true,
+                          keyboardType: TextInputType.number,
+                          maxLength: 6,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          decoration: const InputDecoration(
+                            labelText: 'Confirm PIN',
+                            hintText: 'Re-enter PIN',
+                            prefixIcon: Icon(Icons.pin),
+                            counterText: '',
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: passwordController,
+                          obscureText: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Account Password',
+                            hintText: 'Verify your identity',
+                            prefixIcon: Icon(Icons.password),
+                          ),
+                        ),
+                        if (error != null) ...[
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.red[50],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.error,
+                                  color: Colors.red[700],
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    error!,
+                                    style: TextStyle(
+                                      color: Colors.red[700],
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
-                ],
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: isLoading ? null : () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: isLoading
-                  ? null
-                  : () async {
-                      final pin = pinController.text.trim();
-                      final confirmPin = confirmPinController.text.trim();
-                      final password = passwordController.text;
+                  actions: [
+                    TextButton(
+                      onPressed: isLoading ? null : () => Navigator.pop(ctx),
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed:
+                          isLoading
+                              ? null
+                              : () async {
+                                final pin = pinController.text.trim();
+                                final confirmPin =
+                                    confirmPinController.text.trim();
+                                final password = passwordController.text;
 
-                      if (pin.length < 4) {
-                        setState(() => error = 'PIN must be at least 4 digits');
-                        return;
-                      }
-                      if (pin != confirmPin) {
-                        setState(() => error = 'PINs do not match');
-                        return;
-                      }
-                      if (password.isEmpty) {
-                        setState(() => error = 'Password is required');
-                        return;
-                      }
+                                if (pin.length < 4) {
+                                  setState(
+                                    () =>
+                                        error = 'PIN must be at least 4 digits',
+                                  );
+                                  return;
+                                }
+                                if (pin != confirmPin) {
+                                  setState(() => error = 'PINs do not match');
+                                  return;
+                                }
+                                if (password.isEmpty) {
+                                  setState(
+                                    () => error = 'Password is required',
+                                  );
+                                  return;
+                                }
 
-                      setState(() {
-                        isLoading = true;
-                        error = null;
-                      });
+                                setState(() {
+                                  isLoading = true;
+                                  error = null;
+                                });
 
-                      final provider = context.read<PinProvider>();
-                      final success = await provider.setPin(pin, password);
+                                final provider = context.read<PinProvider>();
+                                final success = await provider.setPin(
+                                  pin,
+                                  password,
+                                );
 
-                      if (success) {
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('PIN set up successfully!'),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      } else {
-                        setState(() {
-                          isLoading = false;
-                          error = provider.error ?? 'Failed to set PIN';
-                        });
-                      }
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.navyBlue,
-              ),
-              child: isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
+                                if (success) {
+                                  Navigator.pop(ctx);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('PIN set up successfully!'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                } else {
+                                  setState(() {
+                                    isLoading = false;
+                                    error =
+                                        provider.error ?? 'Failed to set PIN';
+                                  });
+                                }
+                              },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.navyBlue,
+                        foregroundColor: Colors.white,
                       ),
-                    )
-                  : const Text('Set PIN'),
-            ),
-          ],
-        ),
-      ),
+                      child:
+                          isLoading
+                              ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                              : const Text('Set PIN'),
+                    ),
+                  ],
+                ),
+          ),
     );
   }
 
@@ -309,140 +333,171 @@ class _PinSetupWidgetState extends State<PinSetupWidget> {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => AlertDialog(
-          title: Row(
-            children: [
-              Icon(Icons.edit, color: AppTheme.navyBlue),
-              const SizedBox(width: 12),
-              const Text('Change PIN'),
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: currentPinController,
-                  obscureText: true,
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(
-                    labelText: 'Current PIN',
-                    prefixIcon: Icon(Icons.pin),
-                    counterText: '',
+      builder:
+          (ctx) => StatefulBuilder(
+            builder:
+                (ctx, setState) => AlertDialog(
+                  title: Row(
+                    children: [
+                      Icon(Icons.edit, color: AppTheme.navyBlue),
+                      const SizedBox(width: 12),
+                      const Text('Change PIN'),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: newPinController,
-                  obscureText: true,
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(
-                    labelText: 'New PIN',
-                    prefixIcon: Icon(Icons.pin),
-                    counterText: '',
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: confirmPinController,
-                  obscureText: true,
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm New PIN',
-                    prefixIcon: Icon(Icons.pin),
-                    counterText: '',
-                  ),
-                ),
-                if (error != null) ...[
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red[50],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      error!,
-                      style: TextStyle(color: Colors.red[700], fontSize: 13),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: isLoading ? null : () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: isLoading
-                  ? null
-                  : () async {
-                      final currentPin = currentPinController.text.trim();
-                      final newPin = newPinController.text.trim();
-                      final confirmPin = confirmPinController.text.trim();
-
-                      if (currentPin.length < 4) {
-                        setState(() => error = 'Enter your current PIN');
-                        return;
-                      }
-                      if (newPin.length < 4) {
-                        setState(() => error = 'New PIN must be at least 4 digits');
-                        return;
-                      }
-                      if (newPin != confirmPin) {
-                        setState(() => error = 'New PINs do not match');
-                        return;
-                      }
-
-                      setState(() {
-                        isLoading = true;
-                        error = null;
-                      });
-
-                      final provider = context.read<PinProvider>();
-                      final success = await provider.changePin(currentPin, newPin);
-
-                      if (success) {
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('PIN changed successfully!'),
-                            backgroundColor: Colors.green,
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          controller: currentPinController,
+                          obscureText: true,
+                          keyboardType: TextInputType.number,
+                          maxLength: 6,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          decoration: const InputDecoration(
+                            labelText: 'Current PIN',
+                            prefixIcon: Icon(Icons.pin),
+                            counterText: '',
                           ),
-                        );
-                      } else {
-                        setState(() {
-                          isLoading = false;
-                          error = provider.error ?? 'Failed to change PIN';
-                        });
-                      }
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.navyBlue,
-              ),
-              child: isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: newPinController,
+                          obscureText: true,
+                          keyboardType: TextInputType.number,
+                          maxLength: 6,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          decoration: const InputDecoration(
+                            labelText: 'New PIN',
+                            prefixIcon: Icon(Icons.pin),
+                            counterText: '',
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: confirmPinController,
+                          obscureText: true,
+                          keyboardType: TextInputType.number,
+                          maxLength: 6,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          decoration: const InputDecoration(
+                            labelText: 'Confirm New PIN',
+                            prefixIcon: Icon(Icons.pin),
+                            counterText: '',
+                          ),
+                        ),
+                        if (error != null) ...[
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.red[50],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              error!,
+                              style: TextStyle(
+                                color: Colors.red[700],
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: isLoading ? null : () => Navigator.pop(ctx),
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed:
+                          isLoading
+                              ? null
+                              : () async {
+                                final currentPin =
+                                    currentPinController.text.trim();
+                                final newPin = newPinController.text.trim();
+                                final confirmPin =
+                                    confirmPinController.text.trim();
+
+                                if (currentPin.length < 4) {
+                                  setState(
+                                    () => error = 'Enter your current PIN',
+                                  );
+                                  return;
+                                }
+                                if (newPin.length < 4) {
+                                  setState(
+                                    () =>
+                                        error =
+                                            'New PIN must be at least 4 digits',
+                                  );
+                                  return;
+                                }
+                                if (newPin != confirmPin) {
+                                  setState(
+                                    () => error = 'New PINs do not match',
+                                  );
+                                  return;
+                                }
+
+                                setState(() {
+                                  isLoading = true;
+                                  error = null;
+                                });
+
+                                final provider = context.read<PinProvider>();
+                                final success = await provider.changePin(
+                                  currentPin,
+                                  newPin,
+                                );
+
+                                if (success) {
+                                  Navigator.pop(ctx);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'PIN changed successfully!',
+                                      ),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                } else {
+                                  setState(() {
+                                    isLoading = false;
+                                    error =
+                                        provider.error ??
+                                        'Failed to change PIN';
+                                  });
+                                }
+                              },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.navyBlue,
+                        foregroundColor: Colors.white,
                       ),
-                    )
-                  : const Text('Change'),
-            ),
-          ],
-        ),
-      ),
+                      child:
+                          isLoading
+                              ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                              : const Text('Change'),
+                    ),
+                  ],
+                ),
+          ),
     );
   }
 
@@ -453,100 +508,114 @@ class _PinSetupWidgetState extends State<PinSetupWidget> {
 
     await showDialog(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => AlertDialog(
-          title: Row(
-            children: [
-              Icon(Icons.warning, color: Colors.orange),
-              const SizedBox(width: 12),
-              const Text('Remove PIN'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Are you sure you want to remove your PIN? Your health data will no longer be protected.',
-                style: TextStyle(color: Colors.grey[700]),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: pinController,
-                obscureText: true,
-                keyboardType: TextInputType.number,
-                maxLength: 6,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: const InputDecoration(
-                  labelText: 'Current PIN',
-                  prefixIcon: Icon(Icons.pin),
-                  counterText: '',
-                ),
-              ),
-              if (error != null) ...[
-                const SizedBox(height: 12),
-                Text(
-                  error!,
-                  style: TextStyle(color: Colors.red[700], fontSize: 13),
-                ),
-              ],
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: isLoading ? null : () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: isLoading
-                  ? null
-                  : () async {
-                      final pin = pinController.text.trim();
-                      if (pin.length < 4) {
-                        setState(() => error = 'Enter your current PIN');
-                        return;
-                      }
-
-                      setState(() {
-                        isLoading = true;
-                        error = null;
-                      });
-
-                      final provider = context.read<PinProvider>();
-                      final success = await provider.removePin(pin);
-
-                      if (success) {
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('PIN removed'),
-                            backgroundColor: Colors.orange,
-                          ),
-                        );
-                      } else {
-                        setState(() {
-                          isLoading = false;
-                          error = provider.error ?? 'Failed to remove PIN';
-                        });
-                      }
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-              ),
-              child: isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
+      builder:
+          (ctx) => StatefulBuilder(
+            builder:
+                (ctx, setState) => AlertDialog(
+                  title: Row(
+                    children: [
+                      Icon(Icons.warning, color: Colors.orange),
+                      const SizedBox(width: 12),
+                      const Text('Remove PIN'),
+                    ],
+                  ),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Are you sure you want to remove your PIN? Your health data will no longer be protected.',
+                        style: TextStyle(color: Colors.grey[700]),
                       ),
-                    )
-                  : const Text('Remove'),
-            ),
-          ],
-        ),
-      ),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: pinController,
+                        obscureText: true,
+                        keyboardType: TextInputType.number,
+                        maxLength: 6,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        decoration: const InputDecoration(
+                          labelText: 'Current PIN',
+                          prefixIcon: Icon(Icons.pin),
+                          counterText: '',
+                        ),
+                      ),
+                      if (error != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          error!,
+                          style: TextStyle(
+                            color: Colors.red[700],
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: isLoading ? null : () => Navigator.pop(ctx),
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed:
+                          isLoading
+                              ? null
+                              : () async {
+                                final pin = pinController.text.trim();
+                                if (pin.length < 4) {
+                                  setState(
+                                    () => error = 'Enter your current PIN',
+                                  );
+                                  return;
+                                }
+
+                                setState(() {
+                                  isLoading = true;
+                                  error = null;
+                                });
+
+                                final provider = context.read<PinProvider>();
+                                final success = await provider.removePin(pin);
+
+                                if (success) {
+                                  Navigator.pop(ctx);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('PIN removed'),
+                                      backgroundColor: Colors.orange,
+                                    ),
+                                  );
+                                } else {
+                                  setState(() {
+                                    isLoading = false;
+                                    error =
+                                        provider.error ??
+                                        'Failed to remove PIN';
+                                  });
+                                }
+                              },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                      ),
+                      child:
+                          isLoading
+                              ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                              : const Text('Remove'),
+                    ),
+                  ],
+                ),
+          ),
     );
   }
 }
