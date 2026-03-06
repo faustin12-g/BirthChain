@@ -8,6 +8,10 @@ import '../features/patients/data/patient_repository.dart';
 import '../features/patients/presentation/patient_provider.dart';
 import '../features/records/data/record_repository.dart';
 import '../features/records/presentation/record_provider.dart';
+import '../features/admin/data/admin_repository.dart';
+import '../features/admin/data/profile_repository.dart';
+import '../features/admin/presentation/admin_provider.dart';
+import '../features/admin/presentation/profile_provider.dart';
 import 'routes.dart';
 import 'theme.dart';
 
@@ -28,6 +32,12 @@ class BirthChainApp extends StatelessWidget {
           create: (_) => RecordProvider(getIt<RecordRepository>()),
         ),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(
+          create: (_) => AdminProvider(getIt<AdminRepository>()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ProfileProvider(getIt<ProfileRepository>()),
+        ),
       ],
       child: Consumer<AuthProvider>(
         builder:

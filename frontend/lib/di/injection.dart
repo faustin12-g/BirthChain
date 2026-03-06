@@ -4,6 +4,8 @@ import '../core/storage/secure_storage.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/patients/data/patient_repository.dart';
 import '../features/records/data/record_repository.dart';
+import '../features/admin/data/admin_repository.dart';
+import '../features/admin/data/profile_repository.dart';
 
 final getIt = GetIt.instance;
 
@@ -19,4 +21,10 @@ void setupDependencies() {
       () => PatientRepository(getIt<ApiClient>()));
   getIt.registerLazySingleton<RecordRepository>(
       () => RecordRepository(getIt<ApiClient>()));
+  getIt.registerLazySingleton<AdminRepository>(
+      () => AdminRepository(getIt<ApiClient>()));
+  getIt.registerLazySingleton<FacilityAdminRepository>(
+      () => FacilityAdminRepository(getIt<ApiClient>()));
+  getIt.registerLazySingleton<ProfileRepository>(
+      () => ProfileRepository(getIt<ApiClient>()));
 }

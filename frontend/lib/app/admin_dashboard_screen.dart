@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -29,6 +33,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       const _OverviewTab(),
       const _UsersTab(),
       const _FacilitiesTab(),
+      const _ProvidersTab(),
       const _ActivityLogsTab(),
       _AdminProfileTab(onSwitchTab: (i) => setState(() => _currentIndex = i)),
     ];
@@ -53,6 +58,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             icon: Icon(Icons.local_hospital_outlined),
             selectedIcon: Icon(Icons.local_hospital),
             label: 'Facilities',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.badge_outlined),
+            selectedIcon: Icon(Icons.badge),
+            label: 'Providers',
           ),
           NavigationDestination(
             icon: Icon(Icons.history_outlined),
@@ -604,14 +614,67 @@ class _UsersTabState extends State<_UsersTab> {
   }
 
   Future<void> _toggleActive(dynamic user) async {
+    final isActive = user['isActive'] == true;
+    final action = isActive ? 'deactivate' : 'activate';
+    final endpoint = isActive 
+        ? ApiEndpoints.adminDeactivateUser(user['id'])
+        : ApiEndpoints.adminActivateUser(user['id']);
+    
     try {
-      await _api.dio.put(ApiEndpoints.adminToggleActive(user['id']));
+      await _api.dio.put(endpoint);
       _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('User ${action}d successfully')),
+        );
+      }
     } on DioException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.response?.data?['message'] ?? 'Failed.'),
+            content: Text(e.response?.data?['message'] ?? 'Failed to $action user.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteUser(dynamic user) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete User'),
+        content: Text('Are you sure you want to delete "${user['fullName']}"? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirmed != true) return;
+    
+    try {
+      await _api.dio.delete(ApiEndpoints.adminDeleteUser(user['id']));
+      _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User deleted successfully')),
+        );
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.response?.data?['message'] ?? 'Failed to delete user.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -751,6 +814,7 @@ class _UsersTabState extends State<_UsersTab> {
                                       user: filtered[i],
                                       onToggleActive:
                                           () => _toggleActive(filtered[i]),
+                                      onDelete: () => _deleteUser(filtered[i]),
                                     ),
                               ),
                     ),
@@ -764,8 +828,13 @@ class _UsersTabState extends State<_UsersTab> {
 class _UserCard extends StatelessWidget {
   final dynamic user;
   final VoidCallback onToggleActive;
+  final VoidCallback onDelete;
 
-  const _UserCard({required this.user, required this.onToggleActive});
+  const _UserCard({
+    required this.user,
+    required this.onToggleActive,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -894,18 +963,42 @@ class _UserCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 6),
-                SizedBox(
-                  height: 28,
-                  child: IconButton(
-                    icon: Icon(
-                      isActive ? Icons.block : Icons.check_circle_outline,
-                      size: 18,
-                      color: isActive ? Colors.red.shade400 : Colors.green,
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, size: 20),
+                  padding: EdgeInsets.zero,
+                  onSelected: (value) {
+                    if (value == 'toggle') {
+                      onToggleActive();
+                    } else if (value == 'delete') {
+                      onDelete();
+                    }
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                      value: 'toggle',
+                      child: Row(
+                        children: [
+                          Icon(
+                            isActive ? Icons.block : Icons.check_circle_outline,
+                            size: 18,
+                            color: isActive ? Colors.red.shade400 : Colors.green,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(isActive ? 'Deactivate' : 'Activate'),
+                        ],
+                      ),
                     ),
-                    tooltip: isActive ? 'Deactivate' : 'Activate',
-                    padding: EdgeInsets.zero,
-                    onPressed: onToggleActive,
-                  ),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete_outline, size: 18, color: Colors.red.shade400),
+                          const SizedBox(width: 8),
+                          Text('Delete', style: TextStyle(color: Colors.red.shade400)),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -944,7 +1037,7 @@ class _FacilitiesTabState extends State<_FacilitiesTab> {
       _error = null;
     });
     try {
-      final res = await _api.dio.get(ApiEndpoints.facilities);
+      final res = await _api.dio.get(ApiEndpoints.adminFacilities);
       _facilities = res.data as List;
     } on DioException catch (e) {
       _error = e.response?.data?['message'] ?? 'Failed to load facilities.';
@@ -952,6 +1045,75 @@ class _FacilitiesTabState extends State<_FacilitiesTab> {
       _error = 'Something went wrong.';
     }
     setState(() => _loading = false);
+  }
+
+  Future<void> _toggleFacilityActive(dynamic facility) async {
+    final isActive = facility['isActive'] == true;
+    final action = isActive ? 'deactivate' : 'activate';
+    final endpoint = isActive 
+        ? ApiEndpoints.adminDeactivateFacility(facility['id'])
+        : ApiEndpoints.adminActivateFacility(facility['id']);
+    
+    try {
+      await _api.dio.put(endpoint);
+      _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Facility ${action}d successfully')),
+        );
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.response?.data?['message'] ?? 'Failed to $action facility.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteFacility(dynamic facility) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete Facility'),
+        content: Text('Are you sure you want to delete "${facility['name']}"? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirmed != true) return;
+    
+    try {
+      await _api.dio.delete(ApiEndpoints.adminDeleteFacility(facility['id']));
+      _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Facility deleted successfully')),
+        );
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.response?.data?['message'] ?? 'Failed to delete facility.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _showCreateFacilityDialog() async {
@@ -1165,57 +1327,144 @@ class _FacilitiesTabState extends State<_FacilitiesTab> {
                                 itemCount: _facilities.length,
                                 itemBuilder: (_, i) {
                                   final f = _facilities[i];
+                                  final isActive = f['isActive'] == true;
                                   return Card(
                                     margin: const EdgeInsets.only(bottom: 8),
-                                    child: ListTile(
-                                      leading: CircleAvatar(
-                                        backgroundColor: Colors.orange.shade100,
-                                        child: Icon(
-                                          Icons.local_hospital,
-                                          color: Colors.orange.shade800,
-                                        ),
-                                      ),
-                                      title: Text(
-                                        f['name'] ?? '',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      subtitle: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12),
+                                      child: Row(
                                         children: [
-                                          if ((f['address'] ?? '')
-                                              .toString()
-                                              .isNotEmpty)
-                                            Text(
-                                              f['address'],
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                              ),
+                                          CircleAvatar(
+                                            backgroundColor: isActive 
+                                                ? Colors.orange.shade100 
+                                                : Colors.grey.shade200,
+                                            child: Icon(
+                                              Icons.local_hospital,
+                                              color: isActive 
+                                                  ? Colors.orange.shade800 
+                                                  : Colors.grey.shade500,
                                             ),
-                                          if ((f['email'] ?? '')
-                                              .toString()
-                                              .isNotEmpty)
-                                            Text(
-                                              f['email'],
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                color: Colors.grey.shade500,
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                      trailing: IconButton(
-                                        icon: const Icon(
-                                          Icons.person_add_alt_1,
-                                        ),
-                                        tooltip: 'Add Facility Admin',
-                                        onPressed:
-                                            () =>
-                                                _showCreateFacilityAdminDialog(
-                                                  f,
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Flexible(
+                                                      child: Text(
+                                                        f['name'] ?? '',
+                                                        style: const TextStyle(
+                                                          fontWeight: FontWeight.w600,
+                                                        ),
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Container(
+                                                      padding: const EdgeInsets.symmetric(
+                                                        horizontal: 6,
+                                                        vertical: 2,
+                                                      ),
+                                                      decoration: BoxDecoration(
+                                                        color: isActive 
+                                                            ? Colors.green.withAlpha(20) 
+                                                            : Colors.red.withAlpha(20),
+                                                        borderRadius: BorderRadius.circular(6),
+                                                      ),
+                                                      child: Text(
+                                                        isActive ? 'Active' : 'Inactive',
+                                                        style: TextStyle(
+                                                          fontSize: 10,
+                                                          fontWeight: FontWeight.w600,
+                                                          color: isActive 
+                                                              ? Colors.green.shade700 
+                                                              : Colors.red.shade700,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
+                                                if ((f['address'] ?? '')
+                                                    .toString()
+                                                    .isNotEmpty)
+                                                  Text(
+                                                    f['address'],
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                if ((f['email'] ?? '')
+                                                    .toString()
+                                                    .isNotEmpty)
+                                                  Text(
+                                                    f['email'],
+                                                    style: TextStyle(
+                                                      fontSize: 11,
+                                                      color: Colors.grey.shade500,
+                                                    ),
+                                                  ),
+                                                Text(
+                                                  '${f['providerCount'] ?? 0} providers • ${f['adminCount'] ?? 0} admins',
+                                                  style: TextStyle(
+                                                    fontSize: 11,
+                                                    color: Colors.grey.shade400,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuButton<String>(
+                                            icon: const Icon(Icons.more_vert, size: 20),
+                                            onSelected: (value) {
+                                              if (value == 'admin') {
+                                                _showCreateFacilityAdminDialog(f);
+                                              } else if (value == 'toggle') {
+                                                _toggleFacilityActive(f);
+                                              } else if (value == 'delete') {
+                                                _deleteFacility(f);
+                                              }
+                                            },
+                                            itemBuilder: (_) => [
+                                              const PopupMenuItem(
+                                                value: 'admin',
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.person_add_alt_1, size: 18),
+                                                    SizedBox(width: 8),
+                                                    Text('Add Admin'),
+                                                  ],
+                                                ),
+                                              ),
+                                              PopupMenuItem(
+                                                value: 'toggle',
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      isActive ? Icons.block : Icons.check_circle_outline,
+                                                      size: 18,
+                                                      color: isActive ? Colors.red.shade400 : Colors.green,
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Text(isActive ? 'Deactivate' : 'Activate'),
+                                                  ],
+                                                ),
+                                              ),
+                                              PopupMenuItem(
+                                                value: 'delete',
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.delete_outline, size: 18, color: Colors.red.shade400),
+                                                    const SizedBox(width: 8),
+                                                    Text('Delete', style: TextStyle(color: Colors.red.shade400)),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   );
@@ -1241,7 +1490,351 @@ class _FacilitiesTabState extends State<_FacilitiesTab> {
 }
 
 // ──────────────────────────────────
-// Tab 3: Activity Logs
+// Tab 3: Providers Management
+// ──────────────────────────────────
+class _ProvidersTab extends StatefulWidget {
+  const _ProvidersTab();
+
+  @override
+  State<_ProvidersTab> createState() => _ProvidersTabState();
+}
+
+class _ProvidersTabState extends State<_ProvidersTab> {
+  final _api = getIt<ApiClient>();
+  List<dynamic> _providers = [];
+  bool _loading = true;
+  String? _error;
+  String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final res = await _api.dio.get(ApiEndpoints.adminProviders);
+      _providers = res.data as List;
+    } on DioException catch (e) {
+      _error = e.response?.data?['message'] ?? 'Failed to load providers.';
+    } catch (_) {
+      _error = 'Something went wrong.';
+    }
+    setState(() => _loading = false);
+  }
+
+  List<dynamic> get _filteredProviders {
+    if (_searchQuery.isEmpty) return _providers;
+    final q = _searchQuery.toLowerCase();
+    return _providers.where((p) {
+      final name = (p['fullName'] ?? '').toString().toLowerCase();
+      final email = (p['email'] ?? '').toString().toLowerCase();
+      final facility = (p['facilityName'] ?? '').toString().toLowerCase();
+      return name.contains(q) || email.contains(q) || facility.contains(q);
+    }).toList();
+  }
+
+  Future<void> _toggleActive(dynamic provider) async {
+    final isActive = provider['isActive'] == true;
+    final action = isActive ? 'deactivate' : 'activate';
+    final endpoint = isActive 
+        ? ApiEndpoints.adminDeactivateProvider(provider['id'])
+        : ApiEndpoints.adminActivateProvider(provider['id']);
+    
+    try {
+      await _api.dio.put(endpoint);
+      _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Provider ${action}d successfully')),
+        );
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.response?.data?['message'] ?? 'Failed to $action provider.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteProvider(dynamic provider) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete Provider'),
+        content: Text('Are you sure you want to delete "${provider['fullName']}"? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirmed != true) return;
+    
+    try {
+      await _api.dio.delete(ApiEndpoints.adminDeleteProvider(provider['id']));
+      _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Provider deleted successfully')),
+        );
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.response?.data?['message'] ?? 'Failed to delete provider.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final filtered = _filteredProviders;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/icon/logo.png', height: 28),
+            const SizedBox(width: 8),
+            const Text('Providers'),
+          ],
+        ),
+        actions: const [NotificationBell(), SizedBox(width: 4)],
+      ),
+      body:
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : _error != null
+              ? Center(
+                child: Text(_error!, style: const TextStyle(color: Colors.red)),
+              )
+              : RefreshIndicator(
+                onRefresh: _load,
+                child: Column(
+                  children: [
+                    // Search bar
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Search providers...',
+                          prefixIcon: const Icon(Icons.search, size: 20),
+                          filled: true,
+                          fillColor: theme.colorScheme.primary.withAlpha(10),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                          ),
+                          isDense: true,
+                        ),
+                        style: const TextStyle(fontSize: 13),
+                        onChanged:
+                            (v) => setState(() => _searchQuery = v.trim()),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            '${filtered.length} provider${filtered.length == 1 ? '' : 's'}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Provider list
+                    Expanded(
+                      child:
+                          filtered.isEmpty
+                              ? const EmptyState(
+                                icon: Icons.badge_outlined,
+                                title: 'No providers found',
+                              )
+                              : ListView.builder(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                itemCount: filtered.length,
+                                itemBuilder: (_, i) {
+                                  final p = filtered[i];
+                                  final isActive = p['isActive'] == true;
+                                  return Card(
+                                    margin: const EdgeInsets.only(bottom: 8),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12),
+                                      child: Row(
+                                        children: [
+                                          CircleAvatar(
+                                            radius: 22,
+                                            backgroundColor: Colors.teal.withAlpha(25),
+                                            child: Text(
+                                              (p['fullName'] ?? 'P')[0].toUpperCase(),
+                                              style: const TextStyle(
+                                                color: Colors.teal,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Flexible(
+                                                      child: Text(
+                                                        p['fullName'] ?? 'Unknown',
+                                                        style: const TextStyle(
+                                                          fontWeight: FontWeight.w600,
+                                                          fontSize: 14,
+                                                        ),
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Container(
+                                                      padding: const EdgeInsets.symmetric(
+                                                        horizontal: 6,
+                                                        vertical: 2,
+                                                      ),
+                                                      decoration: BoxDecoration(
+                                                        color: isActive 
+                                                            ? Colors.green.withAlpha(20) 
+                                                            : Colors.red.withAlpha(20),
+                                                        borderRadius: BorderRadius.circular(6),
+                                                      ),
+                                                      child: Text(
+                                                        isActive ? 'Active' : 'Inactive',
+                                                        style: TextStyle(
+                                                          fontSize: 10,
+                                                          fontWeight: FontWeight.w600,
+                                                          color: isActive 
+                                                              ? Colors.green.shade700 
+                                                              : Colors.red.shade700,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  p['email'] ?? '',
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey.shade600,
+                                                  ),
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.local_hospital,
+                                                      size: 12,
+                                                      color: Colors.grey.shade400,
+                                                    ),
+                                                    const SizedBox(width: 4),
+                                                    Flexible(
+                                                      child: Text(
+                                                        p['facilityName'] ?? 'No facility',
+                                                        style: TextStyle(
+                                                          fontSize: 11,
+                                                          color: Colors.grey.shade400,
+                                                        ),
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuButton<String>(
+                                            icon: const Icon(Icons.more_vert, size: 20),
+                                            onSelected: (value) {
+                                              if (value == 'toggle') {
+                                                _toggleActive(p);
+                                              } else if (value == 'delete') {
+                                                _deleteProvider(p);
+                                              }
+                                            },
+                                            itemBuilder: (_) => [
+                                              PopupMenuItem(
+                                                value: 'toggle',
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      isActive ? Icons.block : Icons.check_circle_outline,
+                                                      size: 18,
+                                                      color: isActive ? Colors.red.shade400 : Colors.green,
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Text(isActive ? 'Deactivate' : 'Activate'),
+                                                  ],
+                                                ),
+                                              ),
+                                              PopupMenuItem(
+                                                value: 'delete',
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.delete_outline, size: 18, color: Colors.red.shade400),
+                                                    const SizedBox(width: 8),
+                                                    Text('Delete', style: TextStyle(color: Colors.red.shade400)),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                    ),
+                  ],
+                ),
+              ),
+    );
+  }
+}
+
+// ──────────────────────────────────
+// Tab 4: Activity Logs
 // ──────────────────────────────────
 class _ActivityLogsTab extends StatefulWidget {
   const _ActivityLogsTab();
@@ -1368,16 +1961,266 @@ class _ActivityLogsTabState extends State<_ActivityLogsTab> {
 }
 
 // ──────────────────────────────────
-// Tab 4: Admin Profile
+// Tab 5: Admin Profile
 // ──────────────────────────────────
-class _AdminProfileTab extends StatelessWidget {
+class _AdminProfileTab extends StatefulWidget {
   const _AdminProfileTab({required this.onSwitchTab});
   final ValueChanged<int> onSwitchTab;
+
+  @override
+  State<_AdminProfileTab> createState() => _AdminProfileTabState();
+}
+
+class _AdminProfileTabState extends State<_AdminProfileTab> {
+  final _api = getIt<ApiClient>();
+  Map<String, dynamic>? _profile;
+  bool _loading = true;
+  bool _updatingImage = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  /// Helper to get appropriate ImageProvider for data URLs or network URLs
+  ImageProvider _getImageProvider(String url) {
+    if (url.startsWith('data:')) {
+      // Data URL - extract base64 and decode
+      final data = url.split(',').last;
+      return MemoryImage(base64Decode(data));
+    }
+    return NetworkImage(url);
+  }
+
+  Future<void> _loadProfile() async {
+    setState(() => _loading = true);
+    try {
+      final res = await _api.dio.get(ApiEndpoints.profile);
+      _profile = res.data as Map<String, dynamic>;
+    } catch (_) {}
+    setState(() => _loading = false);
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.gallery, maxWidth: 512);
+    if (image == null) return;
+
+    setState(() => _updatingImage = true);
+    try {
+      // Read and convert image to base64
+      final bytes = await File(image.path).readAsBytes();
+      final base64Image = base64Encode(bytes);
+      final extension = image.path.split('.').last.toLowerCase();
+      final contentType = extension == 'png' ? 'image/png' : 'image/jpeg';
+      
+      await _api.dio.put(ApiEndpoints.profileImage, data: {
+        'base64Image': base64Image,
+        'contentType': contentType,
+      });
+      _loadProfile();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile image updated')),
+        );
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.response?.data?['message'] ?? 'Failed to update image'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+    setState(() => _updatingImage = false);
+  }
+
+  Future<void> _removeImage() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Remove Profile Image'),
+        content: const Text('Are you sure you want to remove your profile image?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      await _api.dio.delete(ApiEndpoints.profileImage);
+      _loadProfile();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile image removed')),
+        );
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.response?.data?['message'] ?? 'Failed to remove image'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _showEditDialog() async {
+    final nameCtrl = TextEditingController(text: _profile?['fullName'] ?? '');
+    final phoneCtrl = TextEditingController(text: _profile?['phone'] ?? '');
+    final formKey = GlobalKey<FormState>();
+
+    final updated = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Edit Profile'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: nameCtrl,
+                decoration: const InputDecoration(labelText: 'Full Name *'),
+                validator: (v) => v!.isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: phoneCtrl,
+                decoration: const InputDecoration(labelText: 'Phone'),
+                keyboardType: TextInputType.phone,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              if (!formKey.currentState!.validate()) return;
+              final navigator = Navigator.of(context);
+              final messenger = ScaffoldMessenger.of(context);
+              try {
+                await _api.dio.put(ApiEndpoints.profile, data: {
+                  'fullName': nameCtrl.text.trim(),
+                  'phone': phoneCtrl.text.trim(),
+                });
+                messenger.showSnackBar(
+                  const SnackBar(content: Text('Profile updated')),
+                );
+                navigator.pop(true);
+              } on DioException catch (e) {
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text(e.response?.data?['message'] ?? 'Failed to update'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (updated == true) _loadProfile();
+  }
+
+  Future<void> _showChangePasswordDialog() async {
+    final currentCtrl = TextEditingController();
+    final newCtrl = TextEditingController();
+    final confirmCtrl = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Change Password'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: currentCtrl,
+                decoration: const InputDecoration(labelText: 'Current Password *'),
+                obscureText: true,
+                validator: (v) => v!.isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: newCtrl,
+                decoration: const InputDecoration(labelText: 'New Password *'),
+                obscureText: true,
+                validator: (v) => v != null && v.length >= 6 ? null : 'Min 6 chars',
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: confirmCtrl,
+                decoration: const InputDecoration(labelText: 'Confirm Password *'),
+                obscureText: true,
+                validator: (v) => v == newCtrl.text ? null : 'Passwords don\'t match',
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              if (!formKey.currentState!.validate()) return;
+              final navigator = Navigator.of(context);
+              final messenger = ScaffoldMessenger.of(context);
+              try {
+                await _api.dio.put(ApiEndpoints.profilePassword, data: {
+                  'currentPassword': currentCtrl.text,
+                  'newPassword': newCtrl.text,
+                });
+                messenger.showSnackBar(
+                  const SnackBar(content: Text('Password changed successfully')),
+                );
+                navigator.pop();
+              } on DioException catch (e) {
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text(e.response?.data?['message'] ?? 'Failed to change password'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: const Text('Change'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final auth = context.watch<AuthProvider>();
+    final profileImageUrl = _profile?['profileImageUrl'] as String?;
+    final hasImage = profileImageUrl != null && profileImageUrl.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
@@ -1391,132 +2234,214 @@ class _AdminProfileTab extends StatelessWidget {
         ),
         actions: const [NotificationBell(), SizedBox(width: 4)],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          // User card
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: _loadProfile,
+              child: ListView(
+                padding: const EdgeInsets.all(20),
                 children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: Colors.red.shade100,
-                    child: Text(
-                      (auth.name ?? 'A')[0].toUpperCase(),
-                      style: TextStyle(
-                        color: Colors.red.shade700,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                  // Profile card with image
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          Stack(
+                            children: [
+                              GestureDetector(
+                                onTap: _updatingImage ? null : _pickAndUploadImage,
+                                child: CircleAvatar(
+                                  radius: 50,
+                                  backgroundColor: Colors.red.shade100,
+                                  backgroundImage: hasImage 
+                                      ? _getImageProvider(profileImageUrl!) 
+                                      : null,
+                                  child: _updatingImage
+                                      ? const CircularProgressIndicator()
+                                      : hasImage
+                                          ? null
+                                          : Text(
+                                              (auth.name ?? 'A')[0].toUpperCase(),
+                                              style: TextStyle(
+                                                color: Colors.red.shade700,
+                                                fontSize: 36,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: GestureDetector(
+                                  onTap: _updatingImage ? null : _pickAndUploadImage,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.navyBlue,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.white, width: 2),
+                                    ),
+                                    child: const Icon(
+                                      Icons.camera_alt,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (hasImage)
+                            TextButton.icon(
+                              onPressed: _removeImage,
+                              icon: Icon(Icons.delete_outline, size: 16, color: Colors.red.shade400),
+                              label: Text(
+                                'Remove Image',
+                                style: TextStyle(color: Colors.red.shade400, fontSize: 12),
+                              ),
+                            ),
+                          const SizedBox(height: 12),
+                          Text(
+                            _profile?['fullName'] ?? auth.name ?? 'Admin',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _profile?['email'] ?? '',
+                            style: TextStyle(color: Colors.grey.shade600),
+                          ),
+                          if ((_profile?['phone'] ?? '').toString().isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: Text(
+                                _profile!['phone'],
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade100,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              'System Administrator',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.red.shade800,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              OutlinedButton.icon(
+                                onPressed: _showEditDialog,
+                                icon: const Icon(Icons.edit, size: 18),
+                                label: const Text('Edit Profile'),
+                              ),
+                              const SizedBox(width: 8),
+                              OutlinedButton.icon(
+                                onPressed: _showChangePasswordDialog,
+                                icon: const Icon(Icons.lock_outline, size: 18),
+                                label: const Text('Change Password'),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
+                  const SizedBox(height: 24),
+
+                  // Quick links
+                  Text(
+                    'Quick Actions',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Card(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          auth.name ?? 'Admin',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        ListTile(
+                          leading: const Icon(Icons.people_outlined),
+                          title: const Text('Manage Users'),
+                          subtitle: const Text('View, activate, deactivate users'),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => widget.onSwitchTab(1),
                         ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.red.shade100,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            'System Administrator',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.red.shade800,
-                            ),
-                          ),
+                        const Divider(height: 1),
+                        ListTile(
+                          leading: const Icon(Icons.local_hospital_outlined),
+                          title: const Text('Manage Facilities'),
+                          subtitle: const Text('Create facilities and assign admins'),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => widget.onSwitchTab(2),
+                        ),
+                        const Divider(height: 1),
+                        ListTile(
+                          leading: const Icon(Icons.badge_outlined),
+                          title: const Text('Manage Providers'),
+                          subtitle: const Text('View and manage healthcare providers'),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => widget.onSwitchTab(3),
+                        ),
+                        const Divider(height: 1),
+                        ListTile(
+                          leading: const Icon(Icons.history),
+                          title: const Text('Activity Logs'),
+                          subtitle: const Text('View all system activity'),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => widget.onSwitchTab(4),
                         ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Account section
+                  Text(
+                    'Account',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Card(
+                    child: ListTile(
+                      leading: Icon(Icons.logout, color: Colors.red.shade400),
+                      title: Text(
+                        'Sign Out',
+                        style: TextStyle(color: Colors.red.shade400),
+                      ),
+                      onTap: () async {
+                        final authProv = context.read<AuthProvider>();
+                        final navigator = Navigator.of(context);
+                        await authProv.logout();
+                        if (context.mounted) {
+                          navigator.pushReplacementNamed('/login');
+                        }
+                      },
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 24),
-
-          // Quick links
-          Text(
-            'Quick Actions',
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: Colors.grey.shade600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.people_outlined),
-                  title: const Text('Manage Users'),
-                  subtitle: const Text('View, activate, deactivate users'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => onSwitchTab(1),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.local_hospital_outlined),
-                  title: const Text('Manage Facilities'),
-                  subtitle: const Text('Create facilities and assign admins'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => onSwitchTab(2),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.history),
-                  title: const Text('Activity Logs'),
-                  subtitle: const Text('View all system activity'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => onSwitchTab(3),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // Account section
-          Text(
-            'Account',
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: Colors.grey.shade600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: ListTile(
-              leading: Icon(Icons.logout, color: Colors.red.shade400),
-              title: Text(
-                'Sign Out',
-                style: TextStyle(color: Colors.red.shade400),
-              ),
-              onTap: () async {
-                final authProv = context.read<AuthProvider>();
-                final navigator = Navigator.of(context);
-                await authProv.logout();
-                if (context.mounted) {
-                  navigator.pushReplacementNamed('/login');
-                }
-              },
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

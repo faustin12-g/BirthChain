@@ -9,6 +9,11 @@ class ApiEndpoints {
   static const String forgotPassword = '/auth/forgot-password';
   static const String resetPassword = '/auth/reset-password';
 
+  // Profile
+  static const String profile = '/profile';
+  static const String profileImage = '/profile/image';
+  static const String profilePassword = '/profile/password';
+
   // Facilities
   static const String facilities = '/facilities';
   static String facilityById(String id) => '/facilities/$id';
@@ -35,10 +40,38 @@ class ApiEndpoints {
   static const String activityLogs = '/activitylogs';
   static String activityLogsByUser(String id) => '/activitylogs/by-user/$id';
 
-  // Admin
-  static const String adminStats = '/admin/stats';
+  // Admin - Dashboard
+  static const String adminDashboard = '/admin/dashboard';
+  static const String adminStats = '/admin/dashboard';
+
+  // Admin - Facility Management
+  static const String adminFacilities = '/admin/facilities';
+  static String adminFacilityById(String id) => '/admin/facilities/$id';
+  static String adminActivateFacility(String id) => '/admin/facilities/$id/activate';
+  static String adminDeactivateFacility(String id) => '/admin/facilities/$id/deactivate';
+  static String adminDeleteFacility(String id) => '/admin/facilities/$id';
+
+  // Admin - User Management
   static const String adminUsers = '/admin/users';
+  static String adminUsersByRole(String role) => '/admin/users/role/$role';
   static String adminUserById(String id) => '/admin/users/$id';
-  static String adminToggleActive(String id) =>
-      '/admin/users/$id/toggle-active';
+  static String adminActivateUser(String id) => '/admin/users/$id/activate';
+  static String adminDeactivateUser(String id) => '/admin/users/$id/deactivate';
+  static String adminDeleteUser(String id) => '/admin/users/$id';
+
+  // Admin - Provider Management
+  static const String adminProviders = '/admin/providers';
+  static String adminProvidersByFacility(String id) => '/admin/providers/facility/$id';
+  static String adminProviderById(String id) => '/admin/providers/$id';
+  static String adminActivateProvider(String id) => '/admin/providers/$id/activate';
+  static String adminDeactivateProvider(String id) => '/admin/providers/$id/deactivate';
+  static String adminDeleteProvider(String id) => '/admin/providers/$id';
+
+  // Facility Admin - Provider Management
+  static const String facilityAdminMyFacility = '/facility-admin/my-facility';
+  static const String facilityAdminProviders = '/facility-admin/providers';
+  static String facilityAdminProviderById(String id) => '/facility-admin/providers/$id';
+  static String facilityAdminActivateProvider(String id) => '/facility-admin/providers/$id/activate';
+  static String facilityAdminDeactivateProvider(String id) => '/facility-admin/providers/$id/deactivate';
+  static String facilityAdminDeleteProvider(String id) => '/facility-admin/providers/$id';
 }
