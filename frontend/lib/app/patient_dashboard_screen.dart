@@ -14,6 +14,7 @@ import 'dart:io';
 
 import '../core/widgets/notification_bell.dart';
 import '../features/auth/presentation/auth_provider.dart';
+import '../features/notifications/notification_provider.dart';
 import '../features/patients/domain/patient_models.dart';
 import '../features/records/domain/record_models.dart';
 import '../features/records/presentation/record_provider.dart';
@@ -36,6 +37,8 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
     super.initState();
     final prov = context.read<RecordProvider>();
     Future.microtask(() => prov.loadMyRecords());
+    // Load notifications from backend
+    Future.microtask(() => context.read<NotificationProvider>().loadNotifications());
   }
 
   @override

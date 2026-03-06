@@ -9,7 +9,7 @@ class NotificationService {
 
   static Future<void> initialize(BuildContext context) async {
     await _messaging.requestPermission();
-    
+
     // Get and save the FCM token
     final token = await _messaging.getToken();
     if (token != null) {
@@ -43,7 +43,10 @@ class NotificationService {
   static Future<void> saveTokenToBackend(String token) async {
     try {
       final api = getIt<ApiClient>();
-      await api.dio.post(ApiEndpoints.notificationToken, data: {'token': token});
+      await api.dio.post(
+        ApiEndpoints.notificationToken,
+        data: {'token': token},
+      );
     } catch (e) {
       // Token save failed - user may not be logged in yet
       debugPrint('Failed to save FCM token: $e');

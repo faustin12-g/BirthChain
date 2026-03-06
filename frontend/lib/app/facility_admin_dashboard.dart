@@ -8,6 +8,7 @@ import '../core/widgets/empty_state.dart';
 import '../core/widgets/notification_bell.dart';
 import '../di/injection.dart';
 import '../features/auth/presentation/auth_provider.dart';
+import '../features/notifications/notification_provider.dart';
 import 'profile_screen.dart';
 
 class FacilityAdminDashboard extends StatefulWidget {
@@ -66,6 +67,10 @@ class _FacilityProvidersTabState extends State<_FacilityProvidersTab> {
   void initState() {
     super.initState();
     _load();
+    // Load notifications from backend
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NotificationProvider>().loadNotifications();
+    });
   }
 
   Future<void> _load() async {
