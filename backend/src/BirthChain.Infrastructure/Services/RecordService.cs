@@ -13,7 +13,7 @@ public sealed class RecordService : IRecordService
     private readonly IUserRepository _userRepo;
     private readonly IFacilityRepository _facilityRepo;
     private readonly IActivityLogService _activityLog;
-    private readonly IEmailService _emailService;
+    private readonly IEmailQueue _emailQueue;
 
     public RecordService(
         IRecordRepository recordRepo,
@@ -22,7 +22,7 @@ public sealed class RecordService : IRecordService
         IUserRepository userRepo,
         IFacilityRepository facilityRepo,
         IActivityLogService activityLog,
-        IEmailService emailService)
+        IEmailQueue emailQueue)
     {
         _recordRepo = recordRepo;
         _providerRepo = providerRepo;
@@ -30,7 +30,7 @@ public sealed class RecordService : IRecordService
         _userRepo = userRepo;
         _facilityRepo = facilityRepo;
         _activityLog = activityLog;
-        _emailService = emailService;
+        _emailQueue = emailQueue;
     }
 
     public async Task<RecordDto> CreateAsync(Guid providerUserId, CreateRecordDto dto)
@@ -66,21 +66,15 @@ public sealed class RecordService : IRecordService
         {
             var facility = await _facilityRepo.GetByIdAsync(provider.FacilityId);
             var facilityName = facility?.Name ?? "Unknown Facility";
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    await _emailService.SendRecordAddedEmailAsync(
-                        client.Email,
-                        client.FullName,
-                        client.QrCodeId,
-                        user?.FullName ?? "Provider",
-                        facilityName,
-                        record.Description,
-                        record.CreatedAt);
-                }
-                catch { /* Don't fail record creation if email fails */ }
-            });
+            var providerName = user?.FullName ?? "Provider";
+            var clientEmail = client.Email;
+            var clientName = client.FullName;
+            var qrCodeId = client.QrCodeId;
+            var recordDescription = record.Description;
+            var createdAt = record.CreatedAt;
+            
+            _emailQueue.QueueEmail(async svc => await svc.SendRecordAddedEmailAsync(
+                clientEmail, clientName, qrCodeId, providerName, facilityName, recordDescription, createdAt));
         }
 
         return new RecordDto

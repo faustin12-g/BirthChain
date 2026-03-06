@@ -24,6 +24,11 @@ public static class DependencyInjection
         services.AddScoped<IFacilityRepository, FacilityRepository>();
         services.AddScoped<IOtpRepository, OtpRepository>();
 
+        // Background email queue (singleton hosted service)
+        services.AddSingleton<BackgroundEmailService>();
+        services.AddSingleton<IEmailQueue>(sp => sp.GetRequiredService<BackgroundEmailService>());
+        services.AddHostedService(sp => sp.GetRequiredService<BackgroundEmailService>());
+
         // Services
         services.AddScoped<IAuthService, AuthService>();
         services.AddHttpClient<IEmailService, EmailService>();  // Use HttpClient for Resend API

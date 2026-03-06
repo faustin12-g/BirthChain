@@ -9,14 +9,14 @@ public sealed class ProviderService : IProviderService
     private readonly IProviderRepository _providerRepo;
     private readonly IUserRepository _userRepo;
     private readonly IFacilityRepository _facilityRepo;
-    private readonly IEmailService _emailService;
+    private readonly IEmailQueue _emailQueue;
 
-    public ProviderService(IProviderRepository providerRepo, IUserRepository userRepo, IFacilityRepository facilityRepo, IEmailService emailService)
+    public ProviderService(IProviderRepository providerRepo, IUserRepository userRepo, IFacilityRepository facilityRepo, IEmailQueue emailQueue)
     {
         _providerRepo = providerRepo;
         _userRepo = userRepo;
         _facilityRepo = facilityRepo;
-        _emailService = emailService;
+        _emailQueue = emailQueue;
     }
 
     /// <summary>
@@ -58,11 +58,11 @@ public sealed class ProviderService : IProviderService
         await _providerRepo.AddAsync(provider);
 
         // Send provider welcome email
-        _ = Task.Run(async () =>
-        {
-            try { await _emailService.SendProviderWelcomeEmailAsync(user.Email, user.FullName, facility.Name, provider.Specialty); }
-            catch { /* best effort */ }
-        });
+        var email = user.Email;
+        var fullName = user.FullName;
+        var facilityName = facility.Name;
+        var specialty = provider.Specialty;
+        _emailQueue.QueueEmail(async svc => await svc.SendProviderWelcomeEmailAsync(email, fullName, facilityName, specialty));
 
         return new ProviderDto
         {
