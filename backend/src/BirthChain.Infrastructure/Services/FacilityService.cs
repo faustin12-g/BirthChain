@@ -3,6 +3,7 @@ using BirthChain.Application.Interfaces;
 using BirthChain.Core.Entities;
 using BirthChain.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace BirthChain.Infrastructure.Services;
 
@@ -12,17 +13,20 @@ public sealed class FacilityService : IFacilityService
     private readonly IUserRepository _userRepo;
     private readonly IFcmNotificationService _fcmService;
     private readonly BirthChainDbContext _context;
+    private readonly ILogger<FacilityService> _logger;
 
     public FacilityService(
-        IFacilityRepository facilityRepo, 
+        IFacilityRepository facilityRepo,
         IUserRepository userRepo,
         IFcmNotificationService fcmService,
-        BirthChainDbContext context)
+        BirthChainDbContext context,
+        ILogger<FacilityService> logger)
     {
         _facilityRepo = facilityRepo;
         _userRepo = userRepo;
         _fcmService = fcmService;
         _context = context;
+        _logger = logger;
     }
 
     public async Task<FacilityDto> CreateAsync(CreateFacilityDto dto)
@@ -54,30 +58,46 @@ public sealed class FacilityService : IFacilityService
 
     private async Task SendNotificationToAdminsAsync(string title, string body)
     {
-        var admins = await _context.Users
-            .Where(u => u.Role == "Admin" && !string.IsNullOrEmpty(u.FcmToken))
-            .ToListAsync();
-
-        foreach (var admin in admins)
+        try
         {
-            // Save notification for in-app display
-            var notification = new Notification
-            {
-                UserId = admin.Id,
-                Title = title,
-                Body = body,
-                CreatedAt = DateTime.UtcNow
-            };
-            _context.Notifications.Add(notification);
+            // Get all admin users (with or without tokens for logging)
+            var allAdmins = await _context.Users
+                .Where(u => u.Role == "Admin")
+                .ToListAsync();
 
-            // Send push notification
-            if (!string.IsNullOrEmpty(admin.FcmToken))
+            _logger.LogInformation("Found {Count} admin users total", allAdmins.Count);
+
+            var adminsWithTokens = allAdmins.Where(u => !string.IsNullOrEmpty(u.FcmToken)).ToList();
+            _logger.LogInformation("Found {Count} admins with FCM tokens", adminsWithTokens.Count);
+
+            foreach (var admin in adminsWithTokens)
             {
-                await _fcmService.SendNotificationAsync(admin.FcmToken, title, body);
+                _logger.LogInformation("Sending notification to admin {AdminId}, token starts with: {TokenStart}", 
+                    admin.Id, admin.FcmToken?.Substring(0, Math.Min(20, admin.FcmToken?.Length ?? 0)));
+
+                // Save notification for in-app display
+                var notification = new Notification
+                {
+                    UserId = admin.Id,
+                    Title = title,
+                    Body = body,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.Notifications.Add(notification);
+
+                // Send push notification
+                await _fcmService.SendNotificationAsync(admin.FcmToken!, title, body);
+            }
+
+            if (adminsWithTokens.Count > 0)
+            {
+                await _context.SaveChangesAsync();
             }
         }
-
-        await _context.SaveChangesAsync();
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending notifications to admins");
+        }
     }
 
     public async Task<IReadOnlyList<FacilityDto>> GetAllAsync()

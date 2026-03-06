@@ -43,7 +43,7 @@ public class FcmNotificationService : IFcmNotificationService
             {
                 // Try to get credentials from environment variable (for Railway)
                 var firebaseCredentialsJson = Environment.GetEnvironmentVariable("FIREBASE_CREDENTIALS_JSON");
-                
+
                 if (!string.IsNullOrEmpty(firebaseCredentialsJson))
                 {
                     // Use credentials from environment variable (Railway deployment)
@@ -92,7 +92,7 @@ public class FcmNotificationService : IFcmNotificationService
         var message = new Message
         {
             Token = deviceToken,
-            Notification = new Notification
+            Notification = new FirebaseAdmin.Messaging.Notification
             {
                 Title = title,
                 Body = body
