@@ -1,10 +1,20 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
+import 'dart:io';
 
 import '../core/widgets/notification_bell.dart';
 import '../features/auth/presentation/auth_provider.dart';
+import '../features/patients/domain/patient_models.dart';
 import '../features/records/domain/record_models.dart';
 import '../features/records/presentation/record_provider.dart';
 import 'theme.dart';
@@ -990,8 +1000,333 @@ class _Field extends StatelessWidget {
 // ─────────────────────────────────────────────
 // Tab 2: My QR Code
 // ─────────────────────────────────────────────
-class _MyQrCodeTab extends StatelessWidget {
+class _MyQrCodeTab extends StatefulWidget {
   const _MyQrCodeTab();
+
+  @override
+  State<_MyQrCodeTab> createState() => _MyQrCodeTabState();
+}
+
+class _MyQrCodeTabState extends State<_MyQrCodeTab> {
+  bool _busy = false;
+
+  /// Build a professional PDF document with logo, patient info, and QR code.
+  Future<Uint8List> _buildPdf(Patient patient) async {
+    final pdf = pw.Document();
+
+    // Load the logo from assets
+    final logoData = await rootBundle.load('assets/icon/logo.png');
+    final logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
+
+    // Generate the QR code image
+    final qrPainter = QrPainter(
+      data: patient.qrCodeId,
+      version: QrVersions.auto,
+      gapless: true,
+      eyeStyle: const QrEyeStyle(
+        eyeShape: QrEyeShape.square,
+        color: Color(0xFF1A3C6D),
+      ),
+      dataModuleStyle: const QrDataModuleStyle(
+        dataModuleShape: QrDataModuleShape.square,
+        color: Color(0xFF1A3C6D),
+      ),
+    );
+    final qrImage = await qrPainter.toImageData(600, format: ui.ImageByteFormat.png);
+    final qrBytes = qrImage!.buffer.asUint8List();
+    final qrPdfImage = pw.MemoryImage(qrBytes);
+
+    final navy = PdfColor.fromHex('#1A3C6D');
+    final orange = PdfColor.fromHex('#F58B1F');
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(40),
+        build: (pw.Context ctx) {
+          return pw.Column(
+            children: [
+              // ── Header with logo and app name ──
+              pw.Container(
+                padding: const pw.EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+                decoration: pw.BoxDecoration(
+                  color: navy,
+                  borderRadius: pw.BorderRadius.circular(12),
+                ),
+                child: pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.center,
+                  children: [
+                    pw.Image(logoImage, width: 50, height: 50),
+                    pw.SizedBox(width: 14),
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text(
+                          'BirthChain',
+                          style: pw.TextStyle(
+                            fontSize: 28,
+                            fontWeight: pw.FontWeight.bold,
+                            color: PdfColors.white,
+                          ),
+                        ),
+                        pw.Text(
+                          'Secure Birth Record Management',
+                          style: pw.TextStyle(
+                            fontSize: 11,
+                            color: PdfColor.fromHex('#B0C4DE'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 30),
+
+              // ── Title ──
+              pw.Text(
+                'Patient QR Code Card',
+                style: pw.TextStyle(
+                  fontSize: 22,
+                  fontWeight: pw.FontWeight.bold,
+                  color: navy,
+                ),
+              ),
+              pw.SizedBox(height: 6),
+              pw.Container(width: 60, height: 3, color: orange),
+              pw.SizedBox(height: 24),
+
+              // ── QR Code ──
+              pw.Container(
+                padding: const pw.EdgeInsets.all(20),
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: navy, width: 2),
+                  borderRadius: pw.BorderRadius.circular(16),
+                ),
+                child: pw.Column(
+                  children: [
+                    pw.Image(qrPdfImage, width: 200, height: 200),
+                    pw.SizedBox(height: 14),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: pw.BoxDecoration(
+                        color: PdfColor.fromHex('#EEF2F7'),
+                        borderRadius: pw.BorderRadius.circular(8),
+                      ),
+                      child: pw.Text(
+                        patient.qrCodeId,
+                        style: pw.TextStyle(
+                          fontSize: 20,
+                          fontWeight: pw.FontWeight.bold,
+                          color: navy,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 24),
+
+              // ── Patient Information ──
+              pw.Container(
+                width: double.infinity,
+                padding: const pw.EdgeInsets.all(20),
+                decoration: pw.BoxDecoration(
+                  color: PdfColor.fromHex('#F8F9FA'),
+                  borderRadius: pw.BorderRadius.circular(12),
+                  border: pw.Border.all(color: PdfColor.fromHex('#DEE2E6')),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      'Patient Information',
+                      style: pw.TextStyle(
+                        fontSize: 14,
+                        fontWeight: pw.FontWeight.bold,
+                        color: navy,
+                      ),
+                    ),
+                    pw.SizedBox(height: 10),
+                    _pdfInfoRow('Full Name', patient.fullName),
+                    if (patient.email.isNotEmpty) _pdfInfoRow('Email', patient.email),
+                    if (patient.phone.isNotEmpty) _pdfInfoRow('Phone', patient.phone),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 30),
+
+              // ── Instructions ──
+              pw.Container(
+                width: double.infinity,
+                padding: const pw.EdgeInsets.all(16),
+                decoration: pw.BoxDecoration(
+                  color: PdfColor.fromHex('#FFF8F0'),
+                  borderRadius: pw.BorderRadius.circular(10),
+                  border: pw.Border.all(color: orange.shade(.3)),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Row(
+                      children: [
+                        pw.Container(
+                          width: 6,
+                          height: 6,
+                          decoration: pw.BoxDecoration(
+                            color: orange,
+                            shape: pw.BoxShape.circle,
+                          ),
+                        ),
+                        pw.SizedBox(width: 8),
+                        pw.Text(
+                          'Instructions',
+                          style: pw.TextStyle(
+                            fontSize: 13,
+                            fontWeight: pw.FontWeight.bold,
+                            color: navy,
+                          ),
+                        ),
+                      ],
+                    ),
+                    pw.SizedBox(height: 8),
+                    pw.Text(
+                      '• Present this QR code to your healthcare provider to access your birth records.\n'
+                      '• Keep this document safe. It serves as your unique patient identifier.\n'
+                      '• Do not share this QR code with unauthorized persons.',
+                      style: const pw.TextStyle(fontSize: 11, lineSpacing: 4),
+                    ),
+                  ],
+                ),
+              ),
+
+              pw.Spacer(),
+
+              // ── Footer ──
+              pw.Divider(color: PdfColor.fromHex('#DEE2E6')),
+              pw.SizedBox(height: 6),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text(
+                    'Generated on ${DateFormat('MMMM d, yyyy – h:mm a').format(DateTime.now())}',
+                    style: pw.TextStyle(fontSize: 9, color: PdfColor.fromHex('#6C757D')),
+                  ),
+                  pw.Text(
+                    'BirthChain © ${DateTime.now().year}',
+                    style: pw.TextStyle(fontSize: 9, color: PdfColor.fromHex('#6C757D')),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    return pdf.save();
+  }
+
+  pw.Widget _pdfInfoRow(String label, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 3),
+      child: pw.Row(
+        children: [
+          pw.SizedBox(
+            width: 80,
+            child: pw.Text(
+              label,
+              style: pw.TextStyle(
+                fontSize: 11,
+                color: PdfColor.fromHex('#6C757D'),
+              ),
+            ),
+          ),
+          pw.SizedBox(width: 8),
+          pw.Expanded(
+            child: pw.Text(
+              value,
+              style: pw.TextStyle(
+                fontSize: 12,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handlePrint(Patient patient) async {
+    setState(() => _busy = true);
+    try {
+      final pdfBytes = await _buildPdf(patient);
+      await Printing.layoutPdf(onLayout: (_) => pdfBytes);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Print failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _handleSave(Patient patient) async {
+    setState(() => _busy = true);
+    try {
+      final pdfBytes = await _buildPdf(patient);
+      final dir = await getApplicationDocumentsDirectory();
+      final file = File('${dir.path}/BirthChain_QR_${patient.qrCodeId}.pdf');
+      await file.writeAsBytes(pdfBytes);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Saved to ${file.path}'),
+            backgroundColor: Colors.green.shade700,
+            action: SnackBarAction(
+              label: 'Share',
+              textColor: Colors.white,
+              onPressed: () => SharePlus.instance.share(
+                ShareParams(files: [XFile(file.path)]),
+              ),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Save failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _handleShare(Patient patient) async {
+    setState(() => _busy = true);
+    try {
+      final pdfBytes = await _buildPdf(patient);
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/BirthChain_QR_${patient.qrCodeId}.pdf');
+      await file.writeAsBytes(pdfBytes);
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(file.path)]),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Share failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1037,94 +1372,181 @@ class _MyQrCodeTab extends StatelessWidget {
             );
           }
 
-          return Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  Text(
-                    'Show this QR code to your\nhealthcare provider',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                  ),
-                  const SizedBox(height: 24),
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(20),
-                          blurRadius: 20,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        QrImageView(
-                          data: patient.qrCodeId,
-                          version: QrVersions.auto,
-                          size: 220,
-                          eyeStyle: QrEyeStyle(
-                            eyeShape: QrEyeShape.square,
-                            color: theme.colorScheme.primary,
-                          ),
-                          dataModuleStyle: QrDataModuleStyle(
-                            dataModuleShape: QrDataModuleShape.square,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withAlpha(20),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            patient.qrCodeId,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.primary,
-                              letterSpacing: 1.5,
+          return Stack(
+            children: [
+              Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Show this QR code to your\nhealthcare provider',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                      ),
+                      const SizedBox(height: 24),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withAlpha(20),
+                              blurRadius: 20,
+                              offset: const Offset(0, 4),
                             ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            QrImageView(
+                              data: patient.qrCodeId,
+                              version: QrVersions.auto,
+                              size: 220,
+                              eyeStyle: QrEyeStyle(
+                                eyeShape: QrEyeShape.square,
+                                color: theme.colorScheme.primary,
+                              ),
+                              dataModuleStyle: QrDataModuleStyle(
+                                dataModuleShape: QrDataModuleShape.square,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary.withAlpha(20),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                patient.qrCodeId,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.primary,
+                                  letterSpacing: 1.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              _InfoRow(icon: Icons.person, label: patient.fullName),
+                              if (patient.email.isNotEmpty)
+                                _InfoRow(
+                                  icon: Icons.email_outlined,
+                                  label: patient.email,
+                                ),
+                              if (patient.phone.isNotEmpty)
+                                _InfoRow(
+                                  icon: Icons.phone_outlined,
+                                  label: patient.phone,
+                                ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
+                      ),
+                      const SizedBox(height: 24),
+
+                      // ── Action buttons: Print, Save, Share ──
+                      Row(
                         children: [
-                          _InfoRow(icon: Icons.person, label: patient.fullName),
-                          if (patient.email.isNotEmpty)
-                            _InfoRow(
-                              icon: Icons.email_outlined,
-                              label: patient.email,
+                          Expanded(
+                            child: _ActionButton(
+                              icon: Icons.print_rounded,
+                              label: 'Print',
+                              color: theme.colorScheme.primary,
+                              onTap: () => _handlePrint(patient),
                             ),
-                          if (patient.phone.isNotEmpty)
-                            _InfoRow(
-                              icon: Icons.phone_outlined,
-                              label: patient.phone,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _ActionButton(
+                              icon: Icons.save_alt_rounded,
+                              label: 'Save PDF',
+                              color: AppTheme.accentOrange,
+                              onTap: () => _handleSave(patient),
                             ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _ActionButton(
+                              icon: Icons.share_rounded,
+                              label: 'Share',
+                              color: Colors.green.shade600,
+                              onTap: () => _handleShare(patient),
+                            ),
+                          ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: 16),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+              if (_busy)
+                Container(
+                  color: Colors.black26,
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+            ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// Styled action button for the QR tab
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: color.withAlpha(22),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            children: [
+              Icon(icon, color: color, size: 26),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
