@@ -10,7 +10,7 @@ class ApiClient {
 
   ApiClient(this._storage) {
     String baseUrl;
-    
+
     // Use production server if flag is set
     if (AppConstants.useProductionServer) {
       baseUrl = AppConstants.apiBaseUrlProduction;
