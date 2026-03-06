@@ -16,7 +16,7 @@ public sealed class EmailService : IEmailService
     private readonly SmtpSettings _smtp;
     private readonly ILogger<EmailService> _logger;
     private readonly HttpClient _httpClient;
-    
+
     private static readonly Lazy<string> _logoBase64 = new(() =>
     {
         try
@@ -40,8 +40,8 @@ public sealed class EmailService : IEmailService
 
     // ── Shared helpers ──
 
-    private static string LogoImg => string.IsNullOrEmpty(_logoBase64.Value) 
-        ? "" 
+    private static string LogoImg => string.IsNullOrEmpty(_logoBase64.Value)
+        ? ""
         : $"<img src=\"data:image/png;base64,{_logoBase64.Value}\" alt=\"BirthChain\" style=\"height:56px;width:auto;display:inline-block;margin-bottom:8px;\" />";
 
     private static string LogoImgSmall => string.IsNullOrEmpty(_logoBase64.Value)
@@ -90,8 +90,8 @@ public sealed class EmailService : IEmailService
 
     private async Task SendViaResendAsync(string toEmail, string subject, string htmlBody)
     {
-        var fromEmail = string.IsNullOrEmpty(_smtp.Email) 
-            ? "BirthChain <onboarding@resend.dev>" 
+        var fromEmail = string.IsNullOrEmpty(_smtp.Email)
+            ? "BirthChain <onboarding@resend.dev>"
             : $"{_smtp.DisplayName} <{_smtp.Email}>";
 
         // If no custom domain, use Resend's test domain
@@ -111,7 +111,7 @@ public sealed class EmailService : IEmailService
         var json = JsonSerializer.Serialize(payload);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        _httpClient.DefaultRequestHeaders.Authorization = 
+        _httpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", _smtp.ResendApiKey);
 
         try
@@ -125,7 +125,7 @@ public sealed class EmailService : IEmailService
             }
             else
             {
-                _logger.LogError("Resend API error for {Email}: {StatusCode} - {Body}", 
+                _logger.LogError("Resend API error for {Email}: {StatusCode} - {Body}",
                     toEmail, response.StatusCode, responseBody);
                 throw new Exception($"Resend API error: {response.StatusCode} - {responseBody}");
             }
@@ -161,7 +161,7 @@ public sealed class EmailService : IEmailService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send email via SMTP to {Email}: {Subject}. Host: {Host}, Port: {Port}", 
+            _logger.LogError(ex, "Failed to send email via SMTP to {Email}: {Subject}. Host: {Host}, Port: {Port}",
                 toEmail, subject, _smtp.Host, _smtp.Port);
             throw;
         }

@@ -54,17 +54,19 @@ public class HealthController : ControllerBase
         try
         {
             await _emailService.SendOtpAsync(toEmail, "123456", "EmailVerification");
-            return Ok(new { 
-                success = true, 
+            return Ok(new
+            {
+                success = true,
                 message = $"Test email sent to {toEmail}",
                 method = _smtpSettings.UseResend ? "Resend API" : "SMTP"
             });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { 
-                success = false, 
-                error = ex.Message, 
+            return StatusCode(500, new
+            {
+                success = false,
+                error = ex.Message,
                 innerError = ex.InnerException?.Message,
                 method = _smtpSettings.UseResend ? "Resend API" : "SMTP"
             });

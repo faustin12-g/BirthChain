@@ -194,7 +194,7 @@ public sealed class AuthService : IAuthService
             ExpiresAt = DateTime.UtcNow.AddMinutes(10),
             CreatedAt = DateTime.UtcNow
         });
-        await _emailService.SendOtpAsync(email, code, "EmailVerification");
+        _ = Task.Run(async () => { try { await _emailService.SendOtpAsync(email, code, "EmailVerification"); } catch { } });
     }
 
     public async Task<bool> VerifyEmailAsync(string email, string code)
@@ -213,7 +213,9 @@ public sealed class AuthService : IAuthService
             var client = await _clientRepo.GetByEmailAsync(email);
             if (client is not null)
             {
-                await _emailService.SendWelcomeEmailAsync(email, user.FullName, client.QrCodeId);
+                var fullName = user.FullName;
+                var qrCode = client.QrCodeId;
+                _ = Task.Run(async () => { try { await _emailService.SendWelcomeEmailAsync(email, fullName, qrCode); } catch { } });
             }
         }
         return true;
@@ -234,7 +236,7 @@ public sealed class AuthService : IAuthService
             ExpiresAt = DateTime.UtcNow.AddMinutes(10),
             CreatedAt = DateTime.UtcNow
         });
-        await _emailService.SendOtpAsync(email, code, "PasswordReset");
+        _ = Task.Run(async () => { try { await _emailService.SendOtpAsync(email, code, "PasswordReset"); } catch { } });
     }
 
     public async Task<bool> ResetPasswordAsync(string email, string code, string newPassword)
@@ -249,8 +251,9 @@ public sealed class AuthService : IAuthService
         user.PasswordHash = HashPassword(newPassword);
         await _userRepo.UpdateAsync(user);
 
-        // Send confirmation email
-        await _emailService.SendPasswordResetConfirmationAsync(email, user.FullName);
+        // Send confirmation email (fire-and-forget)
+        var name = user.FullName;
+        _ = Task.Run(async () => { try { await _emailService.SendPasswordResetConfirmationAsync(email, name); } catch { } });
         return true;
     }
 
