@@ -24,9 +24,31 @@ public sealed class ProviderRepository : IProviderRepository
         return provider;
     }
 
+    public async Task UpdateAsync(Provider provider)
+    {
+        _db.Providers.Update(provider);
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        var provider = await _db.Providers.FindAsync(id);
+        if (provider is not null)
+        {
+            _db.Providers.Remove(provider);
+            await _db.SaveChangesAsync();
+        }
+    }
+
     public async Task<IReadOnlyList<Provider>> GetAllAsync()
         => await _db.Providers.ToListAsync();
 
     public async Task<IReadOnlyList<Provider>> GetByFacilityIdAsync(Guid facilityId)
         => await _db.Providers.Where(p => p.FacilityId == facilityId).ToListAsync();
+
+    public async Task<int> CountAsync()
+        => await _db.Providers.CountAsync();
+
+    public async Task<int> CountByFacilityIdAsync(Guid facilityId)
+        => await _db.Providers.CountAsync(p => p.FacilityId == facilityId);
 }

@@ -18,6 +18,9 @@ public sealed class RecordRepository : IRecordRepository
         return record;
     }
 
+    public async Task<IReadOnlyList<Record>> GetAllAsync()
+        => await _db.Records.OrderByDescending(r => r.CreatedAt).ToListAsync();
+
     public async Task<IReadOnlyList<Record>> GetByClientIdAsync(Guid clientId)
         => await _db.Records
             .Where(r => r.ClientId == clientId)
@@ -29,4 +32,7 @@ public sealed class RecordRepository : IRecordRepository
             .Where(r => r.ProviderId == providerId)
             .OrderByDescending(r => r.CreatedAt)
             .ToListAsync();
+
+    public async Task<int> CountAsync()
+        => await _db.Records.CountAsync();
 }

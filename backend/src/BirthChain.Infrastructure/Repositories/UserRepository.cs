@@ -30,6 +30,28 @@ public sealed class UserRepository : IUserRepository
         await _db.SaveChangesAsync();
     }
 
+    public async Task DeleteAsync(Guid id)
+    {
+        var user = await _db.Users.FindAsync(id);
+        if (user is not null)
+        {
+            _db.Users.Remove(user);
+            await _db.SaveChangesAsync();
+        }
+    }
+
     public async Task<IReadOnlyList<User>> GetAllAsync()
         => await _db.Users.OrderBy(u => u.FullName).ToListAsync();
+
+    public async Task<IReadOnlyList<User>> GetByRoleAsync(string role)
+        => await _db.Users.Where(u => u.Role == role).OrderBy(u => u.FullName).ToListAsync();
+
+    public async Task<IReadOnlyList<User>> GetByFacilityIdAsync(Guid facilityId)
+        => await _db.Users.Where(u => u.FacilityId == facilityId).OrderBy(u => u.FullName).ToListAsync();
+
+    public async Task<int> CountByRoleAsync(string role)
+        => await _db.Users.CountAsync(u => u.Role == role);
+
+    public async Task<int> CountActiveAsync()
+        => await _db.Users.CountAsync(u => u.IsActive);
 }

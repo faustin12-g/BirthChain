@@ -46,6 +46,14 @@ public sealed class AuthService : IAuthService
         var user = await _userRepo.GetByEmailAsync(request.Email);
         if (user is null || !user.IsActive) return null;
 
+        // Check if user's facility is active (for facility-based users)
+        if (user.FacilityId.HasValue)
+        {
+            var facility = await _facilityRepo.GetByIdAsync(user.FacilityId.Value);
+            if (facility is not null && !facility.IsActive)
+                return null; // Facility is deactivated
+        }
+
         if (!VerifyPassword(request.Password, user.PasswordHash))
             return null;
 

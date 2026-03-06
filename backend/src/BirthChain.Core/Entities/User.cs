@@ -12,6 +12,8 @@ public class User : BaseEntity
     public bool IsActive { get; set; } = true;
     public bool IsEmailVerified { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public string? ProfileImageUrl { get; set; }
+    public string? Phone { get; set; }
 
     /// <summary>
     /// Links FacilityAdmin users to their facility. Null for Admin/Patient.
