@@ -89,6 +89,17 @@ builder.Services.AddAuthorization();
 // Infrastructure (EF Core + PostgreSQL + Repositories + Auth)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+// Convert Railway's DATABASE_URL format to Npgsql format if needed
+// Railway: postgresql://user:pass@host:port/database
+// Npgsql:  Host=host;Port=port;Database=database;Username=user;Password=pass
+if (connectionString.StartsWith("postgresql://") || connectionString.StartsWith("postgres://"))
+{
+    var uri = new Uri(connectionString);
+    var userInfo = uri.UserInfo.Split(':');
+    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]}";
+}
+
 builder.Services.AddInfrastructure(connectionString);
 
 // --------------- App ---------------
