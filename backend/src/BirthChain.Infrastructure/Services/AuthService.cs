@@ -7,6 +7,7 @@ using BirthChain.Application.DTOs;
 using BirthChain.Application.Interfaces;
 using BirthChain.Core.Entities;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -20,6 +21,7 @@ public sealed class AuthService : IAuthService
     private readonly IFacilityRepository _facilityRepo;
     private readonly IOtpRepository _otpRepo;
     private readonly IEmailService _emailService;
+    private readonly ILogger<AuthService> _logger;
 
     public AuthService(
         IOptions<JwtSettings> jwtOptions,
@@ -27,7 +29,8 @@ public sealed class AuthService : IAuthService
         IClientRepository clientRepo,
         IFacilityRepository facilityRepo,
         IOtpRepository otpRepo,
-        IEmailService emailService)
+        IEmailService emailService,
+        ILogger<AuthService> logger)
     {
         _jwt = jwtOptions.Value;
         _userRepo = userRepo;
@@ -35,6 +38,7 @@ public sealed class AuthService : IAuthService
         _facilityRepo = facilityRepo;
         _otpRepo = otpRepo;
         _emailService = emailService;
+        _logger = logger;
     }
 
     public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto request)
@@ -194,7 +198,7 @@ public sealed class AuthService : IAuthService
             ExpiresAt = DateTime.UtcNow.AddMinutes(10),
             CreatedAt = DateTime.UtcNow
         });
-        _ = Task.Run(async () => { try { await _emailService.SendOtpAsync(email, code, "EmailVerification"); } catch { } });
+        _ = Task.Run(async () => { try { await _emailService.SendOtpAsync(email, code, "EmailVerification"); _logger.LogInformation("OTP email sent to {Email}", email); } catch (Exception ex) { _logger.LogError(ex, "Failed to send OTP email to {Email}", email); } });
     }
 
     public async Task<bool> VerifyEmailAsync(string email, string code)
@@ -215,7 +219,7 @@ public sealed class AuthService : IAuthService
             {
                 var fullName = user.FullName;
                 var qrCode = client.QrCodeId;
-                _ = Task.Run(async () => { try { await _emailService.SendWelcomeEmailAsync(email, fullName, qrCode); } catch { } });
+                _ = Task.Run(async () => { try { await _emailService.SendWelcomeEmailAsync(email, fullName, qrCode); _logger.LogInformation("Welcome email sent to {Email}", email); } catch (Exception ex) { _logger.LogError(ex, "Failed to send welcome email to {Email}", email); } });
             }
         }
         return true;
@@ -236,7 +240,7 @@ public sealed class AuthService : IAuthService
             ExpiresAt = DateTime.UtcNow.AddMinutes(10),
             CreatedAt = DateTime.UtcNow
         });
-        _ = Task.Run(async () => { try { await _emailService.SendOtpAsync(email, code, "PasswordReset"); } catch { } });
+        _ = Task.Run(async () => { try { await _emailService.SendOtpAsync(email, code, "PasswordReset"); _logger.LogInformation("Password reset OTP sent to {Email}", email); } catch (Exception ex) { _logger.LogError(ex, "Failed to send password reset OTP to {Email}", email); } });
     }
 
     public async Task<bool> ResetPasswordAsync(string email, string code, string newPassword)
@@ -253,7 +257,7 @@ public sealed class AuthService : IAuthService
 
         // Send confirmation email (fire-and-forget)
         var name = user.FullName;
-        _ = Task.Run(async () => { try { await _emailService.SendPasswordResetConfirmationAsync(email, name); } catch { } });
+        _ = Task.Run(async () => { try { await _emailService.SendPasswordResetConfirmationAsync(email, name); _logger.LogInformation("Password reset confirmation sent to {Email}", email); } catch (Exception ex) { _logger.LogError(ex, "Failed to send password reset confirmation to {Email}", email); } });
         return true;
     }
 
