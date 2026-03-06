@@ -11,20 +11,30 @@ final getIt = GetIt.instance;
 
 void setupDependencies() {
   // Core
-  getIt.registerLazySingleton<SecureStorageService>(() => SecureStorageService());
-  getIt.registerLazySingleton<ApiClient>(() => ApiClient(getIt<SecureStorageService>()));
+  getIt.registerLazySingleton<SecureStorageService>(
+    () => SecureStorageService(),
+  );
+  getIt.registerLazySingleton<ApiClient>(
+    () => ApiClient(getIt<SecureStorageService>()),
+  );
 
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
-      () => AuthRepository(getIt<ApiClient>(), getIt<SecureStorageService>()));
+    () => AuthRepository(getIt<ApiClient>(), getIt<SecureStorageService>()),
+  );
   getIt.registerLazySingleton<PatientRepository>(
-      () => PatientRepository(getIt<ApiClient>()));
+    () => PatientRepository(getIt<ApiClient>()),
+  );
   getIt.registerLazySingleton<RecordRepository>(
-      () => RecordRepository(getIt<ApiClient>()));
+    () => RecordRepository(getIt<ApiClient>()),
+  );
   getIt.registerLazySingleton<AdminRepository>(
-      () => AdminRepository(getIt<ApiClient>()));
+    () => AdminRepository(getIt<ApiClient>()),
+  );
   getIt.registerLazySingleton<FacilityAdminRepository>(
-      () => FacilityAdminRepository(getIt<ApiClient>()));
+    () => FacilityAdminRepository(getIt<ApiClient>()),
+  );
   getIt.registerLazySingleton<ProfileRepository>(
-      () => ProfileRepository(getIt<ApiClient>()));
+    () => ProfileRepository(getIt<ApiClient>()),
+  );
 }

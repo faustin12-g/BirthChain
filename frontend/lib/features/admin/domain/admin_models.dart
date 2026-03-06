@@ -209,7 +209,12 @@ class UpdateProviderRequest {
   final String? licenseNumber;
   final String? specialty;
 
-  UpdateProviderRequest({this.fullName, this.phone, this.licenseNumber, this.specialty});
+  UpdateProviderRequest({
+    this.fullName,
+    this.phone,
+    this.licenseNumber,
+    this.specialty,
+  });
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -255,7 +260,10 @@ class ChangePasswordRequest {
   final String currentPassword;
   final String newPassword;
 
-  ChangePasswordRequest({required this.currentPassword, required this.newPassword});
+  ChangePasswordRequest({
+    required this.currentPassword,
+    required this.newPassword,
+  });
 
   Map<String, dynamic> toJson() => {
     'currentPassword': currentPassword,

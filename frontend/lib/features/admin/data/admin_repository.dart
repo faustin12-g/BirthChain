@@ -28,11 +28,16 @@ class AdminRepository {
   }
 
   Future<FacilityDetail> getFacilityById(String id) async {
-    final response = await _apiClient.dio.get(ApiEndpoints.adminFacilityById(id));
+    final response = await _apiClient.dio.get(
+      ApiEndpoints.adminFacilityById(id),
+    );
     return FacilityDetail.fromJson(response.data);
   }
 
-  Future<FacilityDetail> updateFacility(String id, UpdateFacilityRequest request) async {
+  Future<FacilityDetail> updateFacility(
+    String id,
+    UpdateFacilityRequest request,
+  ) async {
     final response = await _apiClient.dio.put(
       ApiEndpoints.adminFacilityById(id),
       data: request.toJson(),
@@ -64,7 +69,9 @@ class AdminRepository {
   }
 
   Future<List<UserDetail>> getUsersByRole(String role) async {
-    final response = await _apiClient.dio.get(ApiEndpoints.adminUsersByRole(role));
+    final response = await _apiClient.dio.get(
+      ApiEndpoints.adminUsersByRole(role),
+    );
     return (response.data as List)
         .map((json) => UserDetail.fromJson(json))
         .toList();
@@ -107,18 +114,25 @@ class AdminRepository {
   }
 
   Future<List<ProviderDetail>> getProvidersByFacility(String facilityId) async {
-    final response = await _apiClient.dio.get(ApiEndpoints.adminProvidersByFacility(facilityId));
+    final response = await _apiClient.dio.get(
+      ApiEndpoints.adminProvidersByFacility(facilityId),
+    );
     return (response.data as List)
         .map((json) => ProviderDetail.fromJson(json))
         .toList();
   }
 
   Future<ProviderDetail> getProviderById(String id) async {
-    final response = await _apiClient.dio.get(ApiEndpoints.adminProviderById(id));
+    final response = await _apiClient.dio.get(
+      ApiEndpoints.adminProviderById(id),
+    );
     return ProviderDetail.fromJson(response.data);
   }
 
-  Future<ProviderDetail> updateProvider(String id, UpdateProviderRequest request) async {
+  Future<ProviderDetail> updateProvider(
+    String id,
+    UpdateProviderRequest request,
+  ) async {
     final response = await _apiClient.dio.put(
       ApiEndpoints.adminProviderById(id),
       data: request.toJson(),
@@ -149,23 +163,32 @@ class FacilityAdminRepository {
   FacilityAdminRepository(this._apiClient);
 
   Future<FacilityDetail> getMyFacility() async {
-    final response = await _apiClient.dio.get(ApiEndpoints.facilityAdminMyFacility);
+    final response = await _apiClient.dio.get(
+      ApiEndpoints.facilityAdminMyFacility,
+    );
     return FacilityDetail.fromJson(response.data);
   }
 
   Future<List<ProviderDetail>> getMyProviders() async {
-    final response = await _apiClient.dio.get(ApiEndpoints.facilityAdminProviders);
+    final response = await _apiClient.dio.get(
+      ApiEndpoints.facilityAdminProviders,
+    );
     return (response.data as List)
         .map((json) => ProviderDetail.fromJson(json))
         .toList();
   }
 
   Future<ProviderDetail> getProviderById(String id) async {
-    final response = await _apiClient.dio.get(ApiEndpoints.facilityAdminProviderById(id));
+    final response = await _apiClient.dio.get(
+      ApiEndpoints.facilityAdminProviderById(id),
+    );
     return ProviderDetail.fromJson(response.data);
   }
 
-  Future<ProviderDetail> updateProvider(String id, UpdateProviderRequest request) async {
+  Future<ProviderDetail> updateProvider(
+    String id,
+    UpdateProviderRequest request,
+  ) async {
     final response = await _apiClient.dio.put(
       ApiEndpoints.facilityAdminProviderById(id),
       data: request.toJson(),

@@ -51,8 +51,8 @@ public class AdminController : ControllerBase
     public async Task<IActionResult> GetFacility(Guid id)
     {
         var facility = await _adminService.GetFacilityByIdAsync(id);
-        return facility is null 
-            ? NotFound(new { message = "Facility not found." }) 
+        return facility is null
+            ? NotFound(new { message = "Facility not found." })
             : Ok(facility);
     }
 
@@ -145,8 +145,8 @@ public class AdminController : ControllerBase
     public async Task<IActionResult> GetUser(Guid id)
     {
         var user = await _adminService.GetUserByIdAsync(id);
-        return user is null 
-            ? NotFound(new { message = "User not found." }) 
+        return user is null
+            ? NotFound(new { message = "User not found." })
             : Ok(user);
     }
 
@@ -239,8 +239,8 @@ public class AdminController : ControllerBase
     public async Task<IActionResult> GetProvider(Guid id)
     {
         var provider = await _adminService.GetProviderByIdAsync(id);
-        return provider is null 
-            ? NotFound(new { message = "Provider not found." }) 
+        return provider is null
+            ? NotFound(new { message = "Provider not found." })
             : Ok(provider);
     }
 

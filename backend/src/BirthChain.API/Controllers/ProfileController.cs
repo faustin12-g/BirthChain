@@ -28,8 +28,8 @@ public class ProfileController : ControllerBase
     public async Task<IActionResult> GetProfile()
     {
         var profile = await _profileService.GetProfileAsync(CurrentUserId);
-        return profile is null 
-            ? NotFound(new { message = "Profile not found." }) 
+        return profile is null
+            ? NotFound(new { message = "Profile not found." })
             : Ok(profile);
     }
 

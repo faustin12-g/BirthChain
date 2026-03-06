@@ -62,7 +62,10 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> updateProfileImage(String base64Image, String contentType) async {
+  Future<bool> updateProfileImage(
+    String base64Image,
+    String contentType,
+  ) async {
     _isLoading = true;
     _error = null;
     _successMessage = null;
@@ -78,7 +81,8 @@ class ProfileProvider extends ChangeNotifier {
       return true;
     } on DioException catch (e) {
       _isLoading = false;
-      _error = e.response?.data?['message'] ?? 'Failed to update profile image.';
+      _error =
+          e.response?.data?['message'] ?? 'Failed to update profile image.';
       notifyListeners();
       return false;
     }
@@ -99,13 +103,17 @@ class ProfileProvider extends ChangeNotifier {
       return true;
     } on DioException catch (e) {
       _isLoading = false;
-      _error = e.response?.data?['message'] ?? 'Failed to remove profile image.';
+      _error =
+          e.response?.data?['message'] ?? 'Failed to remove profile image.';
       notifyListeners();
       return false;
     }
   }
 
-  Future<bool> changePassword(String currentPassword, String newPassword) async {
+  Future<bool> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
     _isLoading = true;
     _error = null;
     _successMessage = null;

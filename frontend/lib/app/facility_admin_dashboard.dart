@@ -97,10 +97,11 @@ class _FacilityProvidersTabState extends State<_FacilityProvidersTab> {
   Future<void> _toggleActive(dynamic provider) async {
     final isActive = provider['isActive'] == true;
     final action = isActive ? 'deactivate' : 'activate';
-    final endpoint = isActive 
-        ? ApiEndpoints.facilityAdminDeactivateProvider(provider['id'])
-        : ApiEndpoints.facilityAdminActivateProvider(provider['id']);
-    
+    final endpoint =
+        isActive
+            ? ApiEndpoints.facilityAdminDeactivateProvider(provider['id'])
+            : ApiEndpoints.facilityAdminActivateProvider(provider['id']);
+
     try {
       await _api.dio.put(endpoint);
       _load();
@@ -113,7 +114,9 @@ class _FacilityProvidersTabState extends State<_FacilityProvidersTab> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.response?.data?['message'] ?? 'Failed to $action provider.'),
+            content: Text(
+              e.response?.data?['message'] ?? 'Failed to $action provider.',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -124,27 +127,32 @@ class _FacilityProvidersTabState extends State<_FacilityProvidersTab> {
   Future<void> _deleteProvider(dynamic provider) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Delete Provider'),
-        content: Text('Are you sure you want to delete "${provider['fullName']}"? This action cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+      builder:
+          (_) => AlertDialog(
+            title: const Text('Delete Provider'),
+            content: Text(
+              'Are you sure you want to delete "${provider['fullName']}"? This action cannot be undone.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('Delete'),
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
     );
-    
+
     if (confirmed != true) return;
-    
+
     try {
-      await _api.dio.delete(ApiEndpoints.facilityAdminDeleteProvider(provider['id']));
+      await _api.dio.delete(
+        ApiEndpoints.facilityAdminDeleteProvider(provider['id']),
+      );
       _load();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -155,7 +163,9 @@ class _FacilityProvidersTabState extends State<_FacilityProvidersTab> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.response?.data?['message'] ?? 'Failed to delete provider.'),
+            content: Text(
+              e.response?.data?['message'] ?? 'Failed to delete provider.',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -367,131 +377,165 @@ class _FacilityProvidersTabState extends State<_FacilityProvidersTab> {
         Expanded(
           child: RefreshIndicator(
             onRefresh: _load,
-            child: filtered.isEmpty
-                ? const EmptyState(icon: Icons.badge_outlined, title: 'No providers found')
-                : ListView.builder(
-                    padding: const EdgeInsets.all(12),
-                    itemCount: filtered.length,
-                    itemBuilder: (_, i) {
-                      final p = filtered[i];
-                      final isActive = p['isActive'] == true;
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: Colors.teal.withAlpha(25),
-                                child: Text(
-                                  (p['fullName'] ?? '?')[0].toString().toUpperCase(),
-                                  style: const TextStyle(
-                                    color: Colors.teal,
-                                    fontWeight: FontWeight.bold,
+            child:
+                filtered.isEmpty
+                    ? const EmptyState(
+                      icon: Icons.badge_outlined,
+                      title: 'No providers found',
+                    )
+                    : ListView.builder(
+                      padding: const EdgeInsets.all(12),
+                      itemCount: filtered.length,
+                      itemBuilder: (_, i) {
+                        final p = filtered[i];
+                        final isActive = p['isActive'] == true;
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: Colors.teal.withAlpha(25),
+                                  child: Text(
+                                    (p['fullName'] ?? '?')[0]
+                                        .toString()
+                                        .toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.teal,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            p['fullName'] ?? '',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                            vertical: 2,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: isActive
-                                                ? Colors.green.withAlpha(20)
-                                                : Colors.red.withAlpha(20),
-                                            borderRadius: BorderRadius.circular(6),
-                                          ),
-                                          child: Text(
-                                            isActive ? 'Active' : 'Inactive',
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w600,
-                                              color: isActive
-                                                  ? Colors.green.shade700
-                                                  : Colors.red.shade700,
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              p['fullName'] ?? '',
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  isActive
+                                                      ? Colors.green.withAlpha(
+                                                        20,
+                                                      )
+                                                      : Colors.red.withAlpha(
+                                                        20,
+                                                      ),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: Text(
+                                              isActive ? 'Active' : 'Inactive',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w600,
+                                                color:
+                                                    isActive
+                                                        ? Colors.green.shade700
+                                                        : Colors.red.shade700,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        p['email'] ?? '',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey.shade600,
                                         ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      p['email'] ?? '',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey.shade600,
                                       ),
-                                    ),
-                                    Text(
-                                      '${p['specialty'] ?? 'General'} • ${p['licenseNumber'] ?? 'N/A'}',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey.shade400,
+                                      Text(
+                                        '${p['specialty'] ?? 'General'} • ${p['licenseNumber'] ?? 'N/A'}',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey.shade400,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              PopupMenuButton<String>(
-                                icon: const Icon(Icons.more_vert, size: 20),
-                                onSelected: (value) {
-                                  if (value == 'toggle') {
-                                    _toggleActive(p);
-                                  } else if (value == 'delete') {
-                                    _deleteProvider(p);
-                                  }
-                                },
-                                itemBuilder: (_) => [
-                                  PopupMenuItem(
-                                    value: 'toggle',
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          isActive ? Icons.block : Icons.check_circle_outline,
-                                          size: 18,
-                                          color: isActive ? Colors.red.shade400 : Colors.green,
+                                PopupMenuButton<String>(
+                                  icon: const Icon(Icons.more_vert, size: 20),
+                                  onSelected: (value) {
+                                    if (value == 'toggle') {
+                                      _toggleActive(p);
+                                    } else if (value == 'delete') {
+                                      _deleteProvider(p);
+                                    }
+                                  },
+                                  itemBuilder:
+                                      (_) => [
+                                        PopupMenuItem(
+                                          value: 'toggle',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                isActive
+                                                    ? Icons.block
+                                                    : Icons
+                                                        .check_circle_outline,
+                                                size: 18,
+                                                color:
+                                                    isActive
+                                                        ? Colors.red.shade400
+                                                        : Colors.green,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                isActive
+                                                    ? 'Deactivate'
+                                                    : 'Activate',
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                        const SizedBox(width: 8),
-                                        Text(isActive ? 'Deactivate' : 'Activate'),
+                                        PopupMenuItem(
+                                          value: 'delete',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.delete_outline,
+                                                size: 18,
+                                                color: Colors.red.shade400,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                'Delete',
+                                                style: TextStyle(
+                                                  color: Colors.red.shade400,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ],
-                                    ),
-                                  ),
-                                  PopupMenuItem(
-                                    value: 'delete',
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.delete_outline, size: 18, color: Colors.red.shade400),
-                                        const SizedBox(width: 8),
-                                        Text('Delete', style: TextStyle(color: Colors.red.shade400)),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
           ),
         ),
         Padding(

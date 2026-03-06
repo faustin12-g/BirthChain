@@ -49,8 +49,8 @@ public class FacilityAdminController : ControllerBase
             return BadRequest(new { message = "You are not assigned to a facility." });
 
         var facility = await _adminService.GetFacilityByIdAsync(facilityId.Value);
-        return facility is null 
-            ? NotFound(new { message = "Facility not found." }) 
+        return facility is null
+            ? NotFound(new { message = "Facility not found." })
             : Ok(facility);
     }
 

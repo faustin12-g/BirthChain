@@ -72,7 +72,7 @@ public sealed class RecordService : IRecordService
             var qrCodeId = client.QrCodeId;
             var recordDescription = record.Description;
             var createdAt = record.CreatedAt;
-            
+
             _emailQueue.QueueEmail(async svc => await svc.SendRecordAddedEmailAsync(
                 clientEmail, clientName, qrCodeId, providerName, facilityName, recordDescription, createdAt));
         }
