@@ -2,6 +2,8 @@ using BirthChain.Application.Configuration;
 using BirthChain.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Net;
+using System.Net.Mail;
 
 namespace BirthChain.API.Controllers;
 
@@ -57,7 +59,47 @@ public class HealthController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { success = false, error = ex.Message, innerError = ex.InnerException?.Message });
+            return StatusCode(500, new { success = false, error = ex.Message, innerError = ex.InnerException?.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    /// <summary>
+    /// Simple SMTP test without logo (for debugging)
+    /// </summary>
+    [HttpPost("test-smtp-simple")]
+    public async Task<IActionResult> TestSmtpSimple([FromQuery] string toEmail)
+    {
+        if (string.IsNullOrEmpty(toEmail))
+            return BadRequest("Please provide 'toEmail' query parameter");
+
+        try
+        {
+            using var client = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port)
+            {
+                Credentials = new NetworkCredential(_smtpSettings.Email, _smtpSettings.Password),
+                EnableSsl = true
+            };
+
+            var msg = new MailMessage
+            {
+                From = new MailAddress(_smtpSettings.Email, _smtpSettings.DisplayName),
+                Subject = "BirthChain - Simple Test Email",
+                Body = "<h1>Test Email</h1><p>This is a simple test email from BirthChain API.</p>",
+                IsBodyHtml = true
+            };
+            msg.To.Add(toEmail);
+
+            await client.SendMailAsync(msg);
+            return Ok(new { success = true, message = $"Simple test email sent to {toEmail}" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { 
+                success = false, 
+                error = ex.Message, 
+                innerError = ex.InnerException?.Message,
+                type = ex.GetType().Name
+            });
         }
     }
 }
