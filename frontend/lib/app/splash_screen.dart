@@ -64,6 +64,8 @@ class _SplashScreenState extends State<SplashScreen>
       route = AppRoutes.login;
     } else if (auth.isPatient) {
       route = AppRoutes.patientDashboard;
+    } else if (auth.isFacilityAdmin) {
+      route = AppRoutes.facilityAdminDashboard;
     } else {
       route = AppRoutes.dashboard;
     }

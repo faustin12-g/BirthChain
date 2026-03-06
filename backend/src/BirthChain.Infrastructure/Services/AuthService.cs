@@ -17,12 +17,24 @@ public sealed class AuthService : IAuthService
     private readonly JwtSettings _jwt;
     private readonly IUserRepository _userRepo;
     private readonly IClientRepository _clientRepo;
+    private readonly IFacilityRepository _facilityRepo;
+    private readonly IOtpRepository _otpRepo;
+    private readonly IEmailService _emailService;
 
-    public AuthService(IOptions<JwtSettings> jwtOptions, IUserRepository userRepo, IClientRepository clientRepo)
+    public AuthService(
+        IOptions<JwtSettings> jwtOptions,
+        IUserRepository userRepo,
+        IClientRepository clientRepo,
+        IFacilityRepository facilityRepo,
+        IOtpRepository otpRepo,
+        IEmailService emailService)
     {
         _jwt = jwtOptions.Value;
         _userRepo = userRepo;
         _clientRepo = clientRepo;
+        _facilityRepo = facilityRepo;
+        _otpRepo = otpRepo;
+        _emailService = emailService;
     }
 
     public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto request)
@@ -37,11 +49,11 @@ public sealed class AuthService : IAuthService
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.UniqueName, user.FullName),
-            new Claim(ClaimTypes.Role, user.Role),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim("sub", user.Id.ToString()),
+            new Claim("email", user.Email),
+            new Claim("unique_name", user.FullName),
+            new Claim("role", user.Role),
+            new Claim("jti", Guid.NewGuid().ToString())
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
@@ -54,6 +66,15 @@ public sealed class AuthService : IAuthService
             expires: expiresAt,
             signingCredentials: creds);
 
+        // Resolve facility info if user is linked to one
+        Guid? facilityId = user.FacilityId;
+        string facilityName = "";
+        if (facilityId.HasValue)
+        {
+            var facility = await _facilityRepo.GetByIdAsync(facilityId.Value);
+            facilityName = facility?.Name ?? "";
+        }
+
         return new LoginResponseDto
         {
             Token = new JwtSecurityTokenHandler().WriteToken(token),
@@ -61,7 +82,9 @@ public sealed class AuthService : IAuthService
             Email = user.Email,
             FullName = user.FullName,
             Role = user.Role,
-            ExpiresAt = expiresAt
+            ExpiresAt = expiresAt,
+            FacilityId = facilityId,
+            FacilityName = facilityName
         };
     }
 
@@ -125,11 +148,11 @@ public sealed class AuthService : IAuthService
 
         var claims2 = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.UniqueName, user.FullName),
-            new Claim(ClaimTypes.Role, user.Role),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim("sub", user.Id.ToString()),
+            new Claim("email", user.Email),
+            new Claim("unique_name", user.FullName),
+            new Claim("role", user.Role),
+            new Claim("jti", Guid.NewGuid().ToString())
         };
 
         var key2 = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
@@ -151,6 +174,83 @@ public sealed class AuthService : IAuthService
             Role = user.Role,
             ExpiresAt = expiresAt2
         };
+    }
+
+    // ── OTP Methods ──
+
+    public async Task SendVerificationOtpAsync(string email)
+    {
+        var user = await _userRepo.GetByEmailAsync(email);
+        if (user is null) throw new InvalidOperationException("Account not found.");
+        if (user.IsEmailVerified) throw new InvalidOperationException("Email is already verified.");
+
+        await _otpRepo.InvalidateAllAsync(email, "EmailVerification");
+        var code = GenerateOtp();
+        await _otpRepo.AddAsync(new OtpCode
+        {
+            Email = email,
+            Code = code,
+            Purpose = "EmailVerification",
+            ExpiresAt = DateTime.UtcNow.AddMinutes(10),
+            CreatedAt = DateTime.UtcNow
+        });
+        await _emailService.SendOtpAsync(email, code, "EmailVerification");
+    }
+
+    public async Task<bool> VerifyEmailAsync(string email, string code)
+    {
+        var otp = await _otpRepo.GetValidAsync(email, code, "EmailVerification");
+        if (otp is null) return false;
+
+        await _otpRepo.MarkUsedAsync(otp.Id);
+        var user = await _userRepo.GetByEmailAsync(email);
+        if (user is not null)
+        {
+            user.IsEmailVerified = true;
+            await _userRepo.UpdateAsync(user);
+        }
+        return true;
+    }
+
+    public async Task SendPasswordResetOtpAsync(string email)
+    {
+        var user = await _userRepo.GetByEmailAsync(email);
+        if (user is null) throw new InvalidOperationException("Account not found.");
+
+        await _otpRepo.InvalidateAllAsync(email, "PasswordReset");
+        var code = GenerateOtp();
+        await _otpRepo.AddAsync(new OtpCode
+        {
+            Email = email,
+            Code = code,
+            Purpose = "PasswordReset",
+            ExpiresAt = DateTime.UtcNow.AddMinutes(10),
+            CreatedAt = DateTime.UtcNow
+        });
+        await _emailService.SendOtpAsync(email, code, "PasswordReset");
+    }
+
+    public async Task<bool> ResetPasswordAsync(string email, string code, string newPassword)
+    {
+        var otp = await _otpRepo.GetValidAsync(email, code, "PasswordReset");
+        if (otp is null) return false;
+
+        await _otpRepo.MarkUsedAsync(otp.Id);
+        var user = await _userRepo.GetByEmailAsync(email);
+        if (user is null) return false;
+
+        user.PasswordHash = HashPassword(newPassword);
+        await _userRepo.UpdateAsync(user);
+        return true;
+    }
+
+    private static string GenerateOtp()
+    {
+        using var rng = RandomNumberGenerator.Create();
+        var bytes = new byte[4];
+        rng.GetBytes(bytes);
+        var number = Math.Abs(BitConverter.ToInt32(bytes, 0)) % 1_000_000;
+        return number.ToString("D6");
     }
 
     // ── Password hashing helpers ──

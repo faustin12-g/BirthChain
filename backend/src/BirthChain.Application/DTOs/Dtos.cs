@@ -16,6 +16,8 @@ public record LoginResponseDto
     public string FullName { get; init; } = string.Empty;
     public string Role { get; init; } = string.Empty;
     public DateTime ExpiresAt { get; init; }
+    public Guid? FacilityId { get; init; }
+    public string FacilityName { get; init; } = string.Empty;
 }
 
 public record RegisterPatientDto
@@ -56,6 +58,7 @@ public record ProviderDto
     public Guid Id { get; init; }
     public Guid UserId { get; init; }
     public string LicenseNumber { get; init; } = string.Empty;
+    public Guid FacilityId { get; init; }
     public string FacilityName { get; init; } = string.Empty;
     public string Specialty { get; init; } = string.Empty;
 
@@ -73,8 +76,38 @@ public record CreateProviderDto
 
     // Provider profile fields
     public string LicenseNumber { get; init; } = string.Empty;
-    public string FacilityName { get; init; } = string.Empty;
+    public Guid FacilityId { get; init; }
     public string Specialty { get; init; } = string.Empty;
+}
+
+// ── Facility ──
+
+public record FacilityDto
+{
+    public Guid Id { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public string Address { get; init; } = string.Empty;
+    public string Phone { get; init; } = string.Empty;
+    public string Email { get; init; } = string.Empty;
+    public DateTime CreatedAt { get; init; }
+}
+
+public record CreateFacilityDto
+{
+    public string Name { get; init; } = string.Empty;
+    public string Address { get; init; } = string.Empty;
+    public string Phone { get; init; } = string.Empty;
+    public string Email { get; init; } = string.Empty;
+}
+
+// ── FacilityAdmin ──
+
+public record CreateFacilityAdminDto
+{
+    public string FullName { get; init; } = string.Empty;
+    public string Email { get; init; } = string.Empty;
+    public string Password { get; init; } = string.Empty;
+    public Guid FacilityId { get; init; }
 }
 
 // ── Client ──
@@ -122,6 +155,31 @@ public record CreateRecordDto
 {
     public Guid ClientId { get; init; }
     public string Description { get; init; } = string.Empty;
+}
+
+// ── OTP ──
+
+public record SendOtpRequestDto
+{
+    public string Email { get; init; } = string.Empty;
+}
+
+public record VerifyOtpRequestDto
+{
+    public string Email { get; init; } = string.Empty;
+    public string Code { get; init; } = string.Empty;
+}
+
+public record ForgotPasswordRequestDto
+{
+    public string Email { get; init; } = string.Empty;
+}
+
+public record ResetPasswordRequestDto
+{
+    public string Email { get; init; } = string.Empty;
+    public string Code { get; init; } = string.Empty;
+    public string NewPassword { get; init; } = string.Empty;
 }
 
 // ── ActivityLog ──

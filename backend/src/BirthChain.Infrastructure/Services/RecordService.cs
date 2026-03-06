@@ -1,3 +1,4 @@
+using System.Text.Json;
 using BirthChain.Application.DTOs;
 using BirthChain.Application.Interfaces;
 using BirthChain.Core.Entities;
@@ -10,6 +11,7 @@ public sealed class RecordService : IRecordService
     private readonly IProviderRepository _providerRepo;
     private readonly IClientRepository _clientRepo;
     private readonly IUserRepository _userRepo;
+    private readonly IFacilityRepository _facilityRepo;
     private readonly IActivityLogService _activityLog;
 
     public RecordService(
@@ -17,12 +19,14 @@ public sealed class RecordService : IRecordService
         IProviderRepository providerRepo,
         IClientRepository clientRepo,
         IUserRepository userRepo,
+        IFacilityRepository facilityRepo,
         IActivityLogService activityLog)
     {
         _recordRepo = recordRepo;
         _providerRepo = providerRepo;
         _clientRepo = clientRepo;
         _userRepo = userRepo;
+        _facilityRepo = facilityRepo;
         _activityLog = activityLog;
     }
 
@@ -36,11 +40,14 @@ public sealed class RecordService : IRecordService
         var client = await _clientRepo.GetByIdAsync(dto.ClientId)
             ?? throw new InvalidOperationException($"Client '{dto.ClientId}' not found.");
 
+        // Auto-inject facility name and current date into the description JSON
+        var description = AutoPopulateDescription(dto.Description, provider);
+
         var record = new Record
         {
             ClientId = dto.ClientId,
             ProviderId = provider.Id,
-            Description = dto.Description,
+            Description = description,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -61,6 +68,29 @@ public sealed class RecordService : IRecordService
             ClientName = client.FullName,
             ProviderName = user?.FullName ?? ""
         };
+    }
+
+    /// <summary>
+    /// Parses the JSON description and overrides facility + date fields
+    /// with the provider's assigned facility name and current UTC date.
+    /// </summary>
+    private string AutoPopulateDescription(string description, Provider provider)
+    {
+        try
+        {
+            var doc = JsonSerializer.Deserialize<Dictionary<string, object>>(description);
+            if (doc is not null)
+            {
+                // Load facility name from provider's assigned facility
+                var facility = _facilityRepo.GetByIdAsync(provider.FacilityId).Result;
+                doc["facility"] = facility?.Name ?? "";
+                doc["date"] = DateTime.UtcNow.ToString("yyyy-MM-dd");
+                return JsonSerializer.Serialize(doc);
+            }
+        }
+        catch { /* not JSON – return as-is */ }
+
+        return description;
     }
 
     public async Task<IReadOnlyList<RecordDto>> GetByClientIdAsync(Guid clientId)

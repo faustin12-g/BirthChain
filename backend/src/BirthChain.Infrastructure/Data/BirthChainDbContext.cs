@@ -13,6 +13,8 @@ public class BirthChainDbContext : DbContext
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Record> Records => Set<Record>();
     public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
+    public DbSet<Facility> Facilities => Set<Facility>();
+    public DbSet<OtpCode> OtpCodes => Set<OtpCode>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -27,14 +29,30 @@ public class BirthChainDbContext : DbContext
             e.HasIndex(u => u.Email).IsUnique();
             e.Property(u => u.PasswordHash).IsRequired();
             e.Property(u => u.Role).IsRequired().HasMaxLength(50);
+
+            // Optional link to a Facility (for FacilityAdmin users)
+            e.HasOne<Facility>()
+             .WithMany()
+             .HasForeignKey(u => u.FacilityId)
+             .OnDelete(DeleteBehavior.SetNull);
         });
 
-        // ── Provider (profile → User) ──
+        // ── Facility ──
+        modelBuilder.Entity<Facility>(e =>
+        {
+            e.HasKey(f => f.Id);
+            e.Property(f => f.Name).IsRequired().HasMaxLength(300);
+            e.HasIndex(f => f.Name).IsUnique();
+            e.Property(f => f.Address).HasMaxLength(500);
+            e.Property(f => f.Phone).HasMaxLength(50);
+            e.Property(f => f.Email).HasMaxLength(200);
+        });
+
+        // ── Provider (profile → User, → Facility) ──
         modelBuilder.Entity<Provider>(e =>
         {
             e.HasKey(p => p.Id);
             e.Property(p => p.LicenseNumber).IsRequired().HasMaxLength(100);
-            e.Property(p => p.FacilityName).IsRequired().HasMaxLength(300);
             e.Property(p => p.Specialty).IsRequired().HasMaxLength(200);
             e.HasIndex(p => p.UserId).IsUnique();
 
@@ -42,6 +60,11 @@ public class BirthChainDbContext : DbContext
              .WithOne()
              .HasForeignKey<Provider>(p => p.UserId)
              .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne<Facility>()
+             .WithMany()
+             .HasForeignKey(p => p.FacilityId)
+             .OnDelete(DeleteBehavior.Restrict);
         });
 
         // ── Client ──
@@ -78,6 +101,16 @@ public class BirthChainDbContext : DbContext
              .WithMany()
              .HasForeignKey(r => r.ProviderId)
              .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── OtpCode ──
+        modelBuilder.Entity<OtpCode>(e =>
+        {
+            e.HasKey(o => o.Id);
+            e.Property(o => o.Email).IsRequired().HasMaxLength(200);
+            e.Property(o => o.Code).IsRequired().HasMaxLength(10);
+            e.Property(o => o.Purpose).IsRequired().HasMaxLength(50);
+            e.HasIndex(o => new { o.Email, o.Purpose });
         });
 
         // ── ActivityLog ──

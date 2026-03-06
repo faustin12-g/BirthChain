@@ -57,4 +57,75 @@ public class AuthController : ControllerBase
             return Conflict(new { message = ex.Message });
         }
     }
+
+    /// <summary>Send a 6-digit OTP for email verification.</summary>
+    [HttpPost("send-otp")]
+    [AllowAnonymous]
+    public async Task<IActionResult> SendOtp([FromBody] SendOtpRequestDto request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Email))
+            return BadRequest(new { message = "Email is required." });
+
+        try
+        {
+            await _authService.SendVerificationOtpAsync(request.Email);
+            return Ok(new { message = "Verification code sent to your email." });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>Verify email using OTP code.</summary>
+    [HttpPost("verify-email")]
+    [AllowAnonymous]
+    public async Task<IActionResult> VerifyEmail([FromBody] VerifyOtpRequestDto request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Code))
+            return BadRequest(new { message = "Email and code are required." });
+
+        var success = await _authService.VerifyEmailAsync(request.Email, request.Code);
+        if (!success)
+            return BadRequest(new { message = "Invalid or expired code." });
+
+        return Ok(new { message = "Email verified successfully." });
+    }
+
+    /// <summary>Send a 6-digit OTP for password reset.</summary>
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Email))
+            return BadRequest(new { message = "Email is required." });
+
+        try
+        {
+            await _authService.SendPasswordResetOtpAsync(request.Email);
+            return Ok(new { message = "Password reset code sent to your email." });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>Reset password using OTP code.</summary>
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Code) || string.IsNullOrWhiteSpace(request.NewPassword))
+            return BadRequest(new { message = "Email, code, and new password are required." });
+
+        if (request.NewPassword.Length < 6)
+            return BadRequest(new { message = "Password must be at least 6 characters." });
+
+        var success = await _authService.ResetPasswordAsync(request.Email, request.Code, request.NewPassword);
+        if (!success)
+            return BadRequest(new { message = "Invalid or expired code." });
+
+        return Ok(new { message = "Password reset successfully." });
+    }
 }

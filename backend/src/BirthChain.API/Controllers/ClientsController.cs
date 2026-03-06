@@ -8,7 +8,7 @@ namespace BirthChain.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Provider,Admin,Patient")]
+[Authorize(Roles = "Provider,Admin,FacilityAdmin,Patient")]
 public class ClientsController : ControllerBase
 {
     private readonly IClientService _clientService;
@@ -25,7 +25,7 @@ public class ClientsController : ControllerBase
     [Authorize(Roles = "Patient")]
     public async Task<IActionResult> GetMyProfile()
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = Guid.Parse(User.FindFirstValue("sub")!);
         var client = await _clientService.GetByUserIdAsync(userId);
         if (client is null)
             return NotFound(new { message = "Patient profile not found." });
@@ -42,7 +42,7 @@ public class ClientsController : ControllerBase
 
         var client = await _clientService.CreateAsync(dto);
 
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = Guid.Parse(User.FindFirstValue("sub")!);
         await _activityLog.LogAsync(userId, $"Registered client {dto.FullName}");
 
         return CreatedAtAction(nameof(GetByQrCode), new { qrCodeId = client.QrCodeId }, client);

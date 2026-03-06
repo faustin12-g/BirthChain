@@ -20,8 +20,6 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
   final _medicationCtrl = TextEditingController();
   final _labTestsCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
-  final _facilityCtrl = TextEditingController();
-  DateTime _eventDate = DateTime.now();
 
   @override
   void dispose() {
@@ -30,18 +28,7 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
     _medicationCtrl.dispose();
     _labTestsCtrl.dispose();
     _notesCtrl.dispose();
-    _facilityCtrl.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _eventDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null) setState(() => _eventDate = picked);
   }
 
   Future<void> _submit() async {
@@ -58,9 +45,6 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
         medication: _medicationCtrl.text.trim(),
         labTests: _labTestsCtrl.text.trim(),
         notes: _notesCtrl.text.trim(),
-        facilityName: _facilityCtrl.text.trim(),
-        eventDate:
-            '${_eventDate.year}-${_eventDate.month.toString().padLeft(2, '0')}-${_eventDate.day.toString().padLeft(2, '0')}',
       ),
     );
 
@@ -190,27 +174,15 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Facility name
-              TextFormField(
-                controller: _facilityCtrl,
-                textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(
-                  labelText: 'Facility Name',
-                  prefixIcon: Icon(Icons.local_hospital_outlined),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Date picker
-              InkWell(
-                onTap: _pickDate,
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Date',
-                    prefixIcon: Icon(Icons.calendar_today_outlined),
-                  ),
-                  child: Text(
-                    '${_eventDate.year}-${_eventDate.month.toString().padLeft(2, '0')}-${_eventDate.day.toString().padLeft(2, '0')}',
+              // Facility & date auto-populated by server
+              Card(
+                color: theme.colorScheme.primaryContainer.withAlpha(40),
+                child: const ListTile(
+                  leading: Icon(Icons.info_outline, size: 20),
+                  dense: true,
+                  title: Text(
+                    'Facility name and date are set automatically.',
+                    style: TextStyle(fontSize: 13),
                   ),
                 ),
               ),

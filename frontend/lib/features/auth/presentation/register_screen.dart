@@ -75,7 +75,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
 
     if (success && mounted) {
-      navigator.pushReplacementNamed('/patient-dashboard');
+      navigator.pushReplacementNamed(
+        '/verify-email',
+        arguments: _emailCtrl.text.trim(),
+      );
     }
   }
 

@@ -6,7 +6,7 @@ namespace BirthChain.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,FacilityAdmin")]
 public class ActivityLogsController : ControllerBase
 {
     private readonly IActivityLogService _logService;

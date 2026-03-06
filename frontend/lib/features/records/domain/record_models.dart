@@ -86,8 +86,8 @@ class CreateRecordRequest {
     this.medication = '',
     this.labTests = '',
     this.notes = '',
-    required this.facilityName,
-    required this.eventDate,
+    this.facilityName = '',
+    this.eventDate = '',
   });
 
   Map<String, dynamic> toJson() => {

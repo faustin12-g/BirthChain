@@ -8,7 +8,7 @@ namespace BirthChain.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Provider,Admin,Patient")]
+[Authorize(Roles = "Provider,Admin,FacilityAdmin,Patient")]
 public class RecordsController : ControllerBase
 {
     private readonly IRecordService _recordService;
@@ -25,7 +25,7 @@ public class RecordsController : ControllerBase
     [Authorize(Roles = "Patient")]
     public async Task<IActionResult> GetMyRecords()
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = Guid.Parse(User.FindFirstValue("sub")!);
         var client = await _clientService.GetByUserIdAsync(userId);
         if (client is null)
             return NotFound(new { message = "Patient profile not found." });
@@ -44,7 +44,7 @@ public class RecordsController : ControllerBase
         if (string.IsNullOrWhiteSpace(dto.Description))
             return BadRequest(new { message = "Description is required." });
 
-        var providerUserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var providerUserId = Guid.Parse(User.FindFirstValue("sub")!);
 
         try
         {

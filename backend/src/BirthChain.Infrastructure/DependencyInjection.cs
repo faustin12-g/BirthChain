@@ -21,14 +21,18 @@ public static class DependencyInjection
         services.AddScoped<IClientRepository, ClientRepository>();
         services.AddScoped<IRecordRepository, RecordRepository>();
         services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
+        services.AddScoped<IFacilityRepository, FacilityRepository>();
+        services.AddScoped<IOtpRepository, OtpRepository>();
 
         // Services
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IProviderService, ProviderService>();
         services.AddScoped<IClientService, ClientService>();
         services.AddScoped<IRecordService, RecordService>();
         services.AddScoped<IActivityLogService, ActivityLogService>();
+        services.AddScoped<IFacilityService, FacilityService>();
 
         return services;
     }

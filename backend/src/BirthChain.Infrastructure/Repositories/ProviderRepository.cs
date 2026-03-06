@@ -26,4 +26,7 @@ public sealed class ProviderRepository : IProviderRepository
 
     public async Task<IReadOnlyList<Provider>> GetAllAsync()
         => await _db.Providers.ToListAsync();
+
+    public async Task<IReadOnlyList<Provider>> GetByFacilityIdAsync(Guid facilityId)
+        => await _db.Providers.Where(p => p.FacilityId == facilityId).ToListAsync();
 }

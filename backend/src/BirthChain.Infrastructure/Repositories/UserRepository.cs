@@ -24,6 +24,12 @@ public sealed class UserRepository : IUserRepository
         return user;
     }
 
+    public async Task UpdateAsync(User user)
+    {
+        _db.Users.Update(user);
+        await _db.SaveChangesAsync();
+    }
+
     public async Task<IReadOnlyList<User>> GetAllAsync()
         => await _db.Users.OrderBy(u => u.FullName).ToListAsync();
 }

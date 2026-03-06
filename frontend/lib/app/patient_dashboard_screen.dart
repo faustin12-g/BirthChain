@@ -156,9 +156,10 @@ class _HomeTab extends StatelessWidget {
                       child: _StatCard(
                         icon: Icons.local_hospital_outlined,
                         label: 'Last Visit',
-                        value: records.isNotEmpty
-                            ? _shortDate(records.last.eventDate)
-                            : '—',
+                        value:
+                            records.isNotEmpty
+                                ? _shortDate(records.last.eventDate)
+                                : '—',
                         color: AppTheme.accentOrange,
                       ),
                     ),
@@ -179,8 +180,11 @@ class _HomeTab extends StatelessWidget {
                 // ── Notifications section ──
                 Row(
                   children: [
-                    Icon(Icons.notifications_outlined,
-                        color: theme.colorScheme.primary, size: 22),
+                    Icon(
+                      Icons.notifications_outlined,
+                      color: theme.colorScheme.primary,
+                      size: 22,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Notifications',
@@ -197,8 +201,11 @@ class _HomeTab extends StatelessWidget {
                 // ── Recent records preview ──
                 Row(
                   children: [
-                    Icon(Icons.history,
-                        color: theme.colorScheme.primary, size: 22),
+                    Icon(
+                      Icons.history,
+                      color: theme.colorScheme.primary,
+                      size: 22,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Recent Records',
@@ -212,8 +219,7 @@ class _HomeTab extends StatelessWidget {
                 if (records.isEmpty)
                   const _EmptyCard(
                     icon: Icons.folder_open,
-                    message:
-                        'No records yet. Visit a provider to get started.',
+                    message: 'No records yet. Visit a provider to get started.',
                   )
                 else
                   ...records.reversed
@@ -224,8 +230,11 @@ class _HomeTab extends StatelessWidget {
                 const SizedBox(height: 24),
                 Row(
                   children: [
-                    Icon(Icons.lightbulb_outline,
-                        color: AppTheme.accentOrange, size: 22),
+                    Icon(
+                      Icons.lightbulb_outline,
+                      color: AppTheme.accentOrange,
+                      size: 22,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Health Tip',
@@ -242,8 +251,11 @@ class _HomeTab extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                     child: Row(
                       children: [
-                        const Icon(Icons.favorite,
-                            color: AppTheme.accentOrange, size: 28),
+                        const Icon(
+                          Icons.favorite,
+                          color: AppTheme.accentOrange,
+                          size: 28,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
@@ -298,7 +310,9 @@ class _HomeTab extends StatelessWidget {
 
   /// Build notification items based on patient state
   static List<Widget> _buildNotifications(
-      List<MedicalRecord> records, dynamic patient) {
+    List<MedicalRecord> records,
+    dynamic patient,
+  ) {
     final notifications = <Widget>[];
 
     if (records.isEmpty && patient != null) {
@@ -455,12 +469,13 @@ class _NotificationCard extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
         ),
         subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
-        trailing: time.isNotEmpty
-            ? Text(
-                time,
-                style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
-              )
-            : null,
+        trailing:
+            time.isNotEmpty
+                ? Text(
+                  time,
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                )
+                : null,
       ),
     );
   }
@@ -526,8 +541,8 @@ class _RecentRecordTile extends StatelessWidget {
           record.facilityName.isNotEmpty
               ? record.facilityName
               : record.details.length > 40
-                  ? '${record.details.substring(0, 40)}...'
-                  : record.details,
+              ? '${record.details.substring(0, 40)}...'
+              : record.details,
           style: const TextStyle(fontSize: 12),
         ),
         trailing: Text(
@@ -581,15 +596,16 @@ class _MyRecordsTabState extends State<_MyRecordsTab> {
 
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
-      filtered = filtered.where((r) {
-        return r.details.toLowerCase().contains(q) ||
-            r.symptoms.toLowerCase().contains(q) ||
-            r.medication.toLowerCase().contains(q) ||
-            r.notes.toLowerCase().contains(q) ||
-            r.labTests.toLowerCase().contains(q) ||
-            r.facilityName.toLowerCase().contains(q) ||
-            r.providerName.toLowerCase().contains(q);
-      }).toList();
+      filtered =
+          filtered.where((r) {
+            return r.details.toLowerCase().contains(q) ||
+                r.symptoms.toLowerCase().contains(q) ||
+                r.medication.toLowerCase().contains(q) ||
+                r.notes.toLowerCase().contains(q) ||
+                r.labTests.toLowerCase().contains(q) ||
+                r.facilityName.toLowerCase().contains(q) ||
+                r.providerName.toLowerCase().contains(q);
+          }).toList();
     }
 
     if (_facilityFilter != null) {
@@ -598,12 +614,13 @@ class _MyRecordsTabState extends State<_MyRecordsTab> {
     }
 
     if (_dateRange != null) {
-      filtered = filtered.where((r) {
-        final date = DateTime.tryParse(r.eventDate);
-        if (date == null) return false;
-        return !date.isBefore(_dateRange!.start) &&
-            !date.isAfter(_dateRange!.end.add(const Duration(days: 1)));
-      }).toList();
+      filtered =
+          filtered.where((r) {
+            final date = DateTime.tryParse(r.eventDate);
+            if (date == null) return false;
+            return !date.isBefore(_dateRange!.start) &&
+                !date.isAfter(_dateRange!.end.add(const Duration(days: 1)));
+          }).toList();
     }
 
     return filtered;
@@ -644,7 +661,9 @@ class _MyRecordsTabState extends State<_MyRecordsTab> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hasFilters =
-        _searchQuery.isNotEmpty || _facilityFilter != null || _dateRange != null;
+        _searchQuery.isNotEmpty ||
+        _facilityFilter != null ||
+        _dateRange != null;
 
     return Scaffold(
       appBar: AppBar(
@@ -667,11 +686,16 @@ class _MyRecordsTabState extends State<_MyRecordsTab> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.error_outline,
-                      size: 48, color: Colors.red.shade300),
+                  Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: Colors.red.shade300,
+                  ),
                   const SizedBox(height: 12),
-                  Text(prov.error!,
-                      style: TextStyle(color: Colors.red.shade600)),
+                  Text(
+                    prov.error!,
+                    style: TextStyle(color: Colors.red.shade600),
+                  ),
                   const SizedBox(height: 16),
                   FilledButton.icon(
                     onPressed: () => prov.loadMyRecords(),
@@ -687,8 +711,11 @@ class _MyRecordsTabState extends State<_MyRecordsTab> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.folder_open,
-                      size: 64, color: Colors.grey.shade300),
+                  Icon(
+                    Icons.folder_open,
+                    size: 64,
+                    color: Colors.grey.shade300,
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     'No medical records yet',
@@ -722,23 +749,23 @@ class _MyRecordsTabState extends State<_MyRecordsTab> {
                   decoration: InputDecoration(
                     hintText: 'Search records...',
                     prefixIcon: const Icon(Icons.search, size: 20),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, size: 18),
-                            onPressed: () {
-                              _searchCtrl.clear();
-                              setState(() => _searchQuery = '');
-                            },
-                          )
-                        : null,
+                    suffixIcon:
+                        _searchQuery.isNotEmpty
+                            ? IconButton(
+                              icon: const Icon(Icons.clear, size: 18),
+                              onPressed: () {
+                                _searchCtrl.clear();
+                                setState(() => _searchQuery = '');
+                              },
+                            )
+                            : null,
                     filled: true,
                     fillColor: theme.colorScheme.primary.withAlpha(10),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
                     ),
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 12),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                     isDense: true,
                   ),
                   style: const TextStyle(fontSize: 13),
@@ -755,8 +782,7 @@ class _MyRecordsTabState extends State<_MyRecordsTab> {
                       Padding(
                         padding: const EdgeInsets.only(right: 6),
                         child: FilterChip(
-                          avatar:
-                              const Icon(Icons.calendar_today, size: 14),
+                          avatar: const Icon(Icons.calendar_today, size: 14),
                           label: Text(
                             _dateRange != null
                                 ? '${_fmtChipDate(_dateRange!.start)} – ${_fmtChipDate(_dateRange!.end)}'
@@ -765,9 +791,10 @@ class _MyRecordsTabState extends State<_MyRecordsTab> {
                           ),
                           selected: _dateRange != null,
                           onSelected: (_) => _pickDateRange(),
-                          onDeleted: _dateRange != null
-                              ? () => setState(() => _dateRange = null)
-                              : null,
+                          onDeleted:
+                              _dateRange != null
+                                  ? () => setState(() => _dateRange = null)
+                                  : null,
                           visualDensity: VisualDensity.compact,
                           materialTapTargetSize:
                               MaterialTapTargetSize.shrinkWrap,
@@ -778,14 +805,14 @@ class _MyRecordsTabState extends State<_MyRecordsTab> {
                         (f) => Padding(
                           padding: const EdgeInsets.only(right: 6),
                           child: FilterChip(
-                            avatar: const Icon(Icons.local_hospital,
-                                size: 14),
-                            label: Text(f,
-                                style: const TextStyle(fontSize: 12)),
+                            avatar: const Icon(Icons.local_hospital, size: 14),
+                            label: Text(
+                              f,
+                              style: const TextStyle(fontSize: 12),
+                            ),
                             selected: _facilityFilter == f,
                             onSelected: (sel) {
-                              setState(
-                                  () => _facilityFilter = sel ? f : null);
+                              setState(() => _facilityFilter = sel ? f : null);
                             },
                             visualDensity: VisualDensity.compact,
                             materialTapTargetSize:
@@ -805,7 +832,9 @@ class _MyRecordsTabState extends State<_MyRecordsTab> {
                     Text(
                       '${filtered.length} of ${allRecords.length} record${allRecords.length == 1 ? '' : 's'}',
                       style: TextStyle(
-                          color: Colors.grey.shade600, fontSize: 13),
+                        color: Colors.grey.shade600,
+                        fontSize: 13,
+                      ),
                     ),
                     if (hasFilters)
                       TextButton.icon(
@@ -813,8 +842,7 @@ class _MyRecordsTabState extends State<_MyRecordsTab> {
                         icon: const Icon(Icons.clear_all, size: 18),
                         label: const Text('Clear'),
                         style: TextButton.styleFrom(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           visualDensity: VisualDensity.compact,
                         ),
                       ),
@@ -828,20 +856,21 @@ class _MyRecordsTabState extends State<_MyRecordsTab> {
                     padding: const EdgeInsets.all(32),
                     child: Column(
                       children: [
-                        Icon(Icons.filter_list_off,
-                            size: 40, color: Colors.grey.shade300),
+                        Icon(
+                          Icons.filter_list_off,
+                          size: 40,
+                          color: Colors.grey.shade300,
+                        ),
                         const SizedBox(height: 8),
                         Text(
                           'No records match your filters',
-                          style:
-                              TextStyle(color: Colors.grey.shade500),
+                          style: TextStyle(color: Colors.grey.shade500),
                         ),
                       ],
                     ),
                   )
                 else
-                  ...filtered
-                      .map((rec) => _PatientRecordCard(record: rec)),
+                  ...filtered.map((rec) => _PatientRecordCard(record: rec)),
               ],
             ),
           );
@@ -877,8 +906,11 @@ class _PatientRecordCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.local_hospital,
-                    size: 18, color: theme.colorScheme.primary),
+                Icon(
+                  Icons.local_hospital,
+                  size: 18,
+                  color: theme.colorScheme.primary,
+                ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -886,19 +918,23 @@ class _PatientRecordCard extends StatelessWidget {
                         ? record.facilityName
                         : 'Unknown Facility',
                     style: const TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 14),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
-                Text(_fmtDate(record.eventDate),
-                    style:
-                        TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                Text(
+                  _fmtDate(record.eventDate),
+                  style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                ),
               ],
             ),
             if (record.providerName.isNotEmpty) ...[
               const SizedBox(height: 4),
-              Text('Dr. ${record.providerName}',
-                  style:
-                      TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+              Text(
+                'Dr. ${record.providerName}',
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              ),
             ],
             const Divider(height: 20),
             if (record.details.isNotEmpty)
@@ -941,8 +977,7 @@ class _Field extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(
-              child: Text(value, style: const TextStyle(fontSize: 13))),
+          Expanded(child: Text(value, style: const TextStyle(fontSize: 13))),
         ],
       ),
     );
@@ -981,11 +1016,12 @@ class _MyQrCodeTab extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.qr_code_2,
-                      size: 64, color: Colors.grey.shade300),
+                  Icon(Icons.qr_code_2, size: 64, color: Colors.grey.shade300),
                   const SizedBox(height: 12),
-                  Text('QR Code not available',
-                      style: TextStyle(color: Colors.grey.shade500)),
+                  Text(
+                    'QR Code not available',
+                    style: TextStyle(color: Colors.grey.shade500),
+                  ),
                   const SizedBox(height: 12),
                   FilledButton.icon(
                     onPressed: () => prov.loadMyRecords(),
@@ -1005,8 +1041,7 @@ class _MyQrCodeTab extends StatelessWidget {
                   Text(
                     'Show this QR code to your\nhealthcare provider',
                     textAlign: TextAlign.center,
-                    style:
-                        TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                   ),
                   const SizedBox(height: 24),
                   Container(
@@ -1040,7 +1075,9 @@ class _MyQrCodeTab extends StatelessWidget {
                         const SizedBox(height: 16),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: theme.colorScheme.primary.withAlpha(20),
                             borderRadius: BorderRadius.circular(8),
@@ -1064,16 +1101,17 @@ class _MyQrCodeTab extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         children: [
-                          _InfoRow(
-                              icon: Icons.person, label: patient.fullName),
+                          _InfoRow(icon: Icons.person, label: patient.fullName),
                           if (patient.email.isNotEmpty)
                             _InfoRow(
-                                icon: Icons.email_outlined,
-                                label: patient.email),
+                              icon: Icons.email_outlined,
+                              label: patient.email,
+                            ),
                           if (patient.phone.isNotEmpty)
                             _InfoRow(
-                                icon: Icons.phone_outlined,
-                                label: patient.phone),
+                              icon: Icons.phone_outlined,
+                              label: patient.phone,
+                            ),
                         ],
                       ),
                     ),
@@ -1101,8 +1139,7 @@ class _InfoRow extends StatelessWidget {
         children: [
           Icon(icon, size: 18, color: Colors.grey.shade600),
           const SizedBox(width: 10),
-          Expanded(
-              child: Text(label, style: const TextStyle(fontSize: 14))),
+          Expanded(child: Text(label, style: const TextStyle(fontSize: 14))),
         ],
       ),
     );
@@ -1166,7 +1203,9 @@ class _PatientProfileTab extends StatelessWidget {
                         const SizedBox(height: 4),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 2),
+                            horizontal: 10,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.green.shade100,
                             borderRadius: BorderRadius.circular(20),
@@ -1233,8 +1272,7 @@ class _PatientProfileTab extends StatelessWidget {
                           ),
                         if (p.dateOfBirth.isNotEmpty)
                           ListTile(
-                            leading:
-                                const Icon(Icons.calendar_today_outlined),
+                            leading: const Icon(Icons.calendar_today_outlined),
                             title: const Text('Date of Birth'),
                             subtitle: Text(_fmtDob(p.dateOfBirth)),
                           ),
@@ -1258,8 +1296,10 @@ class _PatientProfileTab extends StatelessWidget {
           Card(
             child: ListTile(
               leading: Icon(Icons.logout, color: Colors.red.shade400),
-              title: Text('Sign Out',
-                  style: TextStyle(color: Colors.red.shade400)),
+              title: Text(
+                'Sign Out',
+                style: TextStyle(color: Colors.red.shade400),
+              ),
               onTap: () async {
                 final authProv = context.read<AuthProvider>();
                 final navigator = Navigator.of(context);

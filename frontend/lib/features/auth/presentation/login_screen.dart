@@ -35,6 +35,8 @@ class _LoginScreenState extends State<LoginScreen> {
       final role = auth.role;
       if (role == 'Patient') {
         navigator.pushReplacementNamed('/patient-dashboard');
+      } else if (role == 'FacilityAdmin') {
+        navigator.pushReplacementNamed('/facility-admin-dashboard');
       } else {
         navigator.pushReplacementNamed('/dashboard');
       }
@@ -194,7 +196,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 Center(
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(
+                        context,
+                      ).pushReplacementNamed('/forgot-password');
+                    },
                     child: Text(
                       'Forgot Password?',
                       style: TextStyle(color: theme.colorScheme.primary),

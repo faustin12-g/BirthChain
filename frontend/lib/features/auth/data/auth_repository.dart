@@ -24,6 +24,8 @@ class AuthRepository {
       role: loginResponse.role,
       name: loginResponse.fullName,
       email: loginResponse.email,
+      facilityId: loginResponse.facilityId,
+      facilityName: loginResponse.facilityName,
     );
 
     return loginResponse;
@@ -44,9 +46,40 @@ class AuthRepository {
       role: loginResponse.role,
       name: loginResponse.fullName,
       email: loginResponse.email,
+      facilityId: loginResponse.facilityId,
+      facilityName: loginResponse.facilityName,
     );
 
     return loginResponse;
+  }
+
+  Future<void> sendOtp(String email) async {
+    await _apiClient.dio.post(ApiEndpoints.sendOtp, data: {'email': email});
+  }
+
+  Future<void> verifyEmail(String email, String code) async {
+    await _apiClient.dio.post(
+      ApiEndpoints.verifyEmail,
+      data: {'email': email, 'code': code},
+    );
+  }
+
+  Future<void> forgotPassword(String email) async {
+    await _apiClient.dio.post(
+      ApiEndpoints.forgotPassword,
+      data: {'email': email},
+    );
+  }
+
+  Future<void> resetPassword(
+    String email,
+    String code,
+    String newPassword,
+  ) async {
+    await _apiClient.dio.post(
+      ApiEndpoints.resetPassword,
+      data: {'email': email, 'code': code, 'newPassword': newPassword},
+    );
   }
 
   Future<void> logout() async {
@@ -61,4 +94,6 @@ class AuthRepository {
   Future<String?> getRole() => _storage.getRole();
   Future<String?> getName() => _storage.getName();
   Future<String?> getUserId() => _storage.getUserId();
+  Future<String?> getFacilityId() => _storage.getFacilityId();
+  Future<String?> getFacilityName() => _storage.getFacilityName();
 }

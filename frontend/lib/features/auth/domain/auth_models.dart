@@ -44,6 +44,8 @@ class LoginResponse {
   final String fullName;
   final String role;
   final String expiresAt;
+  final String? facilityId;
+  final String facilityName;
 
   LoginResponse({
     required this.token,
@@ -52,6 +54,8 @@ class LoginResponse {
     required this.fullName,
     required this.role,
     required this.expiresAt,
+    this.facilityId,
+    this.facilityName = '',
   });
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) => LoginResponse(
@@ -61,5 +65,7 @@ class LoginResponse {
     fullName: json['fullName'] ?? '',
     role: json['role'] ?? '',
     expiresAt: json['expiresAt'] ?? '',
+    facilityId: json['facilityId'],
+    facilityName: json['facilityName'] ?? '',
   );
 }
