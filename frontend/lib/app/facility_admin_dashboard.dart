@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../core/network/api_client.dart';
 import '../core/network/api_endpoints.dart';
 import '../core/widgets/empty_state.dart';
+import '../core/widgets/notification_bell.dart';
 import '../di/injection.dart';
 import '../features/auth/presentation/auth_provider.dart';
 import 'profile_screen.dart';
@@ -199,6 +200,7 @@ class _FacilityProvidersTabState extends State<_FacilityProvidersTab> {
             ),
           ],
         ),
+        actions: const [NotificationBell(), SizedBox(width: 4)],
       ),
       body: _buildBody(),
     );

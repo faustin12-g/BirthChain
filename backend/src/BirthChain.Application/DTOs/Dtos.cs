@@ -192,3 +192,17 @@ public record ActivityLogDto
     public string Action { get; init; } = string.Empty;
     public DateTime Timestamp { get; init; }
 }
+
+// ── Admin Dashboard ──
+
+public record AdminStatsDto
+{
+    public int TotalUsers { get; init; }
+    public int ActiveUsers { get; init; }
+    public int TotalFacilities { get; init; }
+    public int TotalProviders { get; init; }
+    public int TotalClients { get; init; }
+    public int TotalRecords { get; init; }
+    public int TotalActivityLogs { get; init; }
+    public Dictionary<string, int> UsersByRole { get; init; } = new();
+}

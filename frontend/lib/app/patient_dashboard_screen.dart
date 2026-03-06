@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../core/widgets/notification_bell.dart';
 import '../features/auth/presentation/auth_provider.dart';
 import '../features/records/domain/record_models.dart';
 import '../features/records/presentation/record_provider.dart';
@@ -89,6 +90,7 @@ class _HomeTab extends StatelessWidget {
             const Text('BirthChain'),
           ],
         ),
+        actions: const [NotificationBell(), SizedBox(width: 4)],
       ),
       body: Consumer<RecordProvider>(
         builder: (_, prov, __) {
@@ -675,6 +677,7 @@ class _MyRecordsTabState extends State<_MyRecordsTab> {
             const Text('My Health Records'),
           ],
         ),
+        actions: const [NotificationBell(), SizedBox(width: 4)],
       ),
       body: Consumer<RecordProvider>(
         builder: (_, prov, __) {
@@ -1004,6 +1007,7 @@ class _MyQrCodeTab extends StatelessWidget {
             const Text('My QR Code'),
           ],
         ),
+        actions: const [NotificationBell(), SizedBox(width: 4)],
       ),
       body: Consumer<RecordProvider>(
         builder: (_, prov, __) {
@@ -1167,6 +1171,7 @@ class _PatientProfileTab extends StatelessWidget {
             const Text('My Profile'),
           ],
         ),
+        actions: const [NotificationBell(), SizedBox(width: 4)],
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),

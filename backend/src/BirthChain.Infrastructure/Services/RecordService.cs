@@ -13,6 +13,7 @@ public sealed class RecordService : IRecordService
     private readonly IUserRepository _userRepo;
     private readonly IFacilityRepository _facilityRepo;
     private readonly IActivityLogService _activityLog;
+    private readonly IEmailService _emailService;
 
     public RecordService(
         IRecordRepository recordRepo,
@@ -20,7 +21,8 @@ public sealed class RecordService : IRecordService
         IClientRepository clientRepo,
         IUserRepository userRepo,
         IFacilityRepository facilityRepo,
-        IActivityLogService activityLog)
+        IActivityLogService activityLog,
+        IEmailService emailService)
     {
         _recordRepo = recordRepo;
         _providerRepo = providerRepo;
@@ -28,6 +30,7 @@ public sealed class RecordService : IRecordService
         _userRepo = userRepo;
         _facilityRepo = facilityRepo;
         _activityLog = activityLog;
+        _emailService = emailService;
     }
 
     public async Task<RecordDto> CreateAsync(Guid providerUserId, CreateRecordDto dto)
@@ -57,6 +60,28 @@ public sealed class RecordService : IRecordService
         await _activityLog.LogAsync(providerUserId, $"Created record for client {client.FullName}");
 
         var user = await _userRepo.GetByIdAsync(provider.UserId);
+
+        // Send email notification to the patient
+        if (!string.IsNullOrWhiteSpace(client.Email))
+        {
+            var facility = await _facilityRepo.GetByIdAsync(provider.FacilityId);
+            var facilityName = facility?.Name ?? "Unknown Facility";
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _emailService.SendRecordAddedEmailAsync(
+                        client.Email,
+                        client.FullName,
+                        client.QrCodeId,
+                        user?.FullName ?? "Provider",
+                        facilityName,
+                        record.Description,
+                        record.CreatedAt);
+                }
+                catch { /* Don't fail record creation if email fails */ }
+            });
+        }
 
         return new RecordDto
         {

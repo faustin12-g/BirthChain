@@ -208,6 +208,13 @@ public sealed class AuthService : IAuthService
         {
             user.IsEmailVerified = true;
             await _userRepo.UpdateAsync(user);
+
+            // Send welcome email with QR code ID
+            var client = await _clientRepo.GetByEmailAsync(email);
+            if (client is not null)
+            {
+                await _emailService.SendWelcomeEmailAsync(email, user.FullName, client.QrCodeId);
+            }
         }
         return true;
     }
@@ -241,6 +248,9 @@ public sealed class AuthService : IAuthService
 
         user.PasswordHash = HashPassword(newPassword);
         await _userRepo.UpdateAsync(user);
+
+        // Send confirmation email
+        await _emailService.SendPasswordResetConfirmationAsync(email, user.FullName);
         return true;
     }
 

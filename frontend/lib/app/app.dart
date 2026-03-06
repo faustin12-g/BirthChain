@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../di/injection.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/presentation/auth_provider.dart';
+import '../features/notifications/notification_provider.dart';
 import '../features/patients/data/patient_repository.dart';
 import '../features/patients/presentation/patient_provider.dart';
 import '../features/records/data/record_repository.dart';
@@ -25,6 +26,9 @@ class BirthChainApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => RecordProvider(getIt<RecordRepository>()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => NotificationProvider(),
         ),
       ],
       child: Consumer<AuthProvider>(

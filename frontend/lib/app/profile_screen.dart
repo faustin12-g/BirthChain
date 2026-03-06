@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/widgets/notification_bell.dart';
 import '../features/auth/presentation/auth_provider.dart';
-import 'admin_panel_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -22,6 +22,7 @@ class ProfileScreen extends StatelessWidget {
             const Text('BirthChain'),
           ],
         ),
+        actions: const [NotificationBell(), SizedBox(width: 4)],
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
@@ -102,14 +103,12 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.badge_outlined),
-                    title: const Text('Manage Providers'),
+                    leading: const Icon(Icons.dashboard_outlined),
+                    title: const Text('Admin Dashboard'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap:
-                        () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const AdminPanelScreen(),
-                          ),
+                        () => Navigator.of(context).pushReplacementNamed(
+                          '/admin-dashboard',
                         ),
                   ),
                 ],

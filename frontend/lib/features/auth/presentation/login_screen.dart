@@ -33,7 +33,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
     if (success && mounted) {
       final role = auth.role;
-      if (role == 'Patient') {
+      if (role == 'Admin') {
+        navigator.pushReplacementNamed('/admin-dashboard');
+      } else if (role == 'Patient') {
         navigator.pushReplacementNamed('/patient-dashboard');
       } else if (role == 'FacilityAdmin') {
         navigator.pushReplacementNamed('/facility-admin-dashboard');

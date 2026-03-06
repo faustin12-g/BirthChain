@@ -34,4 +34,10 @@ class ApiEndpoints {
   // Activity Logs
   static const String activityLogs = '/activitylogs';
   static String activityLogsByUser(String id) => '/activitylogs/by-user/$id';
+
+  // Admin
+  static const String adminStats = '/admin/stats';
+  static const String adminUsers = '/admin/users';
+  static String adminUserById(String id) => '/admin/users/$id';
+  static String adminToggleActive(String id) => '/admin/users/$id/toggle-active';
 }
