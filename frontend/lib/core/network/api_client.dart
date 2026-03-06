@@ -10,7 +10,11 @@ class ApiClient {
 
   ApiClient(this._storage) {
     String baseUrl;
-    if (kIsWeb) {
+    
+    // Use production server if flag is set
+    if (AppConstants.useProductionServer) {
+      baseUrl = AppConstants.apiBaseUrlProduction;
+    } else if (kIsWeb) {
       baseUrl = AppConstants.apiBaseUrlWindows;
     } else {
       try {

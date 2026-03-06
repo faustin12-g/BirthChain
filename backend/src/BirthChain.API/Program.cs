@@ -98,15 +98,13 @@ var app = builder.Build();
 // Seed database (apply migrations + create admin user)
 await DbInitializer.SeedAsync(app.Services);
 
-if (app.Environment.IsDevelopment())
+// Enable Swagger in all environments (useful for demo/judges)
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "BirthChain API v1");
-        options.RoutePrefix = string.Empty; // Swagger at root
-    });
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "BirthChain API v1");
+    options.RoutePrefix = string.Empty; // Swagger at root
+});
 
 app.UseHttpsRedirection();
 app.UseCors();
@@ -116,4 +114,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+// Use PORT environment variable for Railway, default to 8080
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+app.Run($"http://0.0.0.0:{port}");
