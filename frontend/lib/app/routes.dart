@@ -41,9 +41,7 @@ class AppRoutes {
       case dashboard:
         return MaterialPageRoute(builder: (_) => const DashboardScreen());
       case adminDashboard:
-        return MaterialPageRoute(
-          builder: (_) => const AdminDashboardScreen(),
-        );
+        return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
       case facilityAdminDashboard:
         return MaterialPageRoute(
           builder: (_) => const FacilityAdminDashboard(),

@@ -139,7 +139,11 @@ class _OverviewTabState extends State<_OverviewTab> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.error_outline, size: 48, color: Colors.red.shade300),
+                    Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: Colors.red.shade300,
+                    ),
                     const SizedBox(height: 12),
                     Text(_error!, style: TextStyle(color: Colors.red.shade600)),
                     const SizedBox(height: 16),
@@ -228,7 +232,11 @@ class _OverviewTabState extends State<_OverviewTab> {
               color: Colors.white.withAlpha(25),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.admin_panel_settings, color: Colors.white, size: 32),
+            child: const Icon(
+              Icons.admin_panel_settings,
+              color: Colors.white,
+              size: 32,
+            ),
           ),
         ],
       ),
@@ -322,11 +330,17 @@ class _OverviewTabState extends State<_OverviewTab> {
           children: [
             Row(
               children: [
-                Icon(Icons.pie_chart_outline, color: theme.colorScheme.primary, size: 20),
+                Icon(
+                  Icons.pie_chart_outline,
+                  color: theme.colorScheme.primary,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Users by Role',
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -337,13 +351,16 @@ class _OverviewTabState extends State<_OverviewTab> {
               child: SizedBox(
                 height: 12,
                 child: Row(
-                  children: roles.entries.map((e) {
-                    final pct = total > 0 ? (e.value as int) / total : 0.0;
-                    return Expanded(
-                      flex: (pct * 100).round().clamp(1, 100),
-                      child: Container(color: roleColors[e.key] ?? Colors.grey),
-                    );
-                  }).toList(),
+                  children:
+                      roles.entries.map((e) {
+                        final pct = total > 0 ? (e.value as int) / total : 0.0;
+                        return Expanded(
+                          flex: (pct * 100).round().clamp(1, 100),
+                          child: Container(
+                            color: roleColors[e.key] ?? Colors.grey,
+                          ),
+                        );
+                      }).toList(),
                 ),
               ),
             ),
@@ -351,26 +368,27 @@ class _OverviewTabState extends State<_OverviewTab> {
             Wrap(
               spacing: 16,
               runSpacing: 8,
-              children: roles.entries.map((e) {
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: roleColors[e.key] ?? Colors.grey,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${e.key}: ${e.value}',
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                  ],
-                );
-              }).toList(),
+              children:
+                  roles.entries.map((e) {
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: roleColors[e.key] ?? Colors.grey,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${e.key}: ${e.value}',
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      ],
+                    );
+                  }).toList(),
             ),
           ],
         ),
@@ -388,7 +406,9 @@ class _OverviewTabState extends State<_OverviewTab> {
             const SizedBox(width: 8),
             Text(
               'Recent Activity',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -396,35 +416,40 @@ class _OverviewTabState extends State<_OverviewTab> {
         if (_recentLogs.isEmpty)
           const EmptyState(icon: Icons.history, title: 'No activity yet')
         else
-          ...(_recentLogs.map((log) => Card(
-                margin: const EdgeInsets.only(bottom: 6),
-                child: ListTile(
-                  dense: true,
-                  leading: CircleAvatar(
-                    radius: 16,
-                    backgroundColor: AppTheme.navyBlue.withAlpha(20),
-                    child: Icon(
-                      _iconForAction(log['action'] ?? ''),
-                      size: 16,
-                      color: AppTheme.navyBlue,
-                    ),
-                  ),
-                  title: Text(
-                    log['action'] ?? '',
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Text(
-                    log['userName'] ?? '',
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                  ),
-                  trailing: Text(
-                    _fmtTime(log['timestamp'] ?? ''),
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
+          ...(_recentLogs.map(
+            (log) => Card(
+              margin: const EdgeInsets.only(bottom: 6),
+              child: ListTile(
+                dense: true,
+                leading: CircleAvatar(
+                  radius: 16,
+                  backgroundColor: AppTheme.navyBlue.withAlpha(20),
+                  child: Icon(
+                    _iconForAction(log['action'] ?? ''),
+                    size: 16,
+                    color: AppTheme.navyBlue,
                   ),
                 ),
-              ))),
+                title: Text(
+                  log['action'] ?? '',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(
+                  log['userName'] ?? '',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
+                trailing: Text(
+                  _fmtTime(log['timestamp'] ?? ''),
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
+                ),
+              ),
+            ),
+          )),
       ],
     );
   }
@@ -432,7 +457,8 @@ class _OverviewTabState extends State<_OverviewTab> {
   IconData _iconForAction(String action) {
     if (action.contains('Logged in')) return Icons.login;
     if (action.contains('provider')) return Icons.badge;
-    if (action.contains('client') || action.contains('patient')) return Icons.person_add;
+    if (action.contains('client') || action.contains('patient'))
+      return Icons.person_add;
     if (action.contains('record')) return Icons.description;
     if (action.contains('facility')) return Icons.local_hospital;
     return Icons.circle;
@@ -505,7 +531,10 @@ class _DashStatCard extends StatelessWidget {
                   if (subValue != null)
                     Text(
                       subValue!,
-                      style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade400,
+                      ),
                     ),
                 ],
               ),
@@ -561,11 +590,12 @@ class _UsersTabState extends State<_UsersTab> {
     var list = _users;
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
-      list = list.where((u) {
-        final name = (u['fullName'] ?? '').toString().toLowerCase();
-        final email = (u['email'] ?? '').toString().toLowerCase();
-        return name.contains(q) || email.contains(q);
-      }).toList();
+      list =
+          list.where((u) {
+            final name = (u['fullName'] ?? '').toString().toLowerCase();
+            final email = (u['email'] ?? '').toString().toLowerCase();
+            return name.contains(q) || email.contains(q);
+          }).toList();
     }
     if (_roleFilter != null) {
       list = list.where((u) => u['role'] == _roleFilter).toList();
@@ -579,10 +609,12 @@ class _UsersTabState extends State<_UsersTab> {
       _load();
     } on DioException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(e.response?.data?['message'] ?? 'Failed.'),
-          backgroundColor: Colors.red,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.response?.data?['message'] ?? 'Failed.'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -590,7 +622,8 @@ class _UsersTabState extends State<_UsersTab> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final roles = _users.map((u) => u['role'] as String).toSet().toList()..sort();
+    final roles =
+        _users.map((u) => u['role'] as String).toSet().toList()..sort();
     final filtered = _filteredUsers;
 
     return Scaffold(
@@ -605,94 +638,125 @@ class _UsersTabState extends State<_UsersTab> {
         ),
         actions: const [NotificationBell(), SizedBox(width: 4)],
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(child: Text(_error!, style: const TextStyle(color: Colors.red)))
+      body:
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : _error != null
+              ? Center(
+                child: Text(_error!, style: const TextStyle(color: Colors.red)),
+              )
               : RefreshIndicator(
-                  onRefresh: _load,
-                  child: Column(
-                    children: [
-                      // ── Search + filter ──
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Search users...',
-                            prefixIcon: const Icon(Icons.search, size: 20),
-                            filled: true,
-                            fillColor: theme.colorScheme.primary.withAlpha(10),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                            isDense: true,
+                onRefresh: _load,
+                child: Column(
+                  children: [
+                    // ── Search + filter ──
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Search users...',
+                          prefixIcon: const Icon(Icons.search, size: 20),
+                          filled: true,
+                          fillColor: theme.colorScheme.primary.withAlpha(10),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
                           ),
-                          style: const TextStyle(fontSize: 13),
-                          onChanged: (v) => setState(() => _searchQuery = v.trim()),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                          ),
+                          isDense: true,
                         ),
+                        style: const TextStyle(fontSize: 13),
+                        onChanged:
+                            (v) => setState(() => _searchQuery = v.trim()),
                       ),
-                      // Role filter chips
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        child: Row(
-                          children: [
-                            Padding(
+                    ),
+                    // Role filter chips
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: FilterChip(
+                              label: Text(
+                                'All (${_users.length})',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              selected: _roleFilter == null,
+                              onSelected:
+                                  (_) => setState(() => _roleFilter = null),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ),
+                          ...roles.map((r) {
+                            final count =
+                                _users.where((u) => u['role'] == r).length;
+                            return Padding(
                               padding: const EdgeInsets.only(right: 6),
                               child: FilterChip(
-                                label: Text('All (${_users.length})',
-                                    style: const TextStyle(fontSize: 12)),
-                                selected: _roleFilter == null,
-                                onSelected: (_) => setState(() => _roleFilter = null),
+                                label: Text(
+                                  '$r ($count)',
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                selected: _roleFilter == r,
+                                onSelected:
+                                    (sel) => setState(
+                                      () => _roleFilter = sel ? r : null,
+                                    ),
                                 visualDensity: VisualDensity.compact,
                               ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            '${filtered.length} user${filtered.length == 1 ? '' : 's'}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
                             ),
-                            ...roles.map((r) {
-                              final count = _users.where((u) => u['role'] == r).length;
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 6),
-                                child: FilterChip(
-                                  label: Text('$r ($count)',
-                                      style: const TextStyle(fontSize: 12)),
-                                  selected: _roleFilter == r,
-                                  onSelected: (sel) =>
-                                      setState(() => _roleFilter = sel ? r : null),
-                                  visualDensity: VisualDensity.compact,
+                          ),
+                        ],
+                      ),
+                    ),
+                    // ── User list ──
+                    Expanded(
+                      child:
+                          filtered.isEmpty
+                              ? const EmptyState(
+                                icon: Icons.people_outline,
+                                title: 'No users found',
+                              )
+                              : ListView.builder(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
                                 ),
-                              );
-                            }),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        child: Row(
-                          children: [
-                            Text(
-                              '${filtered.length} user${filtered.length == 1 ? '' : 's'}',
-                              style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // ── User list ──
-                      Expanded(
-                        child: filtered.isEmpty
-                            ? const EmptyState(icon: Icons.people_outline, title: 'No users found')
-                            : ListView.builder(
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
                                 itemCount: filtered.length,
-                                itemBuilder: (_, i) => _UserCard(
-                                  user: filtered[i],
-                                  onToggleActive: () => _toggleActive(filtered[i]),
-                                ),
+                                itemBuilder:
+                                    (_, i) => _UserCard(
+                                      user: filtered[i],
+                                      onToggleActive:
+                                          () => _toggleActive(filtered[i]),
+                                    ),
                               ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+              ),
     );
   }
 }
@@ -759,13 +823,19 @@ class _UserCard extends StatelessWidget {
                       Flexible(
                         child: Text(
                           name,
-                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: roleColor.withAlpha(25),
                           borderRadius: BorderRadius.circular(10),
@@ -789,7 +859,10 @@ class _UserCard extends StatelessWidget {
                   if (dateStr.isNotEmpty)
                     Text(
                       'Joined $dateStr',
-                      style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade400,
+                      ),
                     ),
                 ],
               ),
@@ -797,9 +870,15 @@ class _UserCard extends StatelessWidget {
             Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
-                    color: isActive ? Colors.green.withAlpha(20) : Colors.red.withAlpha(20),
+                    color:
+                        isActive
+                            ? Colors.green.withAlpha(20)
+                            : Colors.red.withAlpha(20),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -807,7 +886,10 @@ class _UserCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: isActive ? Colors.green.shade700 : Colors.red.shade700,
+                      color:
+                          isActive
+                              ? Colors.green.shade700
+                              : Colors.red.shade700,
                     ),
                   ),
                 ),
@@ -881,67 +963,77 @@ class _FacilitiesTabState extends State<_FacilitiesTab> {
 
     final created = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Create Facility'),
-        content: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: nameCtrl,
-                  decoration: const InputDecoration(labelText: 'Facility Name *'),
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
+      builder:
+          (_) => AlertDialog(
+            title: const Text('Create Facility'),
+            content: SingleChildScrollView(
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: nameCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Facility Name *',
+                      ),
+                      validator: (v) => v!.isEmpty ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: addressCtrl,
+                      decoration: const InputDecoration(labelText: 'Address'),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: phoneCtrl,
+                      decoration: const InputDecoration(labelText: 'Phone'),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: emailCtrl,
+                      decoration: const InputDecoration(labelText: 'Email'),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: addressCtrl,
-                  decoration: const InputDecoration(labelText: 'Address'),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: phoneCtrl,
-                  decoration: const InputDecoration(labelText: 'Phone'),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: emailCtrl,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                ),
-              ],
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  if (!formKey.currentState!.validate()) return;
+                  final navigator = Navigator.of(context);
+                  final messenger = ScaffoldMessenger.of(context);
+                  try {
+                    await _api.dio.post(
+                      ApiEndpoints.facilities,
+                      data: {
+                        'name': nameCtrl.text.trim(),
+                        'address': addressCtrl.text.trim(),
+                        'phone': phoneCtrl.text.trim(),
+                        'email': emailCtrl.text.trim(),
+                      },
+                    );
+                    navigator.pop(true);
+                  } on DioException catch (e) {
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          e.response?.data?['message'] ?? 'Failed to create.',
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Create'),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              if (!formKey.currentState!.validate()) return;
-              final navigator = Navigator.of(context);
-              final messenger = ScaffoldMessenger.of(context);
-              try {
-                await _api.dio.post(ApiEndpoints.facilities, data: {
-                  'name': nameCtrl.text.trim(),
-                  'address': addressCtrl.text.trim(),
-                  'phone': phoneCtrl.text.trim(),
-                  'email': emailCtrl.text.trim(),
-                });
-                navigator.pop(true);
-              } on DioException catch (e) {
-                messenger.showSnackBar(SnackBar(
-                  content: Text(e.response?.data?['message'] ?? 'Failed to create.'),
-                  backgroundColor: Colors.red,
-                ));
-              }
-            },
-            child: const Text('Create'),
-          ),
-        ],
-      ),
     );
     if (created == true) _load();
   }
@@ -954,69 +1046,84 @@ class _FacilitiesTabState extends State<_FacilitiesTab> {
 
     final created = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Add Admin for ${facility['name']}'),
-        content: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: nameCtrl,
-                  decoration: const InputDecoration(labelText: 'Full Name *'),
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
+      builder:
+          (_) => AlertDialog(
+            title: Text('Add Admin for ${facility['name']}'),
+            content: SingleChildScrollView(
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: nameCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Full Name *',
+                      ),
+                      validator: (v) => v!.isEmpty ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: emailCtrl,
+                      decoration: const InputDecoration(labelText: 'Email *'),
+                      validator: (v) => v!.isEmpty ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: passCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Password *',
+                      ),
+                      obscureText: true,
+                      validator:
+                          (v) =>
+                              v != null && v.length >= 6 ? null : 'Min 6 chars',
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: emailCtrl,
-                  decoration: const InputDecoration(labelText: 'Email *'),
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: passCtrl,
-                  decoration: const InputDecoration(labelText: 'Password *'),
-                  obscureText: true,
-                  validator: (v) =>
-                      v != null && v.length >= 6 ? null : 'Min 6 chars',
-                ),
-              ],
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  if (!formKey.currentState!.validate()) return;
+                  final navigator = Navigator.of(context);
+                  final messenger = ScaffoldMessenger.of(context);
+                  try {
+                    await _api.dio.post(
+                      ApiEndpoints.facilityAdmins,
+                      data: {
+                        'fullName': nameCtrl.text.trim(),
+                        'email': emailCtrl.text.trim(),
+                        'password': passCtrl.text,
+                        'facilityId': facility['id'],
+                      },
+                    );
+                    messenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('Facility admin created successfully.'),
+                      ),
+                    );
+                    navigator.pop(true);
+                  } on DioException catch (e) {
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          e.response?.data?['message'] ?? 'Failed to create.',
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Create'),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              if (!formKey.currentState!.validate()) return;
-              final navigator = Navigator.of(context);
-              final messenger = ScaffoldMessenger.of(context);
-              try {
-                await _api.dio.post(ApiEndpoints.facilityAdmins, data: {
-                  'fullName': nameCtrl.text.trim(),
-                  'email': emailCtrl.text.trim(),
-                  'password': passCtrl.text,
-                  'facilityId': facility['id'],
-                });
-                messenger.showSnackBar(const SnackBar(
-                  content: Text('Facility admin created successfully.'),
-                ));
-                navigator.pop(true);
-              } on DioException catch (e) {
-                messenger.showSnackBar(SnackBar(
-                  content: Text(e.response?.data?['message'] ?? 'Failed to create.'),
-                  backgroundColor: Colors.red,
-                ));
-              }
-            },
-            child: const Text('Create'),
-          ),
-        ],
-      ),
     );
     if (created == true) _load();
   }
@@ -1035,19 +1142,23 @@ class _FacilitiesTabState extends State<_FacilitiesTab> {
         ),
         actions: const [NotificationBell(), SizedBox(width: 4)],
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(child: Text(_error!, style: const TextStyle(color: Colors.red)))
+      body:
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : _error != null
+              ? Center(
+                child: Text(_error!, style: const TextStyle(color: Colors.red)),
+              )
               : Column(
-                  children: [
-                    Expanded(
-                      child: _facilities.isEmpty
-                          ? const EmptyState(
+                children: [
+                  Expanded(
+                    child:
+                        _facilities.isEmpty
+                            ? const EmptyState(
                               icon: Icons.local_hospital_outlined,
                               title: 'No facilities yet',
                             )
-                          : RefreshIndicator(
+                            : RefreshIndicator(
                               onRefresh: _load,
                               child: ListView.builder(
                                 padding: const EdgeInsets.all(12),
@@ -1059,51 +1170,72 @@ class _FacilitiesTabState extends State<_FacilitiesTab> {
                                     child: ListTile(
                                       leading: CircleAvatar(
                                         backgroundColor: Colors.orange.shade100,
-                                        child: Icon(Icons.local_hospital,
-                                            color: Colors.orange.shade800),
+                                        child: Icon(
+                                          Icons.local_hospital,
+                                          color: Colors.orange.shade800,
+                                        ),
                                       ),
                                       title: Text(
                                         f['name'] ?? '',
-                                        style: const TextStyle(fontWeight: FontWeight.w600),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                       subtitle: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          if ((f['address'] ?? '').toString().isNotEmpty)
-                                            Text(f['address'],
-                                                style: const TextStyle(fontSize: 12)),
-                                          if ((f['email'] ?? '').toString().isNotEmpty)
-                                            Text(f['email'],
-                                                style: TextStyle(
-                                                    fontSize: 11,
-                                                    color: Colors.grey.shade500)),
+                                          if ((f['address'] ?? '')
+                                              .toString()
+                                              .isNotEmpty)
+                                            Text(
+                                              f['address'],
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          if ((f['email'] ?? '')
+                                              .toString()
+                                              .isNotEmpty)
+                                            Text(
+                                              f['email'],
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.grey.shade500,
+                                              ),
+                                            ),
                                         ],
                                       ),
                                       trailing: IconButton(
-                                        icon: const Icon(Icons.person_add_alt_1),
+                                        icon: const Icon(
+                                          Icons.person_add_alt_1,
+                                        ),
                                         tooltip: 'Add Facility Admin',
-                                        onPressed: () =>
-                                            _showCreateFacilityAdminDialog(f),
+                                        onPressed:
+                                            () =>
+                                                _showCreateFacilityAdminDialog(
+                                                  f,
+                                                ),
                                       ),
                                     ),
                                   );
                                 },
                               ),
                             ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.icon(
-                          onPressed: _showCreateFacilityDialog,
-                          icon: const Icon(Icons.add),
-                          label: const Text('Add Facility'),
-                        ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: _showCreateFacilityDialog,
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add Facility'),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
     );
   }
 }
@@ -1160,65 +1292,75 @@ class _ActivityLogsTabState extends State<_ActivityLogsTab> {
         ),
         actions: const [NotificationBell(), SizedBox(width: 4)],
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(child: Text(_error!, style: const TextStyle(color: Colors.red)))
+      body:
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : _error != null
+              ? Center(
+                child: Text(_error!, style: const TextStyle(color: Colors.red)),
+              )
               : _logs.isEmpty
-                  ? const EmptyState(icon: Icons.history, title: 'No activity yet')
-                  : RefreshIndicator(
-                      onRefresh: _load,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(12),
-                        itemCount: _logs.length,
-                        itemBuilder: (_, i) {
-                          final log = _logs[i];
-                          String dateStr = '';
-                          try {
-                            final dt = DateTime.parse(log['timestamp'] ?? '');
-                            dateStr = DateFormat('MMM d, h:mm a').format(dt);
-                          } catch (_) {}
+              ? const EmptyState(icon: Icons.history, title: 'No activity yet')
+              : RefreshIndicator(
+                onRefresh: _load,
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(12),
+                  itemCount: _logs.length,
+                  itemBuilder: (_, i) {
+                    final log = _logs[i];
+                    String dateStr = '';
+                    try {
+                      final dt = DateTime.parse(log['timestamp'] ?? '');
+                      dateStr = DateFormat('MMM d, h:mm a').format(dt);
+                    } catch (_) {}
 
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 6),
-                            child: ListTile(
-                              dense: true,
-                              leading: CircleAvatar(
-                                radius: 16,
-                                backgroundColor: AppTheme.navyBlue.withAlpha(20),
-                                child: Icon(
-                                  _iconForAction(log['action'] ?? ''),
-                                  size: 16,
-                                  color: AppTheme.navyBlue,
-                                ),
-                              ),
-                              title: Text(
-                                log['action'] ?? '',
-                                style: const TextStyle(
-                                    fontSize: 13, fontWeight: FontWeight.w500),
-                              ),
-                              subtitle: Text(
-                                log['userName'] ?? '',
-                                style: TextStyle(
-                                    fontSize: 12, color: Colors.grey.shade600),
-                              ),
-                              trailing: Text(
-                                dateStr,
-                                style: TextStyle(
-                                    fontSize: 11, color: Colors.grey.shade400),
-                              ),
-                            ),
-                          );
-                        },
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 6),
+                      child: ListTile(
+                        dense: true,
+                        leading: CircleAvatar(
+                          radius: 16,
+                          backgroundColor: AppTheme.navyBlue.withAlpha(20),
+                          child: Icon(
+                            _iconForAction(log['action'] ?? ''),
+                            size: 16,
+                            color: AppTheme.navyBlue,
+                          ),
+                        ),
+                        title: Text(
+                          log['action'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        subtitle: Text(
+                          log['userName'] ?? '',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                        trailing: Text(
+                          dateStr,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey.shade400,
+                          ),
+                        ),
                       ),
-                    ),
+                    );
+                  },
+                ),
+              ),
     );
   }
 
   IconData _iconForAction(String action) {
     if (action.contains('Logged in')) return Icons.login;
     if (action.contains('provider')) return Icons.badge;
-    if (action.contains('client') || action.contains('patient')) return Icons.person_add;
+    if (action.contains('client') || action.contains('patient'))
+      return Icons.person_add;
     if (action.contains('record')) return Icons.description;
     if (action.contains('facility')) return Icons.local_hospital;
     return Icons.circle;
@@ -1283,7 +1425,10 @@ class _AdminProfileTab extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.red.shade100,
                             borderRadius: BorderRadius.circular(20),
@@ -1309,7 +1454,9 @@ class _AdminProfileTab extends StatelessWidget {
           // Quick links
           Text(
             'Quick Actions',
-            style: theme.textTheme.titleSmall?.copyWith(color: Colors.grey.shade600),
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: Colors.grey.shade600,
+            ),
           ),
           const SizedBox(height: 8),
           Card(
@@ -1346,7 +1493,9 @@ class _AdminProfileTab extends StatelessWidget {
           // Account section
           Text(
             'Account',
-            style: theme.textTheme.titleSmall?.copyWith(color: Colors.grey.shade600),
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: Colors.grey.shade600,
+            ),
           ),
           const SizedBox(height: 8),
           Card(

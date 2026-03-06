@@ -228,16 +228,26 @@ class _PatientLookupScreenState extends State<PatientLookupScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.error_outline, size: 48, color: Colors.red.shade400),
+                              Icon(
+                                Icons.error_outline,
+                                size: 48,
+                                color: Colors.red.shade400,
+                              ),
                               const SizedBox(height: 8),
                               Text(
                                 'Camera unavailable',
-                                style: TextStyle(color: Colors.red.shade400, fontSize: 13),
+                                style: TextStyle(
+                                  color: Colors.red.shade400,
+                                  fontSize: 13,
+                                ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 'Use manual entry below',
-                                style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                                style: TextStyle(
+                                  color: Colors.grey.shade500,
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
                           ),
@@ -252,10 +262,26 @@ class _PatientLookupScreenState extends State<PatientLookupScreen> {
                         ),
                       ),
                     // Corner brackets
-                    Positioned(top: 36, left: 36, child: _ScanCorner(alignment: Alignment.topLeft)),
-                    Positioned(top: 36, right: 36, child: _ScanCorner(alignment: Alignment.topRight)),
-                    Positioned(bottom: 36, left: 36, child: _ScanCorner(alignment: Alignment.bottomLeft)),
-                    Positioned(bottom: 36, right: 36, child: _ScanCorner(alignment: Alignment.bottomRight)),
+                    Positioned(
+                      top: 36,
+                      left: 36,
+                      child: _ScanCorner(alignment: Alignment.topLeft),
+                    ),
+                    Positioned(
+                      top: 36,
+                      right: 36,
+                      child: _ScanCorner(alignment: Alignment.topRight),
+                    ),
+                    Positioned(
+                      bottom: 36,
+                      left: 36,
+                      child: _ScanCorner(alignment: Alignment.bottomLeft),
+                    ),
+                    Positioned(
+                      bottom: 36,
+                      right: 36,
+                      child: _ScanCorner(alignment: Alignment.bottomRight),
+                    ),
                   ],
                 ),
               ),

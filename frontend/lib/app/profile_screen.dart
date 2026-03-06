@@ -107,9 +107,9 @@ class ProfileScreen extends StatelessWidget {
                     title: const Text('Admin Dashboard'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap:
-                        () => Navigator.of(context).pushReplacementNamed(
-                          '/admin-dashboard',
-                        ),
+                        () => Navigator.of(
+                          context,
+                        ).pushReplacementNamed('/admin-dashboard'),
                   ),
                 ],
               ),

@@ -27,9 +27,7 @@ class BirthChainApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => RecordProvider(getIt<RecordRepository>()),
         ),
-        ChangeNotifierProvider(
-          create: (_) => NotificationProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: Consumer<AuthProvider>(
         builder:

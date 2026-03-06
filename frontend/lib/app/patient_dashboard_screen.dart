@@ -1032,7 +1032,10 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
         color: Color(0xFF1A3C6D),
       ),
     );
-    final qrImage = await qrPainter.toImageData(600, format: ui.ImageByteFormat.png);
+    final qrImage = await qrPainter.toImageData(
+      600,
+      format: ui.ImageByteFormat.png,
+    );
     final qrBytes = qrImage!.buffer.asUint8List();
     final qrPdfImage = pw.MemoryImage(qrBytes);
 
@@ -1048,7 +1051,10 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
             children: [
               // ── Header with logo and app name ──
               pw.Container(
-                padding: const pw.EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+                padding: const pw.EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 24,
+                ),
                 decoration: pw.BoxDecoration(
                   color: navy,
                   borderRadius: pw.BorderRadius.circular(12),
@@ -1108,7 +1114,10 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
                     pw.Image(qrPdfImage, width: 200, height: 200),
                     pw.SizedBox(height: 14),
                     pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: pw.BoxDecoration(
                         color: PdfColor.fromHex('#EEF2F7'),
                         borderRadius: pw.BorderRadius.circular(8),
@@ -1150,8 +1159,10 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
                     ),
                     pw.SizedBox(height: 10),
                     _pdfInfoRow('Full Name', patient.fullName),
-                    if (patient.email.isNotEmpty) _pdfInfoRow('Email', patient.email),
-                    if (patient.phone.isNotEmpty) _pdfInfoRow('Phone', patient.phone),
+                    if (patient.email.isNotEmpty)
+                      _pdfInfoRow('Email', patient.email),
+                    if (patient.phone.isNotEmpty)
+                      _pdfInfoRow('Phone', patient.phone),
                   ],
                 ),
               ),
@@ -1211,11 +1222,17 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
                 children: [
                   pw.Text(
                     'Generated on ${DateFormat('MMMM d, yyyy – h:mm a').format(DateTime.now())}',
-                    style: pw.TextStyle(fontSize: 9, color: PdfColor.fromHex('#6C757D')),
+                    style: pw.TextStyle(
+                      fontSize: 9,
+                      color: PdfColor.fromHex('#6C757D'),
+                    ),
                   ),
                   pw.Text(
                     'BirthChain © ${DateTime.now().year}',
-                    style: pw.TextStyle(fontSize: 9, color: PdfColor.fromHex('#6C757D')),
+                    style: pw.TextStyle(
+                      fontSize: 9,
+                      color: PdfColor.fromHex('#6C757D'),
+                    ),
                   ),
                 ],
               ),
@@ -1247,10 +1264,7 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
           pw.Expanded(
             child: pw.Text(
               value,
-              style: pw.TextStyle(
-                fontSize: 12,
-                fontWeight: pw.FontWeight.bold,
-              ),
+              style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
             ),
           ),
         ],
@@ -1266,7 +1280,10 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Print failed: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Print failed: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -1289,9 +1306,7 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
             action: SnackBarAction(
               label: 'Share',
               textColor: Colors.white,
-              onPressed: () => Share.shareXFiles(
-                [XFile(file.path)],
-              ),
+              onPressed: () => Share.shareXFiles([XFile(file.path)]),
             ),
           ),
         );
@@ -1299,7 +1314,10 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Save failed: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Save failed: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -1314,13 +1332,14 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/BirthChain_QR_${patient.qrCodeId}.pdf');
       await file.writeAsBytes(pdfBytes);
-      await Share.shareXFiles(
-        [XFile(file.path)],
-      );
+      await Share.shareXFiles([XFile(file.path)]);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Share failed: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Share failed: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -1382,7 +1401,10 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
                       Text(
                         'Show this QR code to your\nhealthcare provider',
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 14,
+                        ),
                       ),
                       const SizedBox(height: 24),
                       Container(
@@ -1442,7 +1464,10 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
                           padding: const EdgeInsets.all(16),
                           child: Column(
                             children: [
-                              _InfoRow(icon: Icons.person, label: patient.fullName),
+                              _InfoRow(
+                                icon: Icons.person,
+                                label: patient.fullName,
+                              ),
                               if (patient.email.isNotEmpty)
                                 _InfoRow(
                                   icon: Icons.email_outlined,

@@ -22,10 +22,7 @@ class _FacilityAdminDashboardState extends State<FacilityAdminDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    final pages = const <Widget>[
-      _FacilityProvidersTab(),
-      ProfileScreen(),
-    ];
+    final pages = const <Widget>[_FacilityProvidersTab(), ProfileScreen()];
 
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: pages),
@@ -71,7 +68,10 @@ class _FacilityProvidersTabState extends State<_FacilityProvidersTab> {
   }
 
   Future<void> _load() async {
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final res = await _api.dio.get(ApiEndpoints.providers);
       _providers = res.data as List;
@@ -89,10 +89,12 @@ class _FacilityProvidersTabState extends State<_FacilityProvidersTab> {
     final facilityName = auth.facilityName ?? 'Your Facility';
 
     if (facilityId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('No facility assigned to your account.'),
-        backgroundColor: Colors.red,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No facility assigned to your account.'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
@@ -105,79 +107,94 @@ class _FacilityProvidersTabState extends State<_FacilityProvidersTab> {
 
     final created = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Add Provider to $facilityName'),
-        content: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: nameCtrl,
-                  decoration: const InputDecoration(labelText: 'Full Name *'),
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
+      builder:
+          (_) => AlertDialog(
+            title: Text('Add Provider to $facilityName'),
+            content: SingleChildScrollView(
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: nameCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Full Name *',
+                      ),
+                      validator: (v) => v!.isEmpty ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: emailCtrl,
+                      decoration: const InputDecoration(labelText: 'Email *'),
+                      validator: (v) => v!.isEmpty ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: passCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Password *',
+                      ),
+                      obscureText: true,
+                      validator:
+                          (v) =>
+                              v != null && v.length >= 6 ? null : 'Min 6 chars',
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: licCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'License Number *',
+                      ),
+                      validator: (v) => v!.isEmpty ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: specCtrl,
+                      decoration: const InputDecoration(labelText: 'Specialty'),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: emailCtrl,
-                  decoration: const InputDecoration(labelText: 'Email *'),
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: passCtrl,
-                  decoration: const InputDecoration(labelText: 'Password *'),
-                  obscureText: true,
-                  validator: (v) =>
-                      v != null && v.length >= 6 ? null : 'Min 6 chars',
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: licCtrl,
-                  decoration: const InputDecoration(labelText: 'License Number *'),
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: specCtrl,
-                  decoration: const InputDecoration(labelText: 'Specialty'),
-                ),
-              ],
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  if (!formKey.currentState!.validate()) return;
+                  final navigator = Navigator.of(context);
+                  final messenger = ScaffoldMessenger.of(context);
+                  try {
+                    await _api.dio.post(
+                      ApiEndpoints.providers,
+                      data: {
+                        'fullName': nameCtrl.text.trim(),
+                        'email': emailCtrl.text.trim(),
+                        'password': passCtrl.text,
+                        'licenseNumber': licCtrl.text.trim(),
+                        'facilityId': facilityId,
+                        'specialty': specCtrl.text.trim(),
+                      },
+                    );
+                    navigator.pop(true);
+                  } on DioException catch (e) {
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          e.response?.data?['message'] ?? 'Failed to create.',
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Create'),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              if (!formKey.currentState!.validate()) return;
-              final navigator = Navigator.of(context);
-              final messenger = ScaffoldMessenger.of(context);
-              try {
-                await _api.dio.post(ApiEndpoints.providers, data: {
-                  'fullName': nameCtrl.text.trim(),
-                  'email': emailCtrl.text.trim(),
-                  'password': passCtrl.text,
-                  'licenseNumber': licCtrl.text.trim(),
-                  'facilityId': facilityId,
-                  'specialty': specCtrl.text.trim(),
-                });
-                navigator.pop(true);
-              } on DioException catch (e) {
-                messenger.showSnackBar(SnackBar(
-                  content: Text(e.response?.data?['message'] ?? 'Failed to create.'),
-                  backgroundColor: Colors.red,
-                ));
-              }
-            },
-            child: const Text('Create'),
-          ),
-        ],
-      ),
     );
 
     if (created == true) _load();
@@ -209,13 +226,18 @@ class _FacilityProvidersTabState extends State<_FacilityProvidersTab> {
   Widget _buildBody() {
     if (_loading) return const Center(child: CircularProgressIndicator());
     if (_error != null) {
-      return Center(child: Text(_error!, style: const TextStyle(color: Colors.red)));
+      return Center(
+        child: Text(_error!, style: const TextStyle(color: Colors.red)),
+      );
     }
     if (_providers.isEmpty) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const EmptyState(icon: Icons.badge_outlined, title: 'No providers yet'),
+          const EmptyState(
+            icon: Icons.badge_outlined,
+            title: 'No providers yet',
+          ),
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: _showCreateDialog,
@@ -240,10 +262,14 @@ class _FacilityProvidersTabState extends State<_FacilityProvidersTab> {
                   margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
                     leading: CircleAvatar(
-                      child: Text((p['fullName'] ?? '?')[0].toString().toUpperCase()),
+                      child: Text(
+                        (p['fullName'] ?? '?')[0].toString().toUpperCase(),
+                      ),
                     ),
                     title: Text(p['fullName'] ?? ''),
-                    subtitle: Text('${p['email'] ?? ''}  •  ${p['specialty'] ?? ''}'),
+                    subtitle: Text(
+                      '${p['email'] ?? ''}  •  ${p['specialty'] ?? ''}',
+                    ),
                     trailing: Chip(label: Text(p['licenseNumber'] ?? '')),
                   ),
                 );
