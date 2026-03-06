@@ -18,7 +18,7 @@ public class NotificationController : ControllerBase
     private readonly ILogger<NotificationController> _logger;
 
     public NotificationController(
-        BirthChainDbContext context, 
+        BirthChainDbContext context,
         IFcmNotificationService fcmService,
         ILogger<NotificationController> logger)
     {
@@ -30,9 +30,9 @@ public class NotificationController : ControllerBase
     private Guid? GetUserId()
     {
         // JWT tokens use "sub" claim for user ID
-        var userIdClaim = User.FindFirst("sub")?.Value 
+        var userIdClaim = User.FindFirst("sub")?.Value
             ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        
+
         if (Guid.TryParse(userIdClaim, out var userId))
             return userId;
         return null;
@@ -47,7 +47,7 @@ public class NotificationController : ControllerBase
         var userId = GetUserId();
         if (userId == null)
         {
-            _logger.LogWarning("Failed to get user ID from claims. Claims: {Claims}", 
+            _logger.LogWarning("Failed to get user ID from claims. Claims: {Claims}",
                 string.Join(", ", User.Claims.Select(c => $"{c.Type}={c.Value}")));
             return Unauthorized();
         }
@@ -62,7 +62,7 @@ public class NotificationController : ControllerBase
         user.FcmToken = dto.Token;
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("FCM token saved for user {UserId}, token starts with: {TokenStart}", 
+        _logger.LogInformation("FCM token saved for user {UserId}, token starts with: {TokenStart}",
             userId, dto.Token?.Substring(0, Math.Min(20, dto.Token?.Length ?? 0)));
 
         return Ok(new { message = "Device token saved successfully" });

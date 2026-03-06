@@ -41,11 +41,21 @@ public class FcmNotificationService : IFcmNotificationService
 
             try
             {
+                // Check if Firebase is already initialized
+                if (FirebaseApp.DefaultInstance != null)
+                {
+                    _isInitialized = true;
+                    return;
+                }
+
                 // Try to get credentials from environment variable (for Railway)
                 var firebaseCredentialsJson = Environment.GetEnvironmentVariable("FIREBASE_CREDENTIALS_JSON");
 
                 if (!string.IsNullOrEmpty(firebaseCredentialsJson))
                 {
+                    // Fix escaped newlines in private_key (Railway may double-escape them)
+                    firebaseCredentialsJson = firebaseCredentialsJson.Replace("\\\\n", "\\n");
+                    
                     // Use credentials from environment variable (Railway deployment)
                     FirebaseApp.Create(new AppOptions
                     {
@@ -76,7 +86,7 @@ public class FcmNotificationService : IFcmNotificationService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to initialize Firebase");
+                _logger.LogError(ex, "Failed to initialize Firebase: {Message}", ex.Message);
             }
         }
     }

@@ -72,7 +72,7 @@ public sealed class FacilityService : IFacilityService
 
             foreach (var admin in adminsWithTokens)
             {
-                _logger.LogInformation("Sending notification to admin {AdminId}, token starts with: {TokenStart}", 
+                _logger.LogInformation("Sending notification to admin {AdminId}, token starts with: {TokenStart}",
                     admin.Id, admin.FcmToken?.Substring(0, Math.Min(20, admin.FcmToken?.Length ?? 0)));
 
                 // Save notification for in-app display
