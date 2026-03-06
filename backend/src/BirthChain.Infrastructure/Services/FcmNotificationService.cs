@@ -11,7 +11,6 @@ public interface IFcmNotificationService
 {
     Task SendNotificationAsync(string deviceToken, string title, string body, Dictionary<string, string>? data = null);
     Task SendNotificationToUserAsync(Guid userId, string title, string body, Dictionary<string, string>? data = null);
-    void InitializeFirebase();
 }
 
 public class FcmNotificationService : IFcmNotificationService
@@ -20,6 +19,7 @@ public class FcmNotificationService : IFcmNotificationService
     private readonly ILogger<FcmNotificationService> _logger;
     private readonly BirthChainDbContext _context;
     private static bool _isInitialized = false;
+    private static bool _initializationAttempted = false;
     private static readonly object _lock = new object();
 
     public FcmNotificationService(
@@ -30,14 +30,24 @@ public class FcmNotificationService : IFcmNotificationService
         _configuration = configuration;
         _logger = logger;
         _context = context;
-        InitializeFirebase();
+        
+        // Initialize Firebase lazily - don't crash if it fails
+        try
+        {
+            InitializeFirebase();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Firebase initialization failed in constructor - notifications disabled");
+        }
     }
 
-    public void InitializeFirebase()
+    private void InitializeFirebase()
     {
         lock (_lock)
         {
-            if (_isInitialized) return;
+            if (_isInitialized || _initializationAttempted) return;
+            _initializationAttempted = true;
 
             try
             {
@@ -53,8 +63,7 @@ public class FcmNotificationService : IFcmNotificationService
 
                 if (!string.IsNullOrEmpty(firebaseCredentialsJson))
                 {
-                    // Fix escaped newlines in private_key (Railway may double-escape them)
-                    firebaseCredentialsJson = firebaseCredentialsJson.Replace("\\\\n", "\\n");
+                    _logger.LogInformation("Found FIREBASE_CREDENTIALS_JSON env var, length: {Length}", firebaseCredentialsJson.Length);
                     
                     // Use credentials from environment variable (Railway deployment)
                     FirebaseApp.Create(new AppOptions
@@ -62,6 +71,7 @@ public class FcmNotificationService : IFcmNotificationService
                         Credential = GoogleCredential.FromJson(firebaseCredentialsJson)
                     });
                     _logger.LogInformation("Firebase initialized from environment variable");
+                    _isInitialized = true;
                 }
                 else
                 {
@@ -74,19 +84,18 @@ public class FcmNotificationService : IFcmNotificationService
                             Credential = GoogleCredential.FromFile(credentialsPath)
                         });
                         _logger.LogInformation("Firebase initialized from file: {Path}", credentialsPath);
+                        _isInitialized = true;
                     }
                     else
                     {
                         _logger.LogWarning("Firebase credentials not configured. Push notifications will not work.");
-                        return;
                     }
                 }
-
-                _isInitialized = true;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to initialize Firebase: {Message}", ex.Message);
+                // Don't rethrow - just disable notifications
             }
         }
     }
