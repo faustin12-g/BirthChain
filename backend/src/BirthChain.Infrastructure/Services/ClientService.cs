@@ -7,8 +7,18 @@ namespace BirthChain.Infrastructure.Services;
 public sealed class ClientService : IClientService
 {
     private readonly IClientRepository _clientRepo;
+    private readonly IUserRepository _userRepo;
+    private readonly IProfileService _profileService;
 
-    public ClientService(IClientRepository clientRepo) => _clientRepo = clientRepo;
+    public ClientService(
+        IClientRepository clientRepo,
+        IUserRepository userRepo,
+        IProfileService profileService)
+    {
+        _clientRepo = clientRepo;
+        _userRepo = userRepo;
+        _profileService = profileService;
+    }
 
     public async Task<ClientDto> CreateAsync(CreateClientDto dto)
     {
@@ -57,6 +67,60 @@ public sealed class ClientService : IClientService
         var clients = await _clientRepo.SearchAsync(query);
         return clients.Select(ToDto).ToList().AsReadOnly();
     }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // PIN-secured access methods
+    // ═══════════════════════════════════════════════════════════════════════
+
+    public async Task<ClientLookupDto?> LookupByQrCodeAsync(string qrCodeId)
+    {
+        var client = await _clientRepo.GetByQrCodeAsync(qrCodeId);
+        if (client is null) return null;
+
+        bool hasPinSet = false;
+
+        // If client has a linked user account, check if they have a PIN
+        if (client.UserId.HasValue)
+        {
+            var user = await _userRepo.GetByIdAsync(client.UserId.Value);
+            if (user is not null)
+            {
+                hasPinSet = !string.IsNullOrEmpty(user.PinHash);
+            }
+        }
+
+        return new ClientLookupDto
+        {
+            Id = client.Id,
+            FullName = client.FullName,
+            QrCodeId = client.QrCodeId,
+            HasPinSet = hasPinSet
+        };
+    }
+
+    public async Task<ClientDto?> GetByQrCodeWithPinAsync(string qrCodeId, string pin)
+    {
+        var client = await _clientRepo.GetByQrCodeAsync(qrCodeId);
+        if (client is null) return null;
+
+        // If client has a linked user account with PIN, verify it
+        if (client.UserId.HasValue)
+        {
+            var user = await _userRepo.GetByIdAsync(client.UserId.Value);
+            if (user is not null && !string.IsNullOrEmpty(user.PinHash))
+            {
+                // Verify PIN using profile service (handles lockout etc.)
+                var isValid = await _profileService.VerifyPinAsync(client.UserId.Value, pin);
+                if (!isValid) return null;
+            }
+        }
+
+        return ToDto(client);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Private Helper Methods
+    // ═══════════════════════════════════════════════════════════════════════
 
     private static ClientDto ToDto(Client c) => new()
     {

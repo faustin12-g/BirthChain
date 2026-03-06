@@ -95,4 +95,95 @@ public class ProfileController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // PIN Security Endpoints
+    // ═══════════════════════════════════════════════════════════════════════
+
+    /// <summary>GET api/profile/pin/status — Get PIN status (has PIN, is locked)</summary>
+    [HttpGet("pin/status")]
+    public async Task<IActionResult> GetPinStatus()
+    {
+        try
+        {
+            var status = await _profileService.GetPinStatusAsync(CurrentUserId);
+            return Ok(status);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>POST api/profile/pin — Set PIN for the first time</summary>
+    [HttpPost("pin")]
+    public async Task<IActionResult> SetPin([FromBody] SetPinDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Pin))
+            return BadRequest(new { message = "PIN is required." });
+
+        try
+        {
+            await _profileService.SetPinAsync(CurrentUserId, dto);
+            return Ok(new { message = "PIN set successfully." });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>PUT api/profile/pin — Change existing PIN</summary>
+    [HttpPut("pin")]
+    public async Task<IActionResult> ChangePin([FromBody] ChangePinDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.CurrentPin) || string.IsNullOrWhiteSpace(dto.NewPin))
+            return BadRequest(new { message = "Current and new PINs are required." });
+
+        try
+        {
+            await _profileService.ChangePinAsync(CurrentUserId, dto);
+            return Ok(new { message = "PIN changed successfully." });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>DELETE api/profile/pin — Remove PIN</summary>
+    [HttpDelete("pin")]
+    public async Task<IActionResult> RemovePin([FromBody] VerifyPinDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Pin))
+            return BadRequest(new { message = "Current PIN is required." });
+
+        try
+        {
+            await _profileService.RemovePinAsync(CurrentUserId, dto.Pin);
+            return Ok(new { message = "PIN removed successfully." });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>POST api/profile/pin/verify — Verify PIN (for self-access)</summary>
+    [HttpPost("pin/verify")]
+    public async Task<IActionResult> VerifyPin([FromBody] VerifyPinDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Pin))
+            return BadRequest(new { message = "PIN is required." });
+
+        try
+        {
+            var isValid = await _profileService.VerifyPinAsync(CurrentUserId, dto.Pin);
+            return Ok(new { valid = isValid });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

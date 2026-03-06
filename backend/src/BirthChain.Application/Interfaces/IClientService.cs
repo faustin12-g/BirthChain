@@ -10,4 +10,12 @@ public interface IClientService
     Task<ClientDto?> GetByUserIdAsync(Guid userId);
     Task<IReadOnlyList<ClientDto>> GetAllAsync();
     Task<IReadOnlyList<ClientDto>> SearchAsync(string query);
+
+    // PIN-secured access methods
+
+    /// <summary>Look up client by QR code (returns limited info + hasPinSet)</summary>
+    Task<ClientLookupDto?> LookupByQrCodeAsync(string qrCodeId);
+
+    /// <summary>Get full client data after PIN verification</summary>
+    Task<ClientDto?> GetByQrCodeWithPinAsync(string qrCodeId, string pin);
 }

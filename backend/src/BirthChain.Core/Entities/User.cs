@@ -20,4 +20,14 @@ public class User : BaseEntity
     /// Links FacilityAdmin users to their facility. Null for Admin/Patient.
     /// </summary>
     public Guid? FacilityId { get; set; }
+
+    // PIN-based security for patient data access
+    /// <summary>Hashed 4-6 digit PIN for secure data access</summary>
+    public string? PinHash { get; set; }
+
+    /// <summary>Number of consecutive failed PIN attempts</summary>
+    public int PinFailedAttempts { get; set; } = 0;
+
+    /// <summary>When the PIN lockout ends (null if not locked)</summary>
+    public DateTime? PinLockoutEnd { get; set; }
 }

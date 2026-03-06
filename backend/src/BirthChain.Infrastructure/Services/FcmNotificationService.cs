@@ -30,7 +30,7 @@ public class FcmNotificationService : IFcmNotificationService
         _configuration = configuration;
         _logger = logger;
         _context = context;
-        
+
         // Initialize Firebase lazily - don't crash if it fails
         try
         {
@@ -64,7 +64,7 @@ public class FcmNotificationService : IFcmNotificationService
                 if (!string.IsNullOrEmpty(firebaseCredentialsJson))
                 {
                     _logger.LogInformation("Found FIREBASE_CREDENTIALS_JSON env var, length: {Length}", firebaseCredentialsJson.Length);
-                    
+
                     // Use credentials from environment variable (Railway deployment)
                     FirebaseApp.Create(new AppOptions
                     {

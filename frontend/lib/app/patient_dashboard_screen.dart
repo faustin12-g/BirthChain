@@ -44,6 +44,10 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
     Future.microtask(
       () => context.read<NotificationProvider>().loadNotifications(),
     );
+    // Load PIN status for security checks
+    Future.microtask(
+      () => context.read<PinProvider>().loadStatus(),
+    );
   }
 
   @override

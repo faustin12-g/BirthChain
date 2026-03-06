@@ -126,6 +126,16 @@ public record ClientDto
     public Guid? UserId { get; init; }
 }
 
+/// <summary>Limited client info returned when looking up by QR code (before PIN verification)</summary>
+public record ClientLookupDto
+{
+    public Guid Id { get; init; }
+    public string FullName { get; init; } = string.Empty;
+    public string QrCodeId { get; init; } = string.Empty;
+    public bool HasPinSet { get; init; }
+    public bool RequiresPin => HasPinSet;
+}
+
 public record CreateClientDto
 {
     public string FullName { get; init; } = string.Empty;
@@ -205,4 +215,36 @@ public record AdminStatsDto
     public int TotalRecords { get; init; }
     public int TotalActivityLogs { get; init; }
     public Dictionary<string, int> UsersByRole { get; init; } = new();
+}
+
+// ── PIN Security ──
+
+public record SetPinDto
+{
+    public string Pin { get; init; } = string.Empty;
+    public string? CurrentPassword { get; init; } // Required when setting PIN for first time
+}
+
+public record ChangePinDto
+{
+    public string CurrentPin { get; init; } = string.Empty;
+    public string NewPin { get; init; } = string.Empty;
+}
+
+public record VerifyPinDto
+{
+    public string Pin { get; init; } = string.Empty;
+}
+
+public record VerifyPinForPatientDto
+{
+    public string PatientCode { get; init; } = string.Empty; // QR code value
+    public string Pin { get; init; } = string.Empty;
+}
+
+public record PinStatusDto
+{
+    public bool HasPinSet { get; init; }
+    public bool IsLocked { get; init; }
+    public int? LockoutMinutesRemaining { get; init; }
 }

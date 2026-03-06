@@ -78,7 +78,7 @@ public sealed class FacilityService : IFacilityService
                     CreatedAt = DateTime.UtcNow
                 };
                 _context.Notifications.Add(notification);
-                
+
                 // Send push notification only if admin has FCM token
                 if (!string.IsNullOrEmpty(admin.FcmToken))
                 {
