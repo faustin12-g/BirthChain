@@ -2,6 +2,7 @@ using System.Text.Json;
 using BirthChain.Application.DTOs;
 using BirthChain.Application.Interfaces;
 using BirthChain.Core.Entities;
+using BirthChain.Infrastructure.Data;
 
 namespace BirthChain.Infrastructure.Services;
 
@@ -14,6 +15,8 @@ public sealed class RecordService : IRecordService
     private readonly IFacilityRepository _facilityRepo;
     private readonly IActivityLogService _activityLog;
     private readonly IEmailQueue _emailQueue;
+    private readonly IFcmNotificationService _fcmService;
+    private readonly BirthChainDbContext _context;
 
     public RecordService(
         IRecordRepository recordRepo,
@@ -22,7 +25,9 @@ public sealed class RecordService : IRecordService
         IUserRepository userRepo,
         IFacilityRepository facilityRepo,
         IActivityLogService activityLog,
-        IEmailQueue emailQueue)
+        IEmailQueue emailQueue,
+        IFcmNotificationService fcmService,
+        BirthChainDbContext context)
     {
         _recordRepo = recordRepo;
         _providerRepo = providerRepo;
@@ -31,6 +36,8 @@ public sealed class RecordService : IRecordService
         _facilityRepo = facilityRepo;
         _activityLog = activityLog;
         _emailQueue = emailQueue;
+        _fcmService = fcmService;
+        _context = context;
     }
 
     public async Task<RecordDto> CreateAsync(Guid providerUserId, CreateRecordDto dto)
@@ -60,13 +67,20 @@ public sealed class RecordService : IRecordService
         await _activityLog.LogAsync(providerUserId, $"Created record for client {client.FullName}");
 
         var user = await _userRepo.GetByIdAsync(provider.UserId);
+        var facility = await _facilityRepo.GetByIdAsync(provider.FacilityId);
+        var facilityName = facility?.Name ?? "Unknown Facility";
+        var providerName = user?.FullName ?? "Provider";
+
+        // Send push notification to the patient (if they have a user account with FCM token)
+        await SendNotificationToClientAsync(
+            client,
+            "New Birth Record Added",
+            $"A new birth record has been created by {providerName} at {facilityName}."
+        );
 
         // Send email notification to the patient
         if (!string.IsNullOrWhiteSpace(client.Email))
         {
-            var facility = await _facilityRepo.GetByIdAsync(provider.FacilityId);
-            var facilityName = facility?.Name ?? "Unknown Facility";
-            var providerName = user?.FullName ?? "Provider";
             var clientEmail = client.Email;
             var clientName = client.FullName;
             var qrCodeId = client.QrCodeId;
@@ -142,5 +156,28 @@ public sealed class RecordService : IRecordService
         }
 
         return result.AsReadOnly();
+    }
+
+    private async Task SendNotificationToClientAsync(Client client, string title, string body)
+    {
+        // Find user account linked to this client's email
+        if (string.IsNullOrEmpty(client.Email)) return;
+
+        var user = await _userRepo.GetByEmailAsync(client.Email);
+        if (user == null || string.IsNullOrEmpty(user.FcmToken)) return;
+
+        // Save notification for in-app display
+        var notification = new Notification
+        {
+            UserId = user.Id,
+            Title = title,
+            Body = body,
+            CreatedAt = DateTime.UtcNow
+        };
+        _context.Notifications.Add(notification);
+        await _context.SaveChangesAsync();
+
+        // Send push notification
+        await _fcmService.SendNotificationAsync(user.FcmToken, title, body);
     }
 }

@@ -14,6 +14,7 @@ public class User : BaseEntity
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public string? ProfileImageUrl { get; set; }
     public string? Phone { get; set; }
+    public string? FcmToken { get; set; } // Firebase Cloud Messaging token for push notifications
 
     /// <summary>
     /// Links FacilityAdmin users to their facility. Null for Admin/Patient.

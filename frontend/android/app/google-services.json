@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "332385571448",
+    "project_id": "birthchain",
+    "storage_bucket": "birthchain.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:332385571448:android:d440a694fcb7e3f59b538d",
+        "android_client_info": {
+          "package_name": "com.birthchain.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNJ85FDl8Jdxq3zYfIuaHOR-hYRhGigIM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

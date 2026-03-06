@@ -40,6 +40,7 @@ public static class DependencyInjection
         services.AddScoped<IFacilityService, FacilityService>();
         services.AddScoped<IAdminService, AdminService>();
         services.AddScoped<IProfileService, ProfileService>();
+        services.AddHttpClient<IFcmNotificationService, FcmNotificationService>(); // FCM push notifications
 
         return services;
     }

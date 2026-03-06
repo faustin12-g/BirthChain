@@ -15,6 +15,7 @@ public class BirthChainDbContext : DbContext
     public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
     public DbSet<Facility> Facilities => Set<Facility>();
     public DbSet<OtpCode> OtpCodes => Set<OtpCode>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -124,6 +125,21 @@ public class BirthChainDbContext : DbContext
             e.HasOne<User>()
              .WithMany()
              .HasForeignKey(a => a.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── Notification ──
+        modelBuilder.Entity<Notification>(e =>
+        {
+            e.HasKey(n => n.Id);
+            e.Property(n => n.Title).IsRequired().HasMaxLength(200);
+            e.Property(n => n.Body).HasMaxLength(1000);
+            e.HasIndex(n => n.UserId);
+            e.HasIndex(n => n.CreatedAt);
+
+            e.HasOne<User>()
+             .WithMany()
+             .HasForeignKey(n => n.UserId)
              .OnDelete(DeleteBehavior.Cascade);
         });
     }

@@ -83,4 +83,10 @@ class ApiEndpoints {
       '/facility-admin/providers/$id/deactivate';
   static String facilityAdminDeleteProvider(String id) =>
       '/facility-admin/providers/$id';
+
+  // Notifications
+  static const String notifications = '/notification';
+  static const String notificationToken = '/notification/token';
+  static String notificationMarkRead(String id) => '/notification/$id/read';
+  static const String notificationMarkAllRead = '/notification/read-all';
 }

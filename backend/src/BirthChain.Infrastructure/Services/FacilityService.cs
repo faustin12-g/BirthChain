@@ -1,6 +1,8 @@
 using BirthChain.Application.DTOs;
 using BirthChain.Application.Interfaces;
 using BirthChain.Core.Entities;
+using BirthChain.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace BirthChain.Infrastructure.Services;
 
@@ -8,11 +10,19 @@ public sealed class FacilityService : IFacilityService
 {
     private readonly IFacilityRepository _facilityRepo;
     private readonly IUserRepository _userRepo;
+    private readonly IFcmNotificationService _fcmService;
+    private readonly BirthChainDbContext _context;
 
-    public FacilityService(IFacilityRepository facilityRepo, IUserRepository userRepo)
+    public FacilityService(
+        IFacilityRepository facilityRepo, 
+        IUserRepository userRepo,
+        IFcmNotificationService fcmService,
+        BirthChainDbContext context)
     {
         _facilityRepo = facilityRepo;
         _userRepo = userRepo;
+        _fcmService = fcmService;
+        _context = context;
     }
 
     public async Task<FacilityDto> CreateAsync(CreateFacilityDto dto)
@@ -32,7 +42,42 @@ public sealed class FacilityService : IFacilityService
         };
 
         await _facilityRepo.AddAsync(facility);
+
+        // Send notification to all admins
+        await SendNotificationToAdminsAsync(
+            "New Facility Registered",
+            $"A new facility '{dto.Name}' has been registered."
+        );
+
         return ToDto(facility);
+    }
+
+    private async Task SendNotificationToAdminsAsync(string title, string body)
+    {
+        var admins = await _context.Users
+            .Where(u => u.Role == "Admin" && !string.IsNullOrEmpty(u.FcmToken))
+            .ToListAsync();
+
+        foreach (var admin in admins)
+        {
+            // Save notification for in-app display
+            var notification = new Notification
+            {
+                UserId = admin.Id,
+                Title = title,
+                Body = body,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Notifications.Add(notification);
+
+            // Send push notification
+            if (!string.IsNullOrEmpty(admin.FcmToken))
+            {
+                await _fcmService.SendNotificationAsync(admin.FcmToken, title, body);
+            }
+        }
+
+        await _context.SaveChangesAsync();
     }
 
     public async Task<IReadOnlyList<FacilityDto>> GetAllAsync()

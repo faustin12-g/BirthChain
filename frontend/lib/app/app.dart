@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
+import '../core/notifications/notification_service.dart';
+import '../core/notifications/notification_provider.dart';
+import '../core/notifications/notification_repository.dart';
 import '../di/injection.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/presentation/auth_provider.dart';
-import '../features/notifications/notification_provider.dart';
 import '../features/patients/data/patient_repository.dart';
 import '../features/patients/presentation/patient_provider.dart';
 import '../features/records/data/record_repository.dart';
@@ -31,7 +34,10 @@ class BirthChainApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => RecordProvider(getIt<RecordRepository>()),
         ),
-        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(
+          create:
+              (_) => NotificationProvider(NotificationRepository(getIt<Dio>())),
+        ),
         ChangeNotifierProvider(
           create: (_) => AdminProvider(getIt<AdminRepository>()),
         ),
@@ -39,15 +45,20 @@ class BirthChainApp extends StatelessWidget {
           create: (_) => ProfileProvider(getIt<ProfileRepository>()),
         ),
       ],
-      child: Consumer<AuthProvider>(
-        builder:
-            (_, auth, __) => MaterialApp(
-              title: 'BirthChain',
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.lightTheme,
-              initialRoute: AppRoutes.splash,
-              onGenerateRoute: AppRoutes.onGenerateRoute,
-            ),
+      child: Builder(
+        builder: (context) {
+          NotificationService.initialize(context);
+          return Consumer<AuthProvider>(
+            builder:
+                (_, auth, __) => MaterialApp(
+                  title: 'BirthChain',
+                  debugShowCheckedModeBanner: false,
+                  theme: AppTheme.lightTheme,
+                  initialRoute: AppRoutes.splash,
+                  onGenerateRoute: AppRoutes.onGenerateRoute,
+                ),
+          );
+        },
       ),
     );
   }
