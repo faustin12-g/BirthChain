@@ -60,22 +60,16 @@ public sealed class FacilityService : IFacilityService
     {
         try
         {
-            // Get all admin users (with or without tokens for logging)
+            // Get all admin users
             var allAdmins = await _context.Users
                 .Where(u => u.Role == "Admin")
                 .ToListAsync();
 
             _logger.LogInformation("Found {Count} admin users total", allAdmins.Count);
 
-            var adminsWithTokens = allAdmins.Where(u => !string.IsNullOrEmpty(u.FcmToken)).ToList();
-            _logger.LogInformation("Found {Count} admins with FCM tokens", adminsWithTokens.Count);
-
-            foreach (var admin in adminsWithTokens)
+            // Save notification for ALL admins (for in-app display)
+            foreach (var admin in allAdmins)
             {
-                _logger.LogInformation("Sending notification to admin {AdminId}, token starts with: {TokenStart}",
-                    admin.Id, admin.FcmToken?.Substring(0, Math.Min(20, admin.FcmToken?.Length ?? 0)));
-
-                // Save notification for in-app display
                 var notification = new Notification
                 {
                     UserId = admin.Id,
@@ -84,14 +78,19 @@ public sealed class FacilityService : IFacilityService
                     CreatedAt = DateTime.UtcNow
                 };
                 _context.Notifications.Add(notification);
-
-                // Send push notification
-                await _fcmService.SendNotificationAsync(admin.FcmToken!, title, body);
+                
+                // Send push notification only if admin has FCM token
+                if (!string.IsNullOrEmpty(admin.FcmToken))
+                {
+                    _logger.LogInformation("Sending push notification to admin {AdminId}", admin.Id);
+                    await _fcmService.SendNotificationAsync(admin.FcmToken, title, body);
+                }
             }
 
-            if (adminsWithTokens.Count > 0)
+            if (allAdmins.Count > 0)
             {
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("Saved {Count} notifications to database", allAdmins.Count);
             }
         }
         catch (Exception ex)
