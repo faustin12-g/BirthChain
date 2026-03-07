@@ -205,12 +205,6 @@ class PinProvider extends ChangeNotifier {
     }
   }
 
-  /// Reset PIN verification status (called when leaving protected tabs)
-  void resetPinVerification() {
-    _isPinVerified = false;
-    notifyListeners();
-  }
-
   /// Clear client lookup data
   void clearClientLookup() {
     _clientLookup = null;

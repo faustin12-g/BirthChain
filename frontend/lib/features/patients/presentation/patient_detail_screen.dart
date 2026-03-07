@@ -47,8 +47,8 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
             return r.details.toLowerCase().contains(q) ||
                 r.symptoms.toLowerCase().contains(q) ||
                 r.medication.toLowerCase().contains(q) ||
-                r.notes.toLowerCase().contains(q) ||
-                r.labTests.toLowerCase().contains(q) ||
+                (r.notes ?? '').toLowerCase().contains(q) ||
+                (r.labTests ?? '').toLowerCase().contains(q) ||
                 r.facilityName.toLowerCase().contains(q) ||
                 r.providerName.toLowerCase().contains(q);
           }).toList();
@@ -608,19 +608,19 @@ class _MedicalHistoryCard extends StatelessWidget {
               ),
 
             // Lab Tests
-            if (record.labTests.isNotEmpty)
+            if ((record.labTests ?? '').isNotEmpty)
               _RecordField(
                 icon: Icons.science_outlined,
                 label: 'Lab Tests',
-                value: record.labTests,
+                value: record.labTests ?? '',
               ),
 
             // Notes
-            if (record.notes.isNotEmpty)
+            if ((record.notes ?? '').isNotEmpty)
               _RecordField(
                 icon: Icons.note_alt_outlined,
                 label: 'Notes',
-                value: record.notes,
+                value: record.notes ?? '',
               ),
           ],
         ),

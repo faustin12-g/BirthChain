@@ -12,6 +12,7 @@ public class BirthChainDbContext : DbContext
     public DbSet<Provider> Providers => Set<Provider>();
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Record> Records => Set<Record>();
+    public DbSet<Reminder> Reminders => Set<Reminder>();
     public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
     public DbSet<Facility> Facilities => Set<Facility>();
     public DbSet<OtpCode> OtpCodes => Set<OtpCode>();
@@ -89,9 +90,31 @@ public class BirthChainDbContext : DbContext
         modelBuilder.Entity<Record>(e =>
         {
             e.HasKey(r => r.Id);
-            e.Property(r => r.Description).IsRequired().HasMaxLength(2000);
+            e.Property(r => r.RecordType).IsRequired().HasMaxLength(50);
+            e.Property(r => r.FacilityName).HasMaxLength(300);
+            e.Property(r => r.ChiefComplaint).HasMaxLength(500);
+            e.Property(r => r.Symptoms).HasMaxLength(2000);
+            e.Property(r => r.Examination).HasMaxLength(2000);
+            e.Property(r => r.Diagnosis).HasMaxLength(500);
+            e.Property(r => r.SecondaryDiagnoses).HasMaxLength(1000);
+            e.Property(r => r.Treatment).HasMaxLength(2000);
+            e.Property(r => r.BloodPressure).HasMaxLength(20);
+            e.Property(r => r.FetalPresentation).HasMaxLength(100);
+            e.Property(r => r.FetalMovement).HasMaxLength(200);
+            e.Property(r => r.DeliveryMode).HasMaxLength(100);
+            e.Property(r => r.BirthOutcome).HasMaxLength(200);
+            e.Property(r => r.Medications).HasMaxLength(2000);
+            e.Property(r => r.LabTests).HasMaxLength(2000);
+            e.Property(r => r.Immunizations).HasMaxLength(1000);
+            e.Property(r => r.CareInstructions).HasMaxLength(2000);
+            e.Property(r => r.ReferralTo).HasMaxLength(500);
+            e.Property(r => r.Notes).HasMaxLength(4000);
+            e.Property(r => r.Description).HasMaxLength(4000); // Legacy field
+
             e.HasIndex(r => r.ClientId);
             e.HasIndex(r => r.ProviderId);
+            e.HasIndex(r => r.RecordType);
+            e.HasIndex(r => r.VisitDate);
 
             e.HasOne<Client>()
              .WithMany()
@@ -102,6 +125,32 @@ public class BirthChainDbContext : DbContext
              .WithMany()
              .HasForeignKey(r => r.ProviderId)
              .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── Reminder ──
+        modelBuilder.Entity<Reminder>(e =>
+        {
+            e.HasKey(r => r.Id);
+            e.Property(r => r.ReminderType).IsRequired().HasMaxLength(50);
+            e.Property(r => r.Title).IsRequired().HasMaxLength(200);
+            e.Property(r => r.Message).HasMaxLength(1000);
+            e.Property(r => r.RecurrencePattern).HasMaxLength(50);
+            e.Property(r => r.Status).IsRequired().HasMaxLength(50);
+            e.Property(r => r.FacilityName).HasMaxLength(300);
+
+            e.HasIndex(r => r.ClientId);
+            e.HasIndex(r => r.ScheduledDate);
+            e.HasIndex(r => r.Status);
+
+            e.HasOne<Client>()
+             .WithMany()
+             .HasForeignKey(r => r.ClientId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne<Provider>()
+             .WithMany()
+             .HasForeignKey(r => r.ProviderId)
+             .OnDelete(DeleteBehavior.SetNull);
         });
 
         // ── OtpCode ──

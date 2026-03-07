@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<IProviderRepository, ProviderRepository>();
         services.AddScoped<IClientRepository, ClientRepository>();
         services.AddScoped<IRecordRepository, RecordRepository>();
+        services.AddScoped<IReminderRepository, ReminderRepository>();
         services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
         services.AddScoped<IFacilityRepository, FacilityRepository>();
         services.AddScoped<IOtpRepository, OtpRepository>();
@@ -36,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<IProviderService, ProviderService>();
         services.AddScoped<IClientService, ClientService>();
         services.AddScoped<IRecordService, RecordService>();
+        services.AddScoped<IReminderService, ReminderService>();
         services.AddScoped<IActivityLogService, ActivityLogService>();
         services.AddScoped<IFacilityService, FacilityService>();
         services.AddScoped<IAdminService, AdminService>();

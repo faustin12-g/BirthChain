@@ -31,7 +31,28 @@ public sealed class ClientService : IClientService
             Address = dto.Address,
             DateOfBirth = DateTime.SpecifyKind(dto.DateOfBirth, DateTimeKind.Utc),
             QrCodeId = $"BC-{Guid.NewGuid().ToString("N")[..8].ToUpper()}",
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+
+            // Medical Profile
+            PatientCategory = dto.PatientCategory,
+            BloodType = dto.BloodType,
+            Allergies = dto.Allergies,
+            ChronicConditions = dto.ChronicConditions,
+            EmergencyContactName = dto.EmergencyContactName,
+            EmergencyContactPhone = dto.EmergencyContactPhone,
+
+            // Maternal Health
+            IsPregnant = dto.IsPregnant,
+            LastMenstrualPeriod = dto.LastMenstrualPeriod.HasValue
+                ? DateTime.SpecifyKind(dto.LastMenstrualPeriod.Value, DateTimeKind.Utc)
+                : null,
+            ExpectedDeliveryDate = dto.ExpectedDeliveryDate.HasValue
+                ? DateTime.SpecifyKind(dto.ExpectedDeliveryDate.Value, DateTimeKind.Utc)
+                : null,
+            Gravida = dto.Gravida,
+            Parity = dto.Parity,
+            IsHighRiskPregnancy = dto.IsHighRiskPregnancy,
+            HighRiskFactors = dto.HighRiskFactors
         };
 
         await _clientRepo.AddAsync(client);
@@ -94,7 +115,9 @@ public sealed class ClientService : IClientService
             Id = client.Id,
             FullName = client.FullName,
             QrCodeId = client.QrCodeId,
-            HasPinSet = hasPinSet
+            HasPinSet = hasPinSet,
+            PatientCategory = client.PatientCategory,
+            IsPregnant = client.IsPregnant
         };
     }
 
@@ -133,6 +156,23 @@ public sealed class ClientService : IClientService
         DateOfBirth = c.DateOfBirth,
         QrCodeId = c.QrCodeId,
         CreatedAt = c.CreatedAt,
-        UserId = c.UserId
+        UserId = c.UserId,
+
+        // Medical Profile
+        PatientCategory = c.PatientCategory,
+        BloodType = c.BloodType,
+        Allergies = c.Allergies,
+        ChronicConditions = c.ChronicConditions,
+        EmergencyContactName = c.EmergencyContactName,
+        EmergencyContactPhone = c.EmergencyContactPhone,
+
+        // Maternal Health
+        IsPregnant = c.IsPregnant,
+        LastMenstrualPeriod = c.LastMenstrualPeriod,
+        ExpectedDeliveryDate = c.ExpectedDeliveryDate,
+        Gravida = c.Gravida,
+        Parity = c.Parity,
+        IsHighRiskPregnancy = c.IsHighRiskPregnancy,
+        HighRiskFactors = c.HighRiskFactors
     };
 }

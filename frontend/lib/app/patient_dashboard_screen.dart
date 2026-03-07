@@ -630,8 +630,8 @@ class _MyRecordsTabState extends State<_MyRecordsTab> {
             return r.details.toLowerCase().contains(q) ||
                 r.symptoms.toLowerCase().contains(q) ||
                 r.medication.toLowerCase().contains(q) ||
-                r.notes.toLowerCase().contains(q) ||
-                r.labTests.toLowerCase().contains(q) ||
+                (r.notes ?? '').toLowerCase().contains(q) ||
+                (r.labTests ?? '').toLowerCase().contains(q) ||
                 r.facilityName.toLowerCase().contains(q) ||
                 r.providerName.toLowerCase().contains(q);
           }).toList();
@@ -1071,10 +1071,10 @@ class _PatientRecordCard extends StatelessWidget {
               _Field(label: 'Symptoms', value: record.symptoms),
             if (record.medication.isNotEmpty)
               _Field(label: 'Medication', value: record.medication),
-            if (record.labTests.isNotEmpty)
-              _Field(label: 'Lab Tests', value: record.labTests),
-            if (record.notes.isNotEmpty)
-              _Field(label: 'Notes', value: record.notes),
+            if ((record.labTests ?? '').isNotEmpty)
+              _Field(label: 'Lab Tests', value: record.labTests ?? ''),
+            if ((record.notes ?? '').isNotEmpty)
+              _Field(label: 'Notes', value: record.notes ?? ''),
           ],
         ),
       ),
