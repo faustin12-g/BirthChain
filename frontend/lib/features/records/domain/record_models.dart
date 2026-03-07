@@ -110,7 +110,8 @@ class MedicalRecord {
   }
 
   /// Check if this is a maternal health record
-  bool get isMaternal => recordType == 'AntenatalVisit' || recordType == 'Delivery';
+  bool get isMaternal =>
+      recordType == 'AntenatalVisit' || recordType == 'Delivery';
 
   /// Get formatted vital signs as list
   List<String> get vitalSignsList {
@@ -119,7 +120,8 @@ class MedicalRecord {
       signs.add('BP: $bloodPressure mmHg');
     }
     if (pulseRate != null) signs.add('Pulse: $pulseRate bpm');
-    if (temperature != null) signs.add('Temp: ${temperature!.toStringAsFixed(1)}°C');
+    if (temperature != null)
+      signs.add('Temp: ${temperature!.toStringAsFixed(1)}°C');
     if (weight != null) signs.add('Weight: ${weight!.toStringAsFixed(1)} kg');
     if (height != null) signs.add('Height: ${height!.toStringAsFixed(1)} cm');
     if (oxygenSaturation != null) signs.add('SpO2: $oxygenSaturation%');
@@ -153,7 +155,8 @@ class MedicalRecord {
     clientName: json['clientName'] ?? '',
     providerName: json['providerName'] ?? '',
     recordType: json['recordType'] ?? 'Consultation',
-    visitDate: json['visitDate'] != null ? DateTime.tryParse(json['visitDate']) : null,
+    visitDate:
+        json['visitDate'] != null ? DateTime.tryParse(json['visitDate']) : null,
     facilityName: json['facilityName'] ?? '',
     chiefComplaint: json['chiefComplaint'] ?? '',
     symptoms: json['symptoms'] ?? '',
@@ -184,7 +187,10 @@ class MedicalRecord {
     immunizations: json['immunizations'],
     careInstructions: json['careInstructions'],
     followUpRequired: json['followUpRequired'] ?? false,
-    followUpDate: json['followUpDate'] != null ? DateTime.tryParse(json['followUpDate']) : null,
+    followUpDate:
+        json['followUpDate'] != null
+            ? DateTime.tryParse(json['followUpDate'])
+            : null,
     referralTo: json['referralTo'],
     notes: json['notes'],
     description: json['description'] ?? '',
@@ -217,16 +223,26 @@ class RecordTypes {
 
   static String getDisplayName(String type) {
     switch (type) {
-      case consultation: return 'General Consultation';
-      case antenatalVisit: return 'Antenatal Visit';
-      case delivery: return 'Delivery';
-      case immunization: return 'Immunization';
-      case labResult: return 'Lab Result';
-      case prescription: return 'Prescription';
-      case chronicCareVisit: return 'Chronic Care Visit';
-      case emergency: return 'Emergency';
-      case referral: return 'Referral';
-      default: return type;
+      case consultation:
+        return 'General Consultation';
+      case antenatalVisit:
+        return 'Antenatal Visit';
+      case delivery:
+        return 'Delivery';
+      case immunization:
+        return 'Immunization';
+      case labResult:
+        return 'Lab Result';
+      case prescription:
+        return 'Prescription';
+      case chronicCareVisit:
+        return 'Chronic Care Visit';
+      case emergency:
+        return 'Emergency';
+      case referral:
+        return 'Referral';
+      default:
+        return type;
     }
   }
 }
@@ -234,7 +250,7 @@ class RecordTypes {
 /// Create record request with all structured fields
 class CreateRecordRequest {
   final String clientId;
-  
+
   // Record Classification
   final String recordType;
   final DateTime? visitDate;
@@ -352,7 +368,8 @@ class CreateRecordRequest {
     if (immunizations != null) 'immunizations': immunizations,
     if (careInstructions != null) 'careInstructions': careInstructions,
     'followUpRequired': followUpRequired,
-    if (followUpDate != null) 'followUpDate': followUpDate!.toUtc().toIso8601String(),
+    if (followUpDate != null)
+      'followUpDate': followUpDate!.toUtc().toIso8601String(),
     if (referralTo != null) 'referralTo': referralTo,
     if (notes != null) 'notes': notes,
   };
@@ -411,7 +428,10 @@ class Reminder {
     recurrencePattern: json['recurrencePattern'],
     status: json['status'] ?? 'Pending',
     sentAt: json['sentAt'] != null ? DateTime.tryParse(json['sentAt']) : null,
-    completedAt: json['completedAt'] != null ? DateTime.tryParse(json['completedAt']) : null,
+    completedAt:
+        json['completedAt'] != null
+            ? DateTime.tryParse(json['completedAt'])
+            : null,
     facilityName: json['facilityName'],
     createdAt: json['createdAt'] ?? '',
   );
@@ -453,4 +473,3 @@ class CreateReminderRequest {
     if (facilityName != null) 'facilityName': facilityName,
   };
 }
-

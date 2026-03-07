@@ -17,11 +17,11 @@ class CreateRecordScreen extends StatefulWidget {
 
 class _CreateRecordScreenState extends State<CreateRecordScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Record type
   String _recordType = RecordTypes.consultation;
   DateTime _visitDate = DateTime.now();
-  
+
   // Clinical Information
   final _chiefComplaintCtrl = TextEditingController();
   final _symptomsCtrl = TextEditingController();
@@ -106,8 +106,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
     super.dispose();
   }
 
-  bool get _showMaternalSection => 
-      _recordType == RecordTypes.antenatalVisit || _recordType == RecordTypes.delivery;
+  bool get _showMaternalSection =>
+      _recordType == RecordTypes.antenatalVisit ||
+      _recordType == RecordTypes.delivery;
 
   String? get _bloodPressure {
     final sys = _bpSystolicCtrl.text.trim();
@@ -131,7 +132,8 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
   Future<void> _selectFollowUpDate() async {
     final date = await showDatePicker(
       context: context,
-      initialDate: _followUpDate ?? DateTime.now().add(const Duration(days: 14)),
+      initialDate:
+          _followUpDate ?? DateTime.now().add(const Duration(days: 14)),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
@@ -142,7 +144,7 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     final prov = context.read<RecordProvider>();
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
@@ -154,10 +156,19 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
         visitDate: _visitDate,
         chiefComplaint: _chiefComplaintCtrl.text.trim(),
         symptoms: _symptomsCtrl.text.trim(),
-        examination: _examinationCtrl.text.trim().isEmpty ? null : _examinationCtrl.text.trim(),
+        examination:
+            _examinationCtrl.text.trim().isEmpty
+                ? null
+                : _examinationCtrl.text.trim(),
         diagnosis: _diagnosisCtrl.text.trim(),
-        secondaryDiagnoses: _secondaryDiagnosesCtrl.text.trim().isEmpty ? null : _secondaryDiagnosesCtrl.text.trim(),
-        treatment: _treatmentCtrl.text.trim().isEmpty ? null : _treatmentCtrl.text.trim(),
+        secondaryDiagnoses:
+            _secondaryDiagnosesCtrl.text.trim().isEmpty
+                ? null
+                : _secondaryDiagnosesCtrl.text.trim(),
+        treatment:
+            _treatmentCtrl.text.trim().isEmpty
+                ? null
+                : _treatmentCtrl.text.trim(),
         bloodPressure: _bloodPressure,
         pulseRate: int.tryParse(_pulseCtrl.text.trim()),
         temperature: double.tryParse(_tempCtrl.text.trim()),
@@ -176,13 +187,28 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
         babyWeightGrams: int.tryParse(_babyWeightCtrl.text.trim()),
         apgarScore1Min: int.tryParse(_apgar1Ctrl.text.trim()),
         apgarScore5Min: int.tryParse(_apgar5Ctrl.text.trim()),
-        medications: _medicationsCtrl.text.trim().isEmpty ? null : _medicationsCtrl.text.trim(),
-        labTests: _labTestsCtrl.text.trim().isEmpty ? null : _labTestsCtrl.text.trim(),
-        immunizations: _immunizationsCtrl.text.trim().isEmpty ? null : _immunizationsCtrl.text.trim(),
-        careInstructions: _careInstructionsCtrl.text.trim().isEmpty ? null : _careInstructionsCtrl.text.trim(),
+        medications:
+            _medicationsCtrl.text.trim().isEmpty
+                ? null
+                : _medicationsCtrl.text.trim(),
+        labTests:
+            _labTestsCtrl.text.trim().isEmpty
+                ? null
+                : _labTestsCtrl.text.trim(),
+        immunizations:
+            _immunizationsCtrl.text.trim().isEmpty
+                ? null
+                : _immunizationsCtrl.text.trim(),
+        careInstructions:
+            _careInstructionsCtrl.text.trim().isEmpty
+                ? null
+                : _careInstructionsCtrl.text.trim(),
         followUpRequired: _followUpRequired,
         followUpDate: _followUpDate,
-        referralTo: _referralCtrl.text.trim().isEmpty ? null : _referralCtrl.text.trim(),
+        referralTo:
+            _referralCtrl.text.trim().isEmpty
+                ? null
+                : _referralCtrl.text.trim(),
         notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
       ),
     );
@@ -234,10 +260,15 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                       labelText: 'Type of Visit',
                       prefixIcon: Icon(Icons.local_hospital_outlined),
                     ),
-                    items: RecordTypes.all.map((type) => DropdownMenuItem(
-                      value: type,
-                      child: Text(RecordTypes.getDisplayName(type)),
-                    )).toList(),
+                    items:
+                        RecordTypes.all
+                            .map(
+                              (type) => DropdownMenuItem(
+                                value: type,
+                                child: Text(RecordTypes.getDisplayName(type)),
+                              ),
+                            )
+                            .toList(),
                     onChanged: (v) => setState(() => _recordType = v!),
                   ),
                   const SizedBox(height: 12),
@@ -248,7 +279,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                         labelText: 'Visit Date',
                         prefixIcon: Icon(Icons.calendar_today_outlined),
                       ),
-                      child: Text(DateFormat('MMM dd, yyyy').format(_visitDate)),
+                      child: Text(
+                        DateFormat('MMM dd, yyyy').format(_visitDate),
+                      ),
                     ),
                   ),
                 ],
@@ -272,8 +305,11 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                       hintText: 'Main reason for visit',
                       alignLabelWithHint: true,
                     ),
-                    validator: (v) => v == null || v.trim().isEmpty 
-                        ? 'Chief complaint is required' : null,
+                    validator:
+                        (v) =>
+                            v == null || v.trim().isEmpty
+                                ? 'Chief complaint is required'
+                                : null,
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -307,8 +343,11 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                       hintText: 'Primary diagnosis',
                       alignLabelWithHint: true,
                     ),
-                    validator: (v) => v == null || v.trim().isEmpty 
-                        ? 'Diagnosis is required' : null,
+                    validator:
+                        (v) =>
+                            v == null || v.trim().isEmpty
+                                ? 'Diagnosis is required'
+                                : null,
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -351,7 +390,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                         child: TextFormField(
                           controller: _bpSystolicCtrl,
                           keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           decoration: const InputDecoration(
                             labelText: 'BP (Systolic)',
                             hintText: 'e.g. 120',
@@ -366,7 +407,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                         child: TextFormField(
                           controller: _bpDiastolicCtrl,
                           keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           decoration: const InputDecoration(
                             labelText: 'Diastolic',
                             hintText: 'e.g. 80',
@@ -382,7 +425,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                         child: TextFormField(
                           controller: _pulseCtrl,
                           keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           decoration: const InputDecoration(
                             labelText: 'Pulse',
                             hintText: 'e.g. 72',
@@ -394,7 +439,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                       Expanded(
                         child: TextFormField(
                           controller: _tempCtrl,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           decoration: const InputDecoration(
                             labelText: 'Temperature',
                             hintText: 'e.g. 36.5',
@@ -410,7 +457,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                       Expanded(
                         child: TextFormField(
                           controller: _weightCtrl,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           decoration: const InputDecoration(
                             labelText: 'Weight',
                             hintText: 'e.g. 65.5',
@@ -422,7 +471,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                       Expanded(
                         child: TextFormField(
                           controller: _heightCtrl,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           decoration: const InputDecoration(
                             labelText: 'Height',
                             hintText: 'e.g. 165',
@@ -439,7 +490,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                         child: TextFormField(
                           controller: _spo2Ctrl,
                           keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           decoration: const InputDecoration(
                             labelText: 'SpO2',
                             hintText: 'e.g. 98',
@@ -452,7 +505,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                         child: TextFormField(
                           controller: _rrCtrl,
                           keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           decoration: const InputDecoration(
                             labelText: 'Resp. Rate',
                             hintText: 'e.g. 16',
@@ -483,7 +538,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                           child: TextFormField(
                             controller: _gestWeeksCtrl,
                             keyboardType: TextInputType.number,
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                             decoration: const InputDecoration(
                               labelText: 'Gestational Age',
                               hintText: 'Weeks',
@@ -496,7 +553,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                           child: TextFormField(
                             controller: _gestDaysCtrl,
                             keyboardType: TextInputType.number,
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                             decoration: const InputDecoration(
                               labelText: 'Days',
                               hintText: '0-6',
@@ -511,7 +570,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                         Expanded(
                           child: TextFormField(
                             controller: _fundalHeightCtrl,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             decoration: const InputDecoration(
                               labelText: 'Fundal Height',
                               hintText: 'e.g. 28',
@@ -524,7 +585,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                           child: TextFormField(
                             controller: _fetalHRCtrl,
                             keyboardType: TextInputType.number,
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                             decoration: const InputDecoration(
                               labelText: 'Fetal Heart Rate',
                               hintText: 'e.g. 140',
@@ -541,10 +604,22 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                         labelText: 'Fetal Presentation',
                       ),
                       items: const [
-                        DropdownMenuItem(value: 'Cephalic', child: Text('Cephalic (Head down)')),
-                        DropdownMenuItem(value: 'Breech', child: Text('Breech')),
-                        DropdownMenuItem(value: 'Transverse', child: Text('Transverse')),
-                        DropdownMenuItem(value: 'Oblique', child: Text('Oblique')),
+                        DropdownMenuItem(
+                          value: 'Cephalic',
+                          child: Text('Cephalic (Head down)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Breech',
+                          child: Text('Breech'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Transverse',
+                          child: Text('Transverse'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Oblique',
+                          child: Text('Oblique'),
+                        ),
                       ],
                       onChanged: (v) => setState(() => _fetalPresentation = v),
                     ),
@@ -555,13 +630,22 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                         labelText: 'Fetal Movement',
                       ),
                       items: const [
-                        DropdownMenuItem(value: 'Active', child: Text('Active')),
-                        DropdownMenuItem(value: 'Reduced', child: Text('Reduced')),
-                        DropdownMenuItem(value: 'Absent', child: Text('Absent')),
+                        DropdownMenuItem(
+                          value: 'Active',
+                          child: Text('Active'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Reduced',
+                          child: Text('Reduced'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Absent',
+                          child: Text('Absent'),
+                        ),
                       ],
                       onChanged: (v) => setState(() => _fetalMovement = v),
                     ),
-                    
+
                     // Delivery fields (for delivery records)
                     if (_recordType == RecordTypes.delivery) ...[
                       const SizedBox(height: 16),
@@ -580,9 +664,18 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                           labelText: 'Mode of Delivery',
                         ),
                         items: const [
-                          DropdownMenuItem(value: 'SVD', child: Text('Spontaneous Vaginal Delivery')),
-                          DropdownMenuItem(value: 'Caesarean', child: Text('Caesarean Section')),
-                          DropdownMenuItem(value: 'Assisted', child: Text('Assisted Delivery')),
+                          DropdownMenuItem(
+                            value: 'SVD',
+                            child: Text('Spontaneous Vaginal Delivery'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Caesarean',
+                            child: Text('Caesarean Section'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Assisted',
+                            child: Text('Assisted Delivery'),
+                          ),
                           DropdownMenuItem(value: 'VBAC', child: Text('VBAC')),
                         ],
                         onChanged: (v) => setState(() => _deliveryMode = v),
@@ -594,9 +687,18 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                           labelText: 'Birth Outcome',
                         ),
                         items: const [
-                          DropdownMenuItem(value: 'Live Birth', child: Text('Live Birth')),
-                          DropdownMenuItem(value: 'Stillbirth', child: Text('Stillbirth')),
-                          DropdownMenuItem(value: 'Neonatal Death', child: Text('Neonatal Death')),
+                          DropdownMenuItem(
+                            value: 'Live Birth',
+                            child: Text('Live Birth'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Stillbirth',
+                            child: Text('Stillbirth'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Neonatal Death',
+                            child: Text('Neonatal Death'),
+                          ),
                         ],
                         onChanged: (v) => setState(() => _birthOutcome = v),
                       ),
@@ -604,7 +706,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                       TextFormField(
                         controller: _babyWeightCtrl,
                         keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                         decoration: const InputDecoration(
                           labelText: 'Baby Weight',
                           hintText: 'e.g. 3200',
@@ -618,7 +722,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                             child: TextFormField(
                               controller: _apgar1Ctrl,
                               keyboardType: TextInputType.number,
-                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
                               decoration: const InputDecoration(
                                 labelText: 'APGAR (1 min)',
                                 hintText: '0-10',
@@ -630,7 +736,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                             child: TextFormField(
                               controller: _apgar5Ctrl,
                               keyboardType: TextInputType.number,
-                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
                               decoration: const InputDecoration(
                                 labelText: 'APGAR (5 min)',
                                 hintText: '0-10',
@@ -711,10 +819,11 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                   const SizedBox(height: 12),
                   SwitchListTile(
                     value: _followUpRequired,
-                    onChanged: (v) => setState(() {
-                      _followUpRequired = v;
-                      if (!v) _followUpDate = null;
-                    }),
+                    onChanged:
+                        (v) => setState(() {
+                          _followUpRequired = v;
+                          if (!v) _followUpDate = null;
+                        }),
                     title: const Text('Follow-up Required'),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -728,7 +837,9 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                         ),
                         child: Text(
                           _followUpDate != null
-                              ? DateFormat('MMM dd, yyyy').format(_followUpDate!)
+                              ? DateFormat(
+                                'MMM dd, yyyy',
+                              ).format(_followUpDate!)
                               : 'Select date',
                         ),
                       ),
@@ -761,23 +872,31 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
 
             // Submit button
             Consumer<RecordProvider>(
-              builder: (_, prov, __) => FilledButton.icon(
-                onPressed: prov.isLoading ? null : _submit,
-                icon: prov.isLoading 
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                      )
-                    : const Icon(Icons.save),
-                label: Text(
-                  prov.isLoading ? 'Saving...' : 'Save Medical Record',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 52),
-                ),
-              ),
+              builder:
+                  (_, prov, __) => FilledButton.icon(
+                    onPressed: prov.isLoading ? null : _submit,
+                    icon:
+                        prov.isLoading
+                            ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                            : const Icon(Icons.save),
+                    label: Text(
+                      prov.isLoading ? 'Saving...' : 'Save Medical Record',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 52),
+                    ),
+                  ),
             ),
             const SizedBox(height: 16),
           ],
@@ -788,7 +907,7 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
 
   Widget _buildPatientCard(ThemeData theme, ColorScheme colorScheme) {
     final patient = widget.patient;
-    
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -797,9 +916,10 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
           children: [
             CircleAvatar(
               radius: 28,
-              backgroundColor: patient.isMaternal 
-                  ? Colors.pink.shade100 
-                  : colorScheme.primaryContainer,
+              backgroundColor:
+                  patient.isMaternal
+                      ? Colors.pink.shade100
+                      : colorScheme.primaryContainer,
               child: Icon(
                 patient.isMaternal ? Icons.pregnant_woman : Icons.person,
                 color: patient.isMaternal ? Colors.pink : colorScheme.primary,
@@ -827,13 +947,16 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                   if (patient.isMaternal) ...[
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.pink.shade50,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        patient.gestationalAge.isNotEmpty 
+                        patient.gestationalAge.isNotEmpty
                             ? 'Pregnant - ${patient.gestationalAge}'
                             : 'Maternal Patient',
                         style: TextStyle(
@@ -874,10 +997,7 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
         ),
         title: Text(
           title,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: color,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w600, color: color),
         ),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         children: [child],
@@ -885,4 +1005,3 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
     );
   }
 }
-

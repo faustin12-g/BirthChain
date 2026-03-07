@@ -624,7 +624,8 @@ class _MedicalHistoryCard extends StatelessWidget {
                 ),
 
               // Chief Complaint
-              if (record.chiefComplaint.isNotEmpty && record.chiefComplaint != record.details)
+              if (record.chiefComplaint.isNotEmpty &&
+                  record.chiefComplaint != record.details)
                 _RecordField(
                   icon: Icons.report_problem_outlined,
                   label: 'Chief Complaint',
@@ -646,21 +647,30 @@ class _MedicalHistoryCard extends StatelessWidget {
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 4,
-                    children: record.vitalSignsList.take(3).map((vital) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        vital,
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.blue.shade700,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    )).toList(),
+                    children:
+                        record.vitalSignsList
+                            .take(3)
+                            .map(
+                              (vital) => Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  vital,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.blue.shade700,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
                   ),
                 ),
 
@@ -727,259 +737,350 @@ class _RecordDetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return DraggableScrollableSheet(
       initialChildSize: 0.85,
       minChildSize: 0.5,
       maxChildSize: 0.95,
-      builder: (context, scrollController) => Container(
-        decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          children: [
-            // Handle bar
-            Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 8),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
+      builder:
+          (context, scrollController) => Container(
+            decoration: BoxDecoration(
+              color: theme.scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
             ),
-            
-            // Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withAlpha(25),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      _getRecordTypeIcon(record.recordType),
-                      color: theme.colorScheme.primary,
-                      size: 24,
-                    ),
+            child: Column(
+              children: [
+                // Handle bar
+                Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 8),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _getRecordTypeLabel(record.recordType),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          DateFormatter.formatDate(record.eventDate),
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-            ),
-            
-            const Divider(),
-            
-            // Content
-            Expanded(
-              child: ListView(
-                controller: scrollController,
-                padding: const EdgeInsets.all(20),
-                children: [
-                  // Facility & Provider Info
-                  if (record.facilityName.isNotEmpty || record.providerName.isNotEmpty)
-                    _DetailSection(
-                      title: 'Visit Information',
-                      icon: Icons.local_hospital,
-                      children: [
-                        if (record.facilityName.isNotEmpty)
-                          _DetailRow(label: 'Facility', value: record.facilityName),
-                        if (record.providerName.isNotEmpty)
-                          _DetailRow(label: 'Provider', value: record.providerName),
-                      ],
-                    ),
+                ),
 
-                  // Clinical Information
-                  _DetailSection(
-                    title: 'Clinical Information',
-                    icon: Icons.medical_information,
+                // Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
+                  child: Row(
                     children: [
-                      if (record.chiefComplaint.isNotEmpty)
-                        _DetailRow(label: 'Chief Complaint', value: record.chiefComplaint),
-                      if (record.symptoms.isNotEmpty)
-                        _DetailRow(label: 'Symptoms', value: record.symptoms),
-                      if (record.examination.isNotEmpty)
-                        _DetailRow(label: 'Examination', value: record.examination),
-                      if (record.diagnosis.isNotEmpty)
-                        _DetailRow(label: 'Primary Diagnosis', value: record.diagnosis),
-                      if (record.secondaryDiagnoses != null && record.secondaryDiagnoses!.isNotEmpty)
-                        _DetailRow(label: 'Other Diagnoses', value: record.secondaryDiagnoses!),
-                      if (record.treatment.isNotEmpty)
-                        _DetailRow(label: 'Treatment', value: record.treatment),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withAlpha(25),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          _getRecordTypeIcon(record.recordType),
+                          color: theme.colorScheme.primary,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _getRecordTypeLabel(record.recordType),
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              DateFormatter.formatDate(record.eventDate),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close),
+                      ),
                     ],
                   ),
+                ),
 
-                  // Vital Signs
-                  if (record.vitalSignsList.isNotEmpty)
-                    _DetailSection(
-                      title: 'Vital Signs',
-                      icon: Icons.monitor_heart,
-                      children: [
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: record.vitalSignsList.map((vital) => _VitalChip(vital: vital)).toList(),
+                const Divider(),
+
+                // Content
+                Expanded(
+                  child: ListView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.all(20),
+                    children: [
+                      // Facility & Provider Info
+                      if (record.facilityName.isNotEmpty ||
+                          record.providerName.isNotEmpty)
+                        _DetailSection(
+                          title: 'Visit Information',
+                          icon: Icons.local_hospital,
+                          children: [
+                            if (record.facilityName.isNotEmpty)
+                              _DetailRow(
+                                label: 'Facility',
+                                value: record.facilityName,
+                              ),
+                            if (record.providerName.isNotEmpty)
+                              _DetailRow(
+                                label: 'Provider',
+                                value: record.providerName,
+                              ),
+                          ],
                         ),
-                      ],
-                    ),
 
-                  // Maternal Health (if applicable)
-                  if (record.isMaternal || record.gestationalWeeks != null)
-                    _DetailSection(
-                      title: 'Maternal Health',
-                      icon: Icons.pregnant_woman,
-                      children: [
-                        if (record.gestationalAge.isNotEmpty)
-                          _DetailRow(label: 'Gestational Age', value: record.gestationalAge),
-                        if (record.fundalHeight != null)
-                          _DetailRow(label: 'Fundal Height', value: '${record.fundalHeight} cm'),
-                        if (record.fetalHeartRate != null)
-                          _DetailRow(label: 'Fetal Heart Rate', value: '${record.fetalHeartRate} bpm'),
-                        if (record.fetalPresentation != null && record.fetalPresentation!.isNotEmpty)
-                          _DetailRow(label: 'Fetal Presentation', value: record.fetalPresentation!),
-                        if (record.fetalMovement != null && record.fetalMovement!.isNotEmpty)
-                          _DetailRow(label: 'Fetal Movement', value: record.fetalMovement!),
-                      ],
-                    ),
+                      // Clinical Information
+                      _DetailSection(
+                        title: 'Clinical Information',
+                        icon: Icons.medical_information,
+                        children: [
+                          if (record.chiefComplaint.isNotEmpty)
+                            _DetailRow(
+                              label: 'Chief Complaint',
+                              value: record.chiefComplaint,
+                            ),
+                          if (record.symptoms.isNotEmpty)
+                            _DetailRow(
+                              label: 'Symptoms',
+                              value: record.symptoms,
+                            ),
+                          if (record.examination.isNotEmpty)
+                            _DetailRow(
+                              label: 'Examination',
+                              value: record.examination,
+                            ),
+                          if (record.diagnosis.isNotEmpty)
+                            _DetailRow(
+                              label: 'Primary Diagnosis',
+                              value: record.diagnosis,
+                            ),
+                          if (record.secondaryDiagnoses != null &&
+                              record.secondaryDiagnoses!.isNotEmpty)
+                            _DetailRow(
+                              label: 'Other Diagnoses',
+                              value: record.secondaryDiagnoses!,
+                            ),
+                          if (record.treatment.isNotEmpty)
+                            _DetailRow(
+                              label: 'Treatment',
+                              value: record.treatment,
+                            ),
+                        ],
+                      ),
 
-                  // Delivery Information
-                  if (record.recordType == 'Delivery')
-                    _DetailSection(
-                      title: 'Delivery Information',
-                      icon: Icons.child_friendly,
-                      children: [
-                        if (record.deliveryMode != null && record.deliveryMode!.isNotEmpty)
-                          _DetailRow(label: 'Delivery Mode', value: record.deliveryMode!),
-                        if (record.birthOutcome != null && record.birthOutcome!.isNotEmpty)
-                          _DetailRow(label: 'Birth Outcome', value: record.birthOutcome!),
-                        if (record.babyWeightGrams != null)
-                          _DetailRow(label: 'Baby Weight', value: '${record.babyWeightGrams} g (${(record.babyWeightGrams! / 1000).toStringAsFixed(2)} kg)'),
-                        if (record.apgarScore1Min != null)
-                          _DetailRow(label: 'APGAR (1 min)', value: '${record.apgarScore1Min}'),
-                        if (record.apgarScore5Min != null)
-                          _DetailRow(label: 'APGAR (5 min)', value: '${record.apgarScore5Min}'),
-                      ],
-                    ),
-
-                  // Medications
-                  if (record.medications != null && record.medications!.isNotEmpty)
-                    _DetailSection(
-                      title: 'Medications',
-                      icon: Icons.medication,
-                      children: [
-                        _DetailRow(label: 'Prescribed', value: record.medications!),
-                      ],
-                    ),
-
-                  // Lab Tests
-                  if (record.labTests != null && record.labTests!.isNotEmpty)
-                    _DetailSection(
-                      title: 'Laboratory Tests',
-                      icon: Icons.science,
-                      children: [
-                        _DetailRow(label: 'Tests', value: record.labTests!),
-                      ],
-                    ),
-
-                  // Immunizations
-                  if (record.immunizations != null && record.immunizations!.isNotEmpty)
-                    _DetailSection(
-                      title: 'Immunizations',
-                      icon: Icons.vaccines,
-                      children: [
-                        _DetailRow(label: 'Given', value: record.immunizations!),
-                      ],
-                    ),
-
-                  // Follow-up
-                  if (record.followUpDate != null || (record.careInstructions != null && record.careInstructions!.isNotEmpty))
-                    _DetailSection(
-                      title: 'Follow-up',
-                      icon: Icons.calendar_month,
-                      children: [
-                        if (record.followUpDate != null)
-                          _DetailRow(
-                            label: 'Next Appointment',
-                            value: DateFormatter.formatDate(record.followUpDate!.toIso8601String()),
-                          ),
-                        if (record.careInstructions != null && record.careInstructions!.isNotEmpty)
-                          _DetailRow(label: 'Care Instructions', value: record.careInstructions!),
-                        if (record.referralTo != null && record.referralTo!.isNotEmpty)
-                          _DetailRow(label: 'Referred To', value: record.referralTo!),
-                      ],
-                    ),
-
-                  // Notes
-                  if (record.notes != null && record.notes!.isNotEmpty)
-                    _DetailSection(
-                      title: 'Additional Notes',
-                      icon: Icons.note_alt,
-                      children: [
-                        Text(
-                          record.notes!,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade700,
-                          ),
+                      // Vital Signs
+                      if (record.vitalSignsList.isNotEmpty)
+                        _DetailSection(
+                          title: 'Vital Signs',
+                          icon: Icons.monitor_heart,
+                          children: [
+                            Wrap(
+                              spacing: 10,
+                              runSpacing: 10,
+                              children:
+                                  record.vitalSignsList
+                                      .map((vital) => _VitalChip(vital: vital))
+                                      .toList(),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
 
-                  // Record metadata
-                  const SizedBox(height: 20),
-                  Text(
-                    'Record ID: ${record.id.substring(0, 8)}...',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey.shade400,
-                    ),
-                    textAlign: TextAlign.center,
+                      // Maternal Health (if applicable)
+                      if (record.isMaternal || record.gestationalWeeks != null)
+                        _DetailSection(
+                          title: 'Maternal Health',
+                          icon: Icons.pregnant_woman,
+                          children: [
+                            if (record.gestationalAge.isNotEmpty)
+                              _DetailRow(
+                                label: 'Gestational Age',
+                                value: record.gestationalAge,
+                              ),
+                            if (record.fundalHeight != null)
+                              _DetailRow(
+                                label: 'Fundal Height',
+                                value: '${record.fundalHeight} cm',
+                              ),
+                            if (record.fetalHeartRate != null)
+                              _DetailRow(
+                                label: 'Fetal Heart Rate',
+                                value: '${record.fetalHeartRate} bpm',
+                              ),
+                            if (record.fetalPresentation != null &&
+                                record.fetalPresentation!.isNotEmpty)
+                              _DetailRow(
+                                label: 'Fetal Presentation',
+                                value: record.fetalPresentation!,
+                              ),
+                            if (record.fetalMovement != null &&
+                                record.fetalMovement!.isNotEmpty)
+                              _DetailRow(
+                                label: 'Fetal Movement',
+                                value: record.fetalMovement!,
+                              ),
+                          ],
+                        ),
+
+                      // Delivery Information
+                      if (record.recordType == 'Delivery')
+                        _DetailSection(
+                          title: 'Delivery Information',
+                          icon: Icons.child_friendly,
+                          children: [
+                            if (record.deliveryMode != null &&
+                                record.deliveryMode!.isNotEmpty)
+                              _DetailRow(
+                                label: 'Delivery Mode',
+                                value: record.deliveryMode!,
+                              ),
+                            if (record.birthOutcome != null &&
+                                record.birthOutcome!.isNotEmpty)
+                              _DetailRow(
+                                label: 'Birth Outcome',
+                                value: record.birthOutcome!,
+                              ),
+                            if (record.babyWeightGrams != null)
+                              _DetailRow(
+                                label: 'Baby Weight',
+                                value:
+                                    '${record.babyWeightGrams} g (${(record.babyWeightGrams! / 1000).toStringAsFixed(2)} kg)',
+                              ),
+                            if (record.apgarScore1Min != null)
+                              _DetailRow(
+                                label: 'APGAR (1 min)',
+                                value: '${record.apgarScore1Min}',
+                              ),
+                            if (record.apgarScore5Min != null)
+                              _DetailRow(
+                                label: 'APGAR (5 min)',
+                                value: '${record.apgarScore5Min}',
+                              ),
+                          ],
+                        ),
+
+                      // Medications
+                      if (record.medications != null &&
+                          record.medications!.isNotEmpty)
+                        _DetailSection(
+                          title: 'Medications',
+                          icon: Icons.medication,
+                          children: [
+                            _DetailRow(
+                              label: 'Prescribed',
+                              value: record.medications!,
+                            ),
+                          ],
+                        ),
+
+                      // Lab Tests
+                      if (record.labTests != null &&
+                          record.labTests!.isNotEmpty)
+                        _DetailSection(
+                          title: 'Laboratory Tests',
+                          icon: Icons.science,
+                          children: [
+                            _DetailRow(label: 'Tests', value: record.labTests!),
+                          ],
+                        ),
+
+                      // Immunizations
+                      if (record.immunizations != null &&
+                          record.immunizations!.isNotEmpty)
+                        _DetailSection(
+                          title: 'Immunizations',
+                          icon: Icons.vaccines,
+                          children: [
+                            _DetailRow(
+                              label: 'Given',
+                              value: record.immunizations!,
+                            ),
+                          ],
+                        ),
+
+                      // Follow-up
+                      if (record.followUpDate != null ||
+                          (record.careInstructions != null &&
+                              record.careInstructions!.isNotEmpty))
+                        _DetailSection(
+                          title: 'Follow-up',
+                          icon: Icons.calendar_month,
+                          children: [
+                            if (record.followUpDate != null)
+                              _DetailRow(
+                                label: 'Next Appointment',
+                                value: DateFormatter.formatDate(
+                                  record.followUpDate!.toIso8601String(),
+                                ),
+                              ),
+                            if (record.careInstructions != null &&
+                                record.careInstructions!.isNotEmpty)
+                              _DetailRow(
+                                label: 'Care Instructions',
+                                value: record.careInstructions!,
+                              ),
+                            if (record.referralTo != null &&
+                                record.referralTo!.isNotEmpty)
+                              _DetailRow(
+                                label: 'Referred To',
+                                value: record.referralTo!,
+                              ),
+                          ],
+                        ),
+
+                      // Notes
+                      if (record.notes != null && record.notes!.isNotEmpty)
+                        _DetailSection(
+                          title: 'Additional Notes',
+                          icon: Icons.note_alt,
+                          children: [
+                            Text(
+                              record.notes!,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                      // Record metadata
+                      const SizedBox(height: 20),
+                      Text(
+                        'Record ID: ${record.id.substring(0, 8)}...',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade400,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        'Created: ${DateFormatter.formatDate(record.createdAt)}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade400,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      const SizedBox(height: 40),
+                    ],
                   ),
-                  Text(
-                    'Created: ${DateFormatter.formatDate(record.createdAt)}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey.shade400,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  
-                  const SizedBox(height: 40),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -1040,7 +1141,11 @@ class _DetailSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
+              Icon(
+                icon,
+                size: 18,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(width: 8),
               Text(
                 title,
@@ -1097,12 +1202,7 @@ class _DetailRow extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 2),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-            ),
-          ),
+          Text(value, style: const TextStyle(fontSize: 14)),
         ],
       ),
     );

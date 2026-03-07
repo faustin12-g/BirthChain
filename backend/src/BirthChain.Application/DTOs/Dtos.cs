@@ -269,7 +269,7 @@ public record RecordDto
 public record CreateRecordDto
 {
     public Guid ClientId { get; init; }
-    
+
     // Record Classification
     public string RecordType { get; init; } = "Consultation";
     public DateTime? VisitDate { get; init; }

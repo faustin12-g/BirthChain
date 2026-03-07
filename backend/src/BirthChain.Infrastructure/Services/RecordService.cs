@@ -65,8 +65,8 @@ public sealed class RecordService : IRecordService
 
             // Record Classification
             RecordType = dto.RecordType,
-            VisitDate = dto.VisitDate.HasValue 
-                ? DateTime.SpecifyKind(dto.VisitDate.Value, DateTimeKind.Utc) 
+            VisitDate = dto.VisitDate.HasValue
+                ? DateTime.SpecifyKind(dto.VisitDate.Value, DateTimeKind.Utc)
                 : DateTime.UtcNow,
             FacilityName = facilityName,
 

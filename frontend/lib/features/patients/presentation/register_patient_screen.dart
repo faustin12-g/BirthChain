@@ -18,7 +18,7 @@ class RegisterPatientScreen extends StatefulWidget {
 
 class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Basic info
   final _nameCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
@@ -26,7 +26,7 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
   final _addressCtrl = TextEditingController();
   String _selectedGender = 'Male';
   DateTime? _dob;
-  
+
   // Medical profile
   String _patientCategory = PatientCategories.general;
   String? _bloodType;
@@ -34,7 +34,7 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
   final _chronicConditionsCtrl = TextEditingController();
   final _emergencyNameCtrl = TextEditingController();
   final _emergencyPhoneCtrl = TextEditingController();
-  
+
   // Maternal health
   bool _isPregnant = false;
   DateTime? _lastMenstrualPeriod;
@@ -42,7 +42,7 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
   int? _parity;
   bool _isHighRisk = false;
   final _highRiskFactorsCtrl = TextEditingController();
-  
+
   Patient? _createdPatient;
 
   static const _genders = ['Male', 'Female', 'Other'];
@@ -112,17 +112,32 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
         dateOfBirth: _dob!.toIso8601String().split('T').first,
         patientCategory: _patientCategory,
         bloodType: _bloodType,
-        allergies: _allergiesCtrl.text.trim().isEmpty ? null : _allergiesCtrl.text.trim(),
-        chronicConditions: _chronicConditionsCtrl.text.trim().isEmpty ? null : _chronicConditionsCtrl.text.trim(),
-        emergencyContactName: _emergencyNameCtrl.text.trim().isEmpty ? null : _emergencyNameCtrl.text.trim(),
-        emergencyContactPhone: _emergencyPhoneCtrl.text.trim().isEmpty ? null : _emergencyPhoneCtrl.text.trim(),
+        allergies:
+            _allergiesCtrl.text.trim().isEmpty
+                ? null
+                : _allergiesCtrl.text.trim(),
+        chronicConditions:
+            _chronicConditionsCtrl.text.trim().isEmpty
+                ? null
+                : _chronicConditionsCtrl.text.trim(),
+        emergencyContactName:
+            _emergencyNameCtrl.text.trim().isEmpty
+                ? null
+                : _emergencyNameCtrl.text.trim(),
+        emergencyContactPhone:
+            _emergencyPhoneCtrl.text.trim().isEmpty
+                ? null
+                : _emergencyPhoneCtrl.text.trim(),
         isPregnant: _isPregnant,
         lastMenstrualPeriod: _lastMenstrualPeriod,
         expectedDeliveryDate: _expectedDeliveryDate,
         gravida: _gravida,
         parity: _parity,
         isHighRiskPregnancy: _isHighRisk,
-        highRiskFactors: _highRiskFactorsCtrl.text.trim().isEmpty ? null : _highRiskFactorsCtrl.text.trim(),
+        highRiskFactors:
+            _highRiskFactorsCtrl.text.trim().isEmpty
+                ? null
+                : _highRiskFactorsCtrl.text.trim(),
       ),
     );
 
@@ -274,9 +289,14 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             // === SECTION: Basic Information ===
-            _buildSectionHeader(context, 'Basic Information', Icons.person_outline, Colors.blue),
+            _buildSectionHeader(
+              context,
+              'Basic Information',
+              Icons.person_outline,
+              Colors.blue,
+            ),
             const SizedBox(height: 12),
-            
+
             TextFormField(
               controller: _nameCtrl,
               textCapitalization: TextCapitalization.words,
@@ -284,7 +304,9 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
                 labelText: 'Full Name *',
                 prefixIcon: Icon(Icons.person_outline),
               ),
-              validator: (v) => v == null || v.trim().isEmpty ? 'Name is required' : null,
+              validator:
+                  (v) =>
+                      v == null || v.trim().isEmpty ? 'Name is required' : null,
             ),
             const SizedBox(height: 12),
 
@@ -297,7 +319,12 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
                       labelText: 'Gender *',
                       prefixIcon: Icon(Icons.wc_outlined),
                     ),
-                    items: _genders.map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
+                    items:
+                        _genders
+                            .map(
+                              (g) => DropdownMenuItem(value: g, child: Text(g)),
+                            )
+                            .toList(),
                     onChanged: (v) {
                       setState(() {
                         _selectedGender = v!;
@@ -367,23 +394,34 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
             const SizedBox(height: 24),
 
             // === SECTION: Patient Category ===
-            _buildSectionHeader(context, 'Patient Category', Icons.category_outlined, Colors.purple),
+            _buildSectionHeader(
+              context,
+              'Patient Category',
+              Icons.category_outlined,
+              Colors.purple,
+            ),
             const SizedBox(height: 12),
-            
+
             DropdownButtonFormField<String>(
               value: _patientCategory,
               decoration: const InputDecoration(
                 labelText: 'Patient Type *',
                 prefixIcon: Icon(Icons.medical_services_outlined),
               ),
-              items: PatientCategories.all.map((cat) => DropdownMenuItem(
-                value: cat,
-                child: Text(PatientCategories.getDisplayName(cat)),
-              )).toList(),
+              items:
+                  PatientCategories.all
+                      .map(
+                        (cat) => DropdownMenuItem(
+                          value: cat,
+                          child: Text(PatientCategories.getDisplayName(cat)),
+                        ),
+                      )
+                      .toList(),
               onChanged: (v) {
                 setState(() {
                   _patientCategory = v!;
-                  if (v == PatientCategories.maternal && _selectedGender == 'Female') {
+                  if (v == PatientCategories.maternal &&
+                      _selectedGender == 'Female') {
                     _isPregnant = true;
                   }
                 });
@@ -392,7 +430,12 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
             const SizedBox(height: 24),
 
             // === SECTION: Medical Profile ===
-            _buildSectionHeader(context, 'Medical Profile', Icons.medical_information_outlined, Colors.orange),
+            _buildSectionHeader(
+              context,
+              'Medical Profile',
+              Icons.medical_information_outlined,
+              Colors.orange,
+            ),
             const SizedBox(height: 12),
 
             DropdownButtonFormField<String>(
@@ -403,7 +446,9 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
               ),
               items: [
                 const DropdownMenuItem(value: null, child: Text('Unknown')),
-                ..._bloodTypes.map((bt) => DropdownMenuItem(value: bt, child: Text(bt))),
+                ..._bloodTypes.map(
+                  (bt) => DropdownMenuItem(value: bt, child: Text(bt)),
+                ),
               ],
               onChanged: (v) => setState(() => _bloodType = v),
             ),
@@ -473,9 +518,7 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
                   child: TextFormField(
                     controller: _emergencyPhoneCtrl,
                     keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      labelText: 'Phone',
-                    ),
+                    decoration: const InputDecoration(labelText: 'Phone'),
                   ),
                 ),
               ],
@@ -484,17 +527,23 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
 
             // === SECTION: Maternal Health (only for females) ===
             if (_selectedGender == 'Female') ...[
-              _buildSectionHeader(context, 'Maternal Health', Icons.pregnant_woman, Colors.pink),
+              _buildSectionHeader(
+                context,
+                'Maternal Health',
+                Icons.pregnant_woman,
+                Colors.pink,
+              ),
               const SizedBox(height: 12),
-              
+
               SwitchListTile(
                 value: _isPregnant,
-                onChanged: (v) => setState(() {
-                  _isPregnant = v;
-                  if (v && _patientCategory == PatientCategories.general) {
-                    _patientCategory = PatientCategories.maternal;
-                  }
-                }),
+                onChanged:
+                    (v) => setState(() {
+                      _isPregnant = v;
+                      if (v && _patientCategory == PatientCategories.general) {
+                        _patientCategory = PatientCategories.maternal;
+                      }
+                    }),
                 title: const Text('Currently Pregnant'),
                 contentPadding: EdgeInsets.zero,
               ),
@@ -513,10 +562,15 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
                       children: [
                         Text(
                           _lastMenstrualPeriod != null
-                              ? DateFormat('MMM dd, yyyy').format(_lastMenstrualPeriod!)
+                              ? DateFormat(
+                                'MMM dd, yyyy',
+                              ).format(_lastMenstrualPeriod!)
                               : 'Tap to select',
                           style: TextStyle(
-                            color: _lastMenstrualPeriod != null ? null : Colors.grey.shade500,
+                            color:
+                                _lastMenstrualPeriod != null
+                                    ? null
+                                    : Colors.grey.shade500,
                           ),
                         ),
                         if (_lastMenstrualPeriod != null) ...[
@@ -534,14 +588,16 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 Row(
                   children: [
                     Expanded(
                       child: TextFormField(
                         initialValue: _gravida?.toString(),
                         keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                         decoration: const InputDecoration(
                           labelText: 'Gravida (G)',
                           hintText: 'Total pregnancies',
@@ -554,7 +610,9 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
                       child: TextFormField(
                         initialValue: _parity?.toString(),
                         keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                         decoration: const InputDecoration(
                           labelText: 'Parity (P)',
                           hintText: 'Live births',
@@ -565,15 +623,17 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                
+
                 SwitchListTile(
                   value: _isHighRisk,
                   onChanged: (v) => setState(() => _isHighRisk = v),
                   title: const Text('High-Risk Pregnancy'),
-                  subtitle: const Text('Previous complications, medical conditions, etc.'),
+                  subtitle: const Text(
+                    'Previous complications, medical conditions, etc.',
+                  ),
                   contentPadding: EdgeInsets.zero,
                 ),
-                
+
                 if (_isHighRisk) ...[
                   const SizedBox(height: 8),
                   TextFormField(
@@ -582,7 +642,8 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
                     textCapitalization: TextCapitalization.sentences,
                     decoration: const InputDecoration(
                       labelText: 'High Risk Factors',
-                      hintText: 'e.g., Previous C-section, Preeclampsia, Diabetes',
+                      hintText:
+                          'e.g., Previous C-section, Preeclampsia, Diabetes',
                       alignLabelWithHint: true,
                     ),
                   ),
@@ -593,23 +654,31 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
 
             // Submit button
             Consumer<PatientProvider>(
-              builder: (_, prov, __) => FilledButton.icon(
-                onPressed: prov.isLoading ? null : _submit,
-                icon: prov.isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                      )
-                    : const Icon(Icons.person_add),
-                label: Text(
-                  prov.isLoading ? 'Registering...' : 'Register Patient',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 52),
-                ),
-              ),
+              builder:
+                  (_, prov, __) => FilledButton.icon(
+                    onPressed: prov.isLoading ? null : _submit,
+                    icon:
+                        prov.isLoading
+                            ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                            : const Icon(Icons.person_add),
+                    label: Text(
+                      prov.isLoading ? 'Registering...' : 'Register Patient',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 52),
+                    ),
+                  ),
             ),
             const SizedBox(height: 16),
           ],
@@ -618,7 +687,12 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, IconData icon, Color color) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Color color,
+  ) {
     return Row(
       children: [
         Container(

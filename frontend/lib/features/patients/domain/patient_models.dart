@@ -16,12 +16,18 @@ class PatientCategories {
 
   static String getDisplayName(String category) {
     switch (category) {
-      case general: return 'General Patient';
-      case maternal: return 'Maternal Health';
-      case chronicDisease: return 'Chronic Disease';
-      case pediatric: return 'Pediatric';
-      case emergency: return 'Emergency';
-      default: return category;
+      case general:
+        return 'General Patient';
+      case maternal:
+        return 'Maternal Health';
+      case chronicDisease:
+        return 'Chronic Disease';
+      case pediatric:
+        return 'Pediatric';
+      case emergency:
+        return 'Emergency';
+      default:
+        return category;
     }
   }
 }
@@ -82,7 +88,8 @@ class Patient {
   });
 
   /// Check if patient is a maternal health patient
-  bool get isMaternal => patientCategory == PatientCategories.maternal || isPregnant;
+  bool get isMaternal =>
+      patientCategory == PatientCategories.maternal || isPregnant;
 
   /// Get obstetric history as string (Gravida/Para format)
   String get obstetricHistory {
@@ -113,19 +120,31 @@ class Patient {
   /// Get formatted allergies as list
   List<String> get allergyList {
     if (allergies == null || allergies!.isEmpty) return [];
-    return allergies!.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    return allergies!
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
   }
 
   /// Get chronic conditions as list
   List<String> get conditionList {
     if (chronicConditions == null || chronicConditions!.isEmpty) return [];
-    return chronicConditions!.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    return chronicConditions!
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
   }
 
   /// Get high risk factors as list
   List<String> get riskFactorList {
     if (highRiskFactors == null || highRiskFactors!.isEmpty) return [];
-    return highRiskFactors!.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    return highRiskFactors!
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
   }
 
   factory Patient.fromJson(Map<String, dynamic> json) => Patient(
@@ -146,12 +165,14 @@ class Patient {
     emergencyContactName: json['emergencyContactName'],
     emergencyContactPhone: json['emergencyContactPhone'],
     isPregnant: json['isPregnant'] ?? false,
-    lastMenstrualPeriod: json['lastMenstrualPeriod'] != null 
-        ? DateTime.tryParse(json['lastMenstrualPeriod']) 
-        : null,
-    expectedDeliveryDate: json['expectedDeliveryDate'] != null 
-        ? DateTime.tryParse(json['expectedDeliveryDate']) 
-        : null,
+    lastMenstrualPeriod:
+        json['lastMenstrualPeriod'] != null
+            ? DateTime.tryParse(json['lastMenstrualPeriod'])
+            : null,
+    expectedDeliveryDate:
+        json['expectedDeliveryDate'] != null
+            ? DateTime.tryParse(json['expectedDeliveryDate'])
+            : null,
     gravida: json['gravida'],
     parity: json['parity'],
     isHighRiskPregnancy: json['isHighRiskPregnancy'] ?? false,
@@ -179,7 +200,8 @@ class PatientLookup {
     this.isPregnant = false,
   });
 
-  bool get isMaternal => patientCategory == PatientCategories.maternal || isPregnant;
+  bool get isMaternal =>
+      patientCategory == PatientCategories.maternal || isPregnant;
 
   factory PatientLookup.fromJson(Map<String, dynamic> json) => PatientLookup(
     id: json['id'] ?? '',
@@ -250,15 +272,18 @@ class CreatePatientRequest {
     if (bloodType != null) 'bloodType': bloodType,
     if (allergies != null) 'allergies': allergies,
     if (chronicConditions != null) 'chronicConditions': chronicConditions,
-    if (emergencyContactName != null) 'emergencyContactName': emergencyContactName,
-    if (emergencyContactPhone != null) 'emergencyContactPhone': emergencyContactPhone,
+    if (emergencyContactName != null)
+      'emergencyContactName': emergencyContactName,
+    if (emergencyContactPhone != null)
+      'emergencyContactPhone': emergencyContactPhone,
     'isPregnant': isPregnant,
-    if (lastMenstrualPeriod != null) 'lastMenstrualPeriod': lastMenstrualPeriod!.toUtc().toIso8601String(),
-    if (expectedDeliveryDate != null) 'expectedDeliveryDate': expectedDeliveryDate!.toUtc().toIso8601String(),
+    if (lastMenstrualPeriod != null)
+      'lastMenstrualPeriod': lastMenstrualPeriod!.toUtc().toIso8601String(),
+    if (expectedDeliveryDate != null)
+      'expectedDeliveryDate': expectedDeliveryDate!.toUtc().toIso8601String(),
     if (gravida != null) 'gravida': gravida,
     if (parity != null) 'parity': parity,
     'isHighRiskPregnancy': isHighRiskPregnancy,
     if (highRiskFactors != null) 'highRiskFactors': highRiskFactors,
   };
 }
-
