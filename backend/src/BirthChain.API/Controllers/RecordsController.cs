@@ -41,7 +41,7 @@ public class RecordsController : ControllerBase
     {
         if (dto.ClientId == Guid.Empty)
             return BadRequest(new { message = "ClientId is required." });
-        
+
         // Validate that at least some clinical information is provided
         if (string.IsNullOrWhiteSpace(dto.ChiefComplaint) && string.IsNullOrWhiteSpace(dto.Diagnosis))
             return BadRequest(new { message = "Chief complaint or diagnosis is required." });

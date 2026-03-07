@@ -117,7 +117,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
           children: [
             Image.asset('assets/icon/logo.png', height: 28),
             const SizedBox(width: 8),
-            const Text('BirthChain'),
+            const Text('Sanara'),
           ],
         ),
         actions: [

@@ -179,7 +179,7 @@ class _PatientLookupScreenState extends State<PatientLookupScreen> {
           children: [
             Image.asset('assets/icon/logo.png', height: 28),
             const SizedBox(width: 8),
-            const Text('BirthChain'),
+            const Text('Sanara'),
           ],
         ),
       ),

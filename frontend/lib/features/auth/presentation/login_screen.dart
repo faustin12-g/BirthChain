@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Image.asset('assets/icon/logo.png', height: 30),
             const SizedBox(width: 8),
             const Text(
-              'BirthChain',
+              'Sanara',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ],

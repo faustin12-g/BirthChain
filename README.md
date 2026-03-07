@@ -1,4 +1,4 @@
-# BirthChain
+# Sanara
 
 A healthcare records management system that allows providers to register patients, scan QR codes, and maintain digital medical histories. Built with a .NET 9 backend and Flutter frontend.
 

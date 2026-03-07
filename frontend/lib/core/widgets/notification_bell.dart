@@ -141,7 +141,7 @@ class _NotificationSheet extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'You\'ll see updates here as you use BirthChain.',
+                            'You\'ll see updates here as you use Sanara.',
                             style: TextStyle(
                               color: Colors.grey.shade400,
                               fontSize: 13,

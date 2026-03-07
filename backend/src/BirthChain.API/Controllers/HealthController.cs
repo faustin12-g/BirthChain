@@ -22,7 +22,7 @@ public class HealthController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult Get() => Ok(new { status = "healthy", service = "BirthChain API" });
+    public IActionResult Get() => Ok(new { status = "healthy", service = "Sanara API" });
 
     /// <summary>
     /// Check email configuration

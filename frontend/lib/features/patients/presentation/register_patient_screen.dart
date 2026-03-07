@@ -189,7 +189,7 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
                     children: [
                       Image.asset('assets/icon/logo.png', height: 28),
                       const SizedBox(width: 8),
-                      const Text('BirthChain'),
+                      const Text('Sanara'),
                     ],
                   )
                   : const Text('Register Patient'),
@@ -277,7 +277,7 @@ class _RegisterPatientScreenState extends State<RegisterPatientScreen> {
                   children: [
                     Image.asset('assets/icon/logo.png', height: 28),
                     const SizedBox(width: 8),
-                    const Text('BirthChain'),
+                    const Text('Sanara'),
                   ],
                 )
                 : const Text('Register Patient'),

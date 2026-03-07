@@ -7,5 +7,5 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   setupDependencies();
-  runApp(const BirthChainApp());
+  runApp(const SanaraApp());
 }

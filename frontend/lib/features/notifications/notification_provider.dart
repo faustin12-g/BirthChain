@@ -148,7 +148,7 @@ class NotificationProvider extends ChangeNotifier {
       addNotification(
         AppNotification(
           id: 'welcome',
-          title: 'Welcome to BirthChain!',
+          title: 'Welcome to Sanara!',
           subtitle:
               'Your account is set up. Visit a provider to start tracking your health.',
           icon: Icons.celebration,

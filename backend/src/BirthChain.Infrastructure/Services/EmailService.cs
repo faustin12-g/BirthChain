@@ -42,7 +42,7 @@ public sealed class EmailService : IEmailService
 
     private static string LogoImg => string.IsNullOrEmpty(_logoBase64.Value)
         ? ""
-        : $"<img src=\"data:image/png;base64,{_logoBase64.Value}\" alt=\"BirthChain\" style=\"height:56px;width:auto;display:inline-block;margin-bottom:8px;\" />";
+        : $"<img src=\"data:image/png;base64,{_logoBase64.Value}\" alt=\"Sanara\" style=\"height:56px;width:auto;display:inline-block;margin-bottom:8px;\" />";
 
     private static string LogoImgSmall => string.IsNullOrEmpty(_logoBase64.Value)
         ? ""
@@ -52,7 +52,7 @@ public sealed class EmailService : IEmailService
         <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:520px;margin:0 auto;padding:0;border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;">
             <div style="background:#1A3C6D;padding:20px;text-align:center;">
                 {LogoImg}
-                <h1 style="color:#fff;margin:0;font-size:22px;">BirthChain</h1>
+                <h1 style="color:#fff;margin:0;font-size:22px;">Sanara</h1>
                 <p style="color:#F58B1F;margin:4px 0 0;font-size:13px;">Secure Birth &amp; Health Record Management</p>
             </div>
             <div style="padding:24px 28px;">
@@ -60,7 +60,7 @@ public sealed class EmailService : IEmailService
             </div>
             <div style="background:#f5f5f5;padding:14px 28px;text-align:center;font-size:11px;color:#999;">
                 {LogoImgSmall}
-                &copy; 2026 BirthChain &middot; This is an automated message, please do not reply.
+                &copy; 2026 Sanara &middot; This is an automated message, please do not reply.
             </div>
         </div>
         """;
@@ -72,7 +72,7 @@ public sealed class EmailService : IEmailService
                 <div style="font-size:26px;font-weight:bold;letter-spacing:4px;">{qrCodeId}</div>
             </div>
         </div>
-        <p style="text-align:center;color:#666;font-size:12px;">Show this ID or scan your QR code at any BirthChain facility for instant access to your records.</p>
+        <p style="text-align:center;color:#666;font-size:12px;">Show this ID or scan your QR code at any Sanara facility for instant access to your records.</p>
         """;
 
     private async Task SendAsync(string toEmail, string subject, string htmlBody)
@@ -91,13 +91,13 @@ public sealed class EmailService : IEmailService
     private async Task SendViaResendAsync(string toEmail, string subject, string htmlBody)
     {
         var fromEmail = string.IsNullOrEmpty(_smtp.Email)
-            ? "BirthChain <onboarding@resend.dev>"
+            ? "Sanara <onboarding@resend.dev>"
             : $"{_smtp.DisplayName} <{_smtp.Email}>";
 
         // If no custom domain, use Resend's test domain
         if (!_smtp.Email.Contains("@") || _smtp.Email.EndsWith("@gmail.com"))
         {
-            fromEmail = "BirthChain <onboarding@resend.dev>";
+            fromEmail = "Sanara <onboarding@resend.dev>";
         }
 
         var payload = new
@@ -173,14 +173,14 @@ public sealed class EmailService : IEmailService
     {
         var subject = purpose switch
         {
-            "EmailVerification" => "BirthChain — Verify Your Email",
-            "PasswordReset" => "BirthChain — Password Reset Code",
-            _ => "BirthChain — Verification Code"
+            "EmailVerification" => "Sanara — Verify Your Email",
+            "PasswordReset" => "Sanara — Password Reset Code",
+            _ => "Sanara — Verification Code"
         };
 
         var inner = $"""
             <p style="margin-top:0;">Hello,</p>
-            <p>{(purpose == "PasswordReset" ? "You requested a password reset." : "Please verify your email address to activate your BirthChain account.")}</p>
+            <p>{(purpose == "PasswordReset" ? "You requested a password reset." : "Please verify your email address to activate your Sanara account.")}</p>
             <p>Your verification code is:</p>
             <div style="text-align:center;margin:24px 0;">
                 <span style="background:#1A3C6D;color:#fff;font-size:32px;letter-spacing:10px;padding:14px 28px;border-radius:10px;font-weight:bold;">{code}</span>
@@ -196,9 +196,9 @@ public sealed class EmailService : IEmailService
     public async Task SendWelcomeEmailAsync(string toEmail, string fullName, string qrCodeId)
     {
         var inner = $"""
-            <h2 style="color:#1A3C6D;margin-top:0;">Welcome to BirthChain, {fullName}!</h2>
+            <h2 style="color:#1A3C6D;margin-top:0;">Welcome to Sanara, {fullName}!</h2>
             <p>Your email has been verified and your account is now fully active.</p>
-            <p>Here is your <strong>unique patient ID</strong> — keep it safe! You can use it at any BirthChain-enabled facility to access your medical records instantly.</p>
+            <p>Here is your <strong>unique patient ID</strong> — keep it safe! You can use it at any Sanara-enabled facility to access your medical records instantly.</p>
             {QrBadge(qrCodeId)}
             <div style="background:#FFF8F0;border-left:4px solid #F58B1F;padding:12px 16px;margin:16px 0;border-radius:0 8px 8px 0;">
                 <strong style="color:#F58B1F;">Tip:</strong> Save this email or take a screenshot of your ID. You'll need it when visiting healthcare facilities.
@@ -206,7 +206,7 @@ public sealed class EmailService : IEmailService
             <p>You can now log in and view your health records anytime.</p>
             """;
 
-        await SendAsync(toEmail, "Welcome to BirthChain — Your Patient ID", Wrap(inner));
+        await SendAsync(toEmail, "Welcome to Sanara — Your Patient ID", Wrap(inner));
     }
 
     // ── Record Added ──
@@ -219,7 +219,7 @@ public sealed class EmailService : IEmailService
         var inner = $"""
             <h2 style="color:#1A3C6D;margin-top:0;">New Medical Record Added</h2>
             <p>Hello <strong>{patientName}</strong>,</p>
-            <p>A new record has been added to your BirthChain health profile:</p>
+            <p>A new record has been added to your Sanara health profile:</p>
             <table style="width:100%;border-collapse:collapse;margin:16px 0;">
                 <tr style="border-bottom:1px solid #eee;">
                     <td style="padding:10px 0;color:#888;width:120px;">Provider</td>
@@ -239,10 +239,10 @@ public sealed class EmailService : IEmailService
                 {descriptionHtml}
             </div>
             {QrBadge(qrCodeId)}
-            <p style="color:#666;font-size:13px;">Log in to your BirthChain account to view your complete medical history.</p>
+            <p style="color:#666;font-size:13px;">Log in to your Sanara account to view your complete medical history.</p>
             """;
 
-        await SendAsync(toEmail, $"BirthChain — New Record Added by {providerName}", Wrap(inner));
+        await SendAsync(toEmail, $"Sanara — New Record Added by {providerName}", Wrap(inner));
     }
 
     // ── Password Reset Confirmation ──
@@ -252,14 +252,14 @@ public sealed class EmailService : IEmailService
         var inner = $"""
             <h2 style="color:#1A3C6D;margin-top:0;">Password Reset Successful</h2>
             <p>Hello <strong>{fullName}</strong>,</p>
-            <p>Your BirthChain password has been successfully reset.</p>
+            <p>Your Sanara password has been successfully reset.</p>
             <div style="background:#FFF8F0;border-left:4px solid #F58B1F;padding:12px 16px;margin:16px 0;border-radius:0 8px 8px 0;">
                 <strong style="color:#F58B1F;">Warning:</strong> If you did not reset your password, please contact support immediately as your account may be compromised.
             </div>
             <p>You can now log in with your new password.</p>
             """;
 
-        await SendAsync(toEmail, "BirthChain — Password Reset Confirmation", Wrap(inner));
+        await SendAsync(toEmail, "Sanara — Password Reset Confirmation", Wrap(inner));
     }
 
     // ── Provider Welcome ──
@@ -267,8 +267,8 @@ public sealed class EmailService : IEmailService
     public async Task SendProviderWelcomeEmailAsync(string toEmail, string fullName, string facilityName, string specialty)
     {
         var inner = $"""
-            <h2 style="color:#1A3C6D;margin-top:0;">Welcome to BirthChain, Dr. {fullName}!</h2>
-            <p>You have been added as a healthcare provider on the BirthChain platform.</p>
+            <h2 style="color:#1A3C6D;margin-top:0;">Welcome to Sanara, Dr. {fullName}!</h2>
+            <p>You have been added as a healthcare provider on the Sanara platform.</p>
             <table style="width:100%;border-collapse:collapse;margin:16px 0;">
                 <tr style="border-bottom:1px solid #eee;">
                     <td style="padding:10px 0;color:#888;width:120px;">Facility</td>
@@ -283,7 +283,7 @@ public sealed class EmailService : IEmailService
             <p style="color:#888;font-size:13px;">Your login credentials were sent separately by your administrator.</p>
             """;
 
-        await SendAsync(toEmail, $"BirthChain — Welcome to {facilityName}", Wrap(inner));
+        await SendAsync(toEmail, $"Sanara — Welcome to {facilityName}", Wrap(inner));
     }
 
     // ── Description formatter ──

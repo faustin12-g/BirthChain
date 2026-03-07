@@ -19,8 +19,8 @@ import '../features/pin/presentation/pin_provider.dart';
 import 'routes.dart';
 import 'theme.dart';
 
-class BirthChainApp extends StatelessWidget {
-  const BirthChainApp({super.key});
+class SanaraApp extends StatelessWidget {
+  const SanaraApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +54,7 @@ class BirthChainApp extends StatelessWidget {
           return Consumer<AuthProvider>(
             builder:
                 (_, auth, __) => MaterialApp(
-                  title: 'BirthChain',
+                  title: 'Sanara',
                   debugShowCheckedModeBanner: false,
                   theme: AppTheme.lightTheme,
                   initialRoute: AppRoutes.splash,

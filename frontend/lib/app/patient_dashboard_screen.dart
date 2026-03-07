@@ -114,7 +114,7 @@ class _HomeTab extends StatelessWidget {
           children: [
             Image.asset('assets/icon/logo.png', height: 28),
             const SizedBox(width: 8),
-            const Text('BirthChain'),
+            const Text('Sanara'),
           ],
         ),
         actions: const [NotificationBell(), SizedBox(width: 4)],
@@ -349,7 +349,7 @@ class _HomeTab extends StatelessWidget {
         const _NotificationCard(
           icon: Icons.info_outline,
           color: Colors.blue,
-          title: 'Welcome to BirthChain!',
+          title: 'Welcome to Sanara!',
           subtitle:
               'Your account is set up. Show your QR code to a healthcare provider to start building your health history.',
           time: 'Just now',
@@ -1183,7 +1183,7 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Text(
-                          'BirthChain',
+                          'Sanara',
                           style: pw.TextStyle(
                             fontSize: 28,
                             fontWeight: pw.FontWeight.bold,
@@ -1343,7 +1343,7 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
                     ),
                   ),
                   pw.Text(
-                    'BirthChain © ${DateTime.now().year}',
+                    'Sanara © ${DateTime.now().year}',
                     style: pw.TextStyle(
                       fontSize: 9,
                       color: PdfColor.fromHex('#6C757D'),
@@ -1411,7 +1411,7 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
     try {
       final pdfBytes = await _buildPdf(patient);
       final dir = await getApplicationDocumentsDirectory();
-      final file = File('${dir.path}/BirthChain_QR_${patient.qrCodeId}.pdf');
+      final file = File('${dir.path}/Sanara_QR_${patient.qrCodeId}.pdf');
       await file.writeAsBytes(pdfBytes);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1445,7 +1445,7 @@ class _MyQrCodeTabState extends State<_MyQrCodeTab> {
     try {
       final pdfBytes = await _buildPdf(patient);
       final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/BirthChain_QR_${patient.qrCodeId}.pdf');
+      final file = File('${dir.path}/Sanara_QR_${patient.qrCodeId}.pdf');
       await file.writeAsBytes(pdfBytes);
       await Share.shareXFiles([XFile(file.path)]);
     } catch (e) {

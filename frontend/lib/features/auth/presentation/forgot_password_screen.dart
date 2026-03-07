@@ -94,7 +94,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           children: [
             Image.asset('assets/icon/logo.png', height: 30),
             const SizedBox(width: 8),
-            const Text('BirthChain',
+            const Text('Sanara',
                 style: TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),

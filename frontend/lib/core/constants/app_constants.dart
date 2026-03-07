@@ -1,7 +1,7 @@
 class AppConstants {
   AppConstants._();
 
-  static const String appName = 'BirthChain';
+  static const String appName = 'Sanara';
 
   // Production URL - Railway deployment
   static const String apiBaseUrlProduction =

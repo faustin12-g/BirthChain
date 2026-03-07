@@ -95,7 +95,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             Image.asset('assets/icon/logo.png', height: 30),
             const SizedBox(width: 8),
             const Text(
-              'BirthChain',
+              'Sanara',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
