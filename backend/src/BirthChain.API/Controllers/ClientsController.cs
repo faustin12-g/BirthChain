@@ -12,11 +12,13 @@ namespace BirthChain.API.Controllers;
 public class ClientsController : ControllerBase
 {
     private readonly IClientService _clientService;
+    private readonly IRecordService _recordService;
     private readonly IActivityLogService _activityLog;
 
-    public ClientsController(IClientService clientService, IActivityLogService activityLog)
+    public ClientsController(IClientService clientService, IRecordService recordService, IActivityLogService activityLog)
     {
         _clientService = clientService;
+        _recordService = recordService;
         _activityLog = activityLog;
     }
 
@@ -86,25 +88,35 @@ public class ClientsController : ControllerBase
             if (lookup is null)
                 return NotFound(new { message = $"No client found with QrCodeId '{qrCodeId}'." });
 
+            ClientDto? client;
+
             // If no PIN required, return full data
             if (!lookup.HasPinSet)
             {
-                var clientData = await _clientService.GetByQrCodeAsync(qrCodeId);
-                return Ok(clientData);
+                client = await _clientService.GetByQrCodeAsync(qrCodeId);
+            }
+            else
+            {
+                // PIN required - verify it
+                if (string.IsNullOrWhiteSpace(dto.Pin))
+                    return BadRequest(new { message = "PIN is required to access this patient's data." });
+
+                client = await _clientService.GetByQrCodeWithPinAsync(qrCodeId, dto.Pin);
+                if (client is null)
+                    return Unauthorized(new { message = "Invalid PIN." });
             }
 
-            // PIN required - verify it
-            if (string.IsNullOrWhiteSpace(dto.Pin))
-                return BadRequest(new { message = "PIN is required to access this patient's data." });
-
-            var client = await _clientService.GetByQrCodeWithPinAsync(qrCodeId, dto.Pin);
             if (client is null)
-                return Unauthorized(new { message = "Invalid PIN." });
+                return NotFound(new { message = "Client data not found." });
+
+            // Get records for this client
+            var records = await _recordService.GetByClientIdAsync(client.Id);
 
             var userId = Guid.Parse(User.FindFirstValue("sub")!);
             await _activityLog.LogAsync(userId, $"Accessed client {lookup.FullName} with PIN verification");
 
-            return Ok(client);
+            // Return both client and records
+            return Ok(new { client, records });
         }
         catch (InvalidOperationException ex)
         {

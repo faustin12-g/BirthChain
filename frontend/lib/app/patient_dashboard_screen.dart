@@ -46,6 +46,15 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
     });
   }
 
+  void _onTabChanged(int newIndex) {
+    // Reset PIN verification when navigating away from Records (1) or QR (2) tabs
+    if (_currentIndex == 1 || _currentIndex == 2) {
+      // Leaving a protected tab - reset PIN verification
+      context.read<PinProvider>().resetPinVerification();
+    }
+    setState(() => _currentIndex = newIndex);
+  }
+
   @override
   Widget build(BuildContext context) {
     final pages = <Widget>[
@@ -59,7 +68,7 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
       body: IndexedStack(index: _currentIndex, children: pages),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
-        onDestinationSelected: (i) => setState(() => _currentIndex = i),
+        onDestinationSelected: _onTabChanged,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
