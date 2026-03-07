@@ -324,7 +324,8 @@ public sealed class ProfileService : IProfileService
 
     private static bool VerifyPinHash(string pin, string hash)
     {
-        return HashPin(pin) == hash;
+        // Use proper verification that extracts salt from stored hash
+        return AuthService.VerifyPassword(pin, hash);
     }
 
     private async Task IncrementFailedPinAttempts(Core.Entities.User user)
